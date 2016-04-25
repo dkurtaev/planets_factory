@@ -22,8 +22,8 @@ class SphericalCS {
   static const unsigned POSITION_Y = 13;
   static const unsigned POSITION_Z = 14;
 
-  SphericalCS(float radius, float azimuth, float zenith, float own_rotation,
-              const SphericalCS* center = 0);
+  SphericalCS(float radius = 0, float azimuth = 0, float zenith = 0,
+              float own_rotation = 0, SphericalCS* center = 0);
 
   ~SphericalCS();
 
@@ -34,7 +34,7 @@ class SphericalCS {
  private:
   bool GlobalMatrixNeedsToUpdate();
 
-  const SphericalCS* center_;
+  SphericalCS* center_;
   float radius_;
   float* local_model_matrix_;
   float* global_model_matrix_;

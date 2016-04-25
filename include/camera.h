@@ -5,17 +5,15 @@
 
 class Camera {
  public:
-  Camera();
+  Camera(SphericalCS* camera_cs);
 
   ~Camera();
 
-  void Setup();
+  void Setup(int display_width, int display_height);
 
  private:
-  float display_width_;
-  float display_height_;
   float* model_matrix_;
-  SphericalCS camera_cs_;
+  SphericalCS* camera_cs_;
 };
 
 #endif  // INCLUDE_CAMERA_H_
