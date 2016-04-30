@@ -2,6 +2,7 @@
 
 #include "include/camera.h"
 #include "include/planet.h"
+#include "include/icosphere.h"
 
 #include <iostream>
 
@@ -23,10 +24,12 @@ SphericalCS planet_cs;
 SphericalCS camera_cs(20, 0, 80, 0, &planet_cs);
 Camera* camera;
 Planet* planet;
+Icosphere* icosphere;
 
 int main(int argc, char** argv) {
   camera = new Camera(&camera_cs);
   planet = new Planet(5);
+  icosphere = new Icosphere(5, 2.5);
 
   InitWindow();
   InitGL();
@@ -90,7 +93,16 @@ void Display() {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  planet->Draw();
+//  planet->Draw();
+  icosphere->Draw();
+
+  glBegin(GL_LINES);
+  for (int i = 0; i < 3; ++i) {
+    glColor3f(i == 0, i == 1, i == 2);
+    glVertex3f(0, 0, 0);
+    glVertex3f(i == 0 ? 100 : 0, i == 1 ? 100 : 0, i == 2 ? 100 : 0);
+  }
+  glEnd();
 
   glutSwapBuffers();
 }
