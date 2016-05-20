@@ -1,8 +1,11 @@
 #include "include/icosphere.h"
 
+#include <math.h>
+#include <algorithm>
+
 #include <GL/freeglut.h>
 
-Icosphere::Icosphere(float base_plane_width, float base_plane_height) {
+Icosphere::Icosphere(float midradius) {
   static const int kNumVertices = 12;
   static const int kNumTris = 20;
 
@@ -10,8 +13,11 @@ Icosphere::Icosphere(float base_plane_width, float base_plane_height) {
   normals_ = new float[3 * kNumTris];
   indices_ = new unsigned short[3 * kNumTris];
 
-  base_plane_width /= 2;
+  float base_plane_height = midradius * sqrt(6);
+  float base_plane_width = 2 * base_plane_height / sqrt(2);
+
   base_plane_height /= 2;
+  base_plane_width /= 2;
 
   // First plane.
   SetPoint(base_plane_width, -base_plane_height, 0, vertices_);

@@ -29,7 +29,7 @@ Icosphere* icosphere;
 int main(int argc, char** argv) {
   camera = new Camera(&camera_cs);
   planet = new Planet(5);
-  icosphere = new Icosphere(5, 2.5);
+  icosphere = new Icosphere(2);
 
   InitWindow();
   InitGL();

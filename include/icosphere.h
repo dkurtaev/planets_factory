@@ -3,7 +3,7 @@
 
 class Icosphere {
  public:
-  Icosphere(float base_plane_width, float base_plane_height);
+  Icosphere(float midradius);
 
   ~Icosphere();
 
@@ -14,10 +14,6 @@ class Icosphere {
 
   void SetTriangle(int triangle_idx, int vert_1, int vert_2, int vert_3);
 
-//  void FillNormals();
-
-  float base_plane_width_;
-  float base_plane_height_;
   float* vertices_;
   float* normals_;
   unsigned short* indices_;
