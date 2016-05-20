@@ -13,8 +13,8 @@ Icosphere::Icosphere(float midradius) {
   normals_ = new float[3 * kNumTris];
   indices_ = new unsigned short[3 * kNumTris];
 
-  float base_plane_height = midradius * sqrt(6);
-  float base_plane_width = 2 * base_plane_height / sqrt(2);
+  float base_plane_height = midradius * sqrt(2);
+  float base_plane_width = 2 * midradius;
 
   base_plane_height /= 2;
   base_plane_width /= 2;
