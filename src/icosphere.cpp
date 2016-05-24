@@ -5,106 +5,126 @@
 
 #include <GL/freeglut.h>
 
-Icosphere::Icosphere(float midradius) {
-  static const int kNumVertices = 12;
-  static const int kNumTris = 20;
+Icosphere::Icosphere(float edge_length) {
+  static const unsigned kNumTriangles = 20;
+  static const unsigned kNumVertices = 12;
 
-  vertices_ = new float[3 * kNumVertices];
-  normals_ = new float[3 * kNumTris];
-  indices_ = new unsigned short[3 * kNumTris];
+  float base_plane_height = edge_length / 2;
+  float base_plane_width = (1 + sqrt(5)) * edge_length / 4;
 
-  float base_plane_height = midradius * sqrt(2);
-  float base_plane_width = 2 * midradius;
+  // Vertices.
+  vertices_.resize(kNumVertices);
+  vertices_[0] = new Point3f(base_plane_width, -base_plane_height, 0, 0);
+  vertices_[1] = new Point3f(base_plane_width, base_plane_height, 0, 1);
+  vertices_[2] = new Point3f(-base_plane_width, base_plane_height, 0, 2);
+  vertices_[3] = new Point3f(-base_plane_width, -base_plane_height, 0, 3);
+  vertices_[4] = new Point3f(0, base_plane_width, -base_plane_height, 4);
+  vertices_[5] = new Point3f(0, base_plane_width, base_plane_height, 5);
+  vertices_[6] = new Point3f(0, -base_plane_width, base_plane_height, 6);
+  vertices_[7] = new Point3f(0, -base_plane_width, -base_plane_height, 7);
+  vertices_[8] = new Point3f(-base_plane_height, 0, base_plane_width, 8);
+  vertices_[9] = new Point3f(base_plane_height, 0, base_plane_width, 9);
+  vertices_[10] = new Point3f(base_plane_height, 0, -base_plane_width, 10);
+  vertices_[11] = new Point3f(-base_plane_height, 0, -base_plane_width, 11);
 
-  base_plane_height /= 2;
-  base_plane_width /= 2;
+  edges_.reserve(30);
+  triangles_.reserve(kNumTriangles);
 
-  // First plane.
-  SetPoint(base_plane_width, -base_plane_height, 0, vertices_);
-  SetPoint(base_plane_width, base_plane_height, 0, vertices_ + 3);
-  SetPoint(-base_plane_width, base_plane_height, 0, vertices_ + 6);
-  SetPoint(-base_plane_width, -base_plane_height, 0, vertices_ + 9);
+  AddTriangle(5, 9, 1);
+  AddTriangle(5, 1, 4);
+  AddTriangle(5, 4, 2);
+  AddTriangle(5, 2, 8);
+  AddTriangle(5, 8, 9);
 
-  // Second plane.
-  SetPoint(0, base_plane_width, -base_plane_height, vertices_ + 12);
-  SetPoint(0, base_plane_width, base_plane_height, vertices_ + 15);
-  SetPoint(0, -base_plane_width, base_plane_height, vertices_ + 18);
-  SetPoint(0, -base_plane_width, -base_plane_height, vertices_ + 21);
+  AddTriangle(0, 1, 9);
+  AddTriangle(0, 9, 6);
+  AddTriangle(0, 6, 7);
+  AddTriangle(0, 7, 10);
+  AddTriangle(0, 10, 1);
 
-  // Third plane.
-  SetPoint(-base_plane_height, 0, base_plane_width, vertices_ + 24);
-  SetPoint(base_plane_height, 0, base_plane_width, vertices_ + 27);
-  SetPoint(base_plane_height, 0, -base_plane_width, vertices_ + 30);
-  SetPoint(-base_plane_height, 0, -base_plane_width, vertices_ + 33);
+  AddTriangle(11, 2, 4);
+  AddTriangle(11, 4, 10);
+  AddTriangle(11, 10, 7);
+  AddTriangle(11, 7, 3);
+  AddTriangle(11, 3, 2);
 
-  SetTriangle(0, 5, 9, 1);
-  SetTriangle(1, 5, 1, 4);
-  SetTriangle(2, 5, 4, 2);
-  SetTriangle(3, 5, 2, 8);
-  SetTriangle(4, 5, 8, 9);
+  AddTriangle(4, 1, 10);
+  AddTriangle(6, 9, 8);
+  AddTriangle(6, 8, 3);
+  AddTriangle(3, 7, 6);
+  AddTriangle(3, 8, 2);
 
-  SetTriangle(5, 0, 1, 9);
-  SetTriangle(6, 0, 9, 6);
-  SetTriangle(7, 0, 6, 7);
-  SetTriangle(8, 0, 7, 10);
-  SetTriangle(9, 0, 10, 1);
+  vertices_array_ = new float[3 * kNumVertices];
+  normals_array_ = new float[3 * kNumTriangles];
+  indices_array_ = new unsigned short[3 * kNumTriangles];
 
-  SetTriangle(10, 11, 2, 4);
-  SetTriangle(11, 11, 4, 10);
-  SetTriangle(12, 11, 10, 7);
-  SetTriangle(13, 11, 7, 3);
-  SetTriangle(14, 11, 3, 2);
-
-  SetTriangle(15, 4, 1, 10);
-  SetTriangle(16, 6, 9, 8);
-  SetTriangle(17, 6, 8, 3);
-  SetTriangle(18, 3, 7, 6);
-  SetTriangle(19, 3, 8, 2);
+  for (unsigned i = 0; i < kNumVertices; ++i) {
+    vertices_[i]->GetCoordinates(vertices_array_ + i * 3);
+  }
+  for (unsigned i = 0; i < kNumTriangles; ++i) {
+    triangles_[i]->GetNormal(normals_array_ + i * 3);
+    triangles_[i]->GetIndices(indices_array_ + i * 3);
+  }
 }
 
 Icosphere::~Icosphere() {
-  delete[] vertices_;
-  delete[] normals_;
-  delete[] indices_;
-}
-
-void Icosphere::SetPoint(float x, float y, float z, float* dst) {
-  dst[0] = x;
-  dst[1] = y;
-  dst[2] = z;
-}
-
-void Icosphere::SetTriangle(int tr_idx, int vert_1, int vert_2, int vert_3) {
-  int verts[3];
-  float xs[3], ys[3], zs[3];
-  verts[0] = vert_1;
-  verts[1] = vert_2;
-  verts[2] = vert_3;
-
-  for (int i = 0; i < 3; ++i) {
-    indices_[tr_idx * 3 + i] = verts[i];
-    xs[i] = vertices_[verts[i] * 3];
-    ys[i] = vertices_[verts[i] * 3 + 1];
-    zs[i] = vertices_[verts[i] * 3 + 2];
+  unsigned size = vertices_.size();
+  for (unsigned i = 0; i < size; ++i) {
+    delete vertices_[i];
   }
-  normals_[tr_idx * 3] = ys[0] * (zs[2] - zs[3]) +
-                         ys[1] * (zs[3] - zs[1]) +
-                         ys[2] * (zs[1] - zs[2]);
-  normals_[tr_idx * 3 + 1] = xs[0] * (zs[3] - zs[2]) +
-                             xs[1] * (zs[1] - zs[3]) +
-                             xs[2] * (zs[2] - zs[1]);
-  normals_[tr_idx * 3 + 2] = xs[0] * (ys[2] - ys[3]) +
-                             xs[1] * (ys[3] - ys[1]) +
-                             xs[2] * (ys[1] - ys[2]);
+
+  size = edges_.size();
+  for (unsigned i = 0; i < size; ++i) {
+    delete edges_[i];
+  }
+
+  size = triangles_.size();
+  for (unsigned i = 0; i < size; ++i) {
+    delete triangles_[i];
+  }
+
+  delete[] vertices_array_;
+  delete[] normals_array_;
+  delete[] indices_array_;
+}
+
+void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
+  unsigned pairs[3][2];
+  pairs[0][0] = v1; pairs[0][1] = v2;
+  pairs[1][0] = v2; pairs[1][1] = v3;
+  pairs[2][0] = v3; pairs[2][1] = v1;
+
+  Edge* traingle_edges[3];
+  int n_edges = edges_.size();
+  for (int i = 0; i < 3; ++i) {
+    // Check if edge exists.
+    traingle_edges[i] = 0;
+    for (int j = 0; j < n_edges; ++j) {
+      if (edges_[j]->CompareTo(pairs[i][0], pairs[i][1])) {
+        traingle_edges[i] = edges_[j];
+        break;
+      }
+    }
+    if (!traingle_edges[i]) {
+      traingle_edges[i] = new Edge(vertices_[pairs[i][0]],
+                                   vertices_[pairs[i][1]]);
+      edges_.push_back(traingle_edges[i]);
+      ++n_edges;
+    }
+  }
+  Triangle* new_triangle = new Triangle(v1, v2, v3, traingle_edges[0],
+                                        traingle_edges[1], traingle_edges[2]);
+  triangles_.push_back(new_triangle);
 }
 
 void Icosphere::Draw() {
   glColor3f(0, 0.8, 0);
 
   glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, normals_);
+  glNormalPointer(GL_FLOAT, 0, normals_array_);
 
   glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices_);
-  glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_SHORT, indices_);
+  glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
+  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
+                 indices_array_);
 }

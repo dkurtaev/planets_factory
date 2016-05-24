@@ -1,22 +1,33 @@
 #ifndef INCLUDE_ICOSPHERE_H_
 #define INCLUDE_ICOSPHERE_H_
 
+#include <vector>
+
+#include "include/structures.h"
+
 class Icosphere {
  public:
-  Icosphere(float midradius);
+  Icosphere(float edge_length);
 
   ~Icosphere();
 
   void Draw();
 
  private:
-  void SetPoint(float x, float y, float z, float* dst);
+  // Used for building icosahedron.
+  void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 
-  void SetTriangle(int triangle_idx, int vert_1, int vert_2, int vert_3);
+  // void SplitTriangles();
 
-  float* vertices_;
-  float* normals_;
-  unsigned short* indices_;
+  std::vector<Point3f*> vertices_;
+  std::vector<Edge*> edges_;
+  std::vector<Triangle*> triangles_;
+
+  float* vertices_array_;
+  float* normals_array_;
+  unsigned short* indices_array_;
+
+  float radius_;
 };
 
 #endif  // INCLUDE_ICOSPHERE_H_
