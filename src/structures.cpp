@@ -44,10 +44,6 @@ bool Edge::CompareTo(unsigned p1_id, unsigned p2_id) const {
          p1_->id == p2_id && p2_->id == p1_id;
 }
 
-const Point3f* Edge::GetPoint(unsigned idx) const {
-  return (idx == 0 ? p1_ : (idx == 1 ? p2_ : 0));
-}
-
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
   points_[0] = v1;
@@ -64,12 +60,12 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
     zs[i] = points_[i]->data[2];
   }
 
-  normal_.data[0] = ys[0] * (zs[2] - zs[3]) + ys[1] * (zs[3] - zs[1]) +
-                    ys[2] * (zs[1] - zs[2]);
-  normal_.data[1] = xs[0] * (zs[3] - zs[2]) + xs[1] * (zs[1] - zs[3]) +
-                    xs[2] * (zs[2] - zs[1]);
-  normal_.data[2] = xs[0] * (ys[2] - ys[3]) + xs[1] * (ys[3] - ys[1]) +
-                    xs[2] * (ys[1] - ys[2]);
+  normal_.data[0] = ys[0] * (zs[1] - zs[2]) + ys[1] * (zs[2] - zs[0]) +
+                    ys[2] * (zs[0] - zs[1]);
+  normal_.data[1] = xs[0] * (zs[2] - zs[1]) + xs[1] * (zs[0] - zs[2]) +
+                    xs[2] * (zs[1] - zs[0]);
+  normal_.data[2] = xs[0] * (ys[1] - ys[2]) + xs[1] * (ys[2] - ys[0]) +
+                    xs[2] * (ys[0] - ys[1]);
   normal_.Normalize(1);
 }
 

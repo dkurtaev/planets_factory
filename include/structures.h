@@ -23,8 +23,6 @@ class Edge {
 
   bool CompareTo(unsigned p1_id, unsigned p2_id) const;
 
-  const Point3f* GetPoint(unsigned idx) const;
-
  private:
   const Point3f* p1_;
   const Point3f* p2_;
