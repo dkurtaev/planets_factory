@@ -2,11 +2,13 @@
 #define INCLUDE_STRUCTURES_H_
 
 struct Point3f {
-  Point3f(float x = 0, float y = 0, float z = 0, unsigned id = -1);
+  Point3f(float x = 0, float y = 0, float z = 0, unsigned short id = 0);
 
-  void GetCoordinates(float* dst);
+  void Normalize(float target_norm);
 
-  unsigned id;
+  void GetCoordinates(float* dst) const;
+
+  unsigned short id;
   float data[3];
 };
 
@@ -14,9 +16,10 @@ class Edge {
  public:
   Edge(const Point3f* p1, const Point3f* p2);
 
-  ~Edge();
-
-  Point3f* Split(unsigned& available_point_id);
+  // Write middle point's coordinates into input Point3f.
+  // If null as input - returns last passed middle point
+  // (or null if not called yet).
+  const Point3f* MiddlePoint(Point3f* middle_point = 0);
 
   bool CompareTo(unsigned p1_id, unsigned p2_id) const;
 
@@ -25,20 +28,21 @@ class Edge {
  private:
   const Point3f* p1_;
   const Point3f* p2_;
-  Point3f* middle_;
+  const Point3f* middle_point_;
 };
 
 struct Triangle {
-  Triangle(unsigned v1, unsigned v2, unsigned v3,
-           const Edge* e1, const Edge* e2, const Edge* e3);
+  Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
+           Edge* e1, Edge* e2, Edge* e3);
 
-  void GetIndices(unsigned short* dst);
+  void GetIndices(unsigned short* dst) const;
 
-  void GetNormal(float* dst);
+  void GetMiddlePointsIndices(unsigned short* dst) const;
 
-  const Edge* edges_[3];
+  void GetNormal(float* dst) const;
+
+  Edge* edges_[3];
   const Point3f* points_[3];
-  unsigned short indices_[3];
   Point3f normal_;
 };
 

@@ -17,7 +17,7 @@ class Icosphere {
   // Used for building icosahedron.
   void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 
-  // void SplitTriangles();
+  void SplitTriangles();
 
   std::vector<Point3f*> vertices_;
   std::vector<Edge*> edges_;

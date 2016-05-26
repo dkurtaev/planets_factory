@@ -1,6 +1,9 @@
 #include "include/icosphere.h"
 
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <algorithm>
 
 #include <GL/freeglut.h>
@@ -11,6 +14,7 @@ Icosphere::Icosphere(float edge_length) {
 
   float base_plane_height = edge_length / 2;
   float base_plane_width = (1 + sqrt(5)) * edge_length / 4;
+  radius_ = sqrt(pow(base_plane_height, 2) + pow(base_plane_width, 2));
 
   // Vertices.
   vertices_.resize(kNumVertices);
@@ -65,6 +69,9 @@ Icosphere::Icosphere(float edge_length) {
     triangles_[i]->GetNormal(normals_array_ + i * 3);
     triangles_[i]->GetIndices(indices_array_ + i * 3);
   }
+
+  // SplitTriangles();
+  // SplitTriangles();
 }
 
 Icosphere::~Icosphere() {
@@ -112,7 +119,8 @@ void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
       ++n_edges;
     }
   }
-  Triangle* new_triangle = new Triangle(v1, v2, v3, traingle_edges[0],
+  Triangle* new_triangle = new Triangle(vertices_[v1], vertices_[v2],
+                                        vertices_[v3], traingle_edges[0],
                                         traingle_edges[1], traingle_edges[2]);
   triangles_.push_back(new_triangle);
 }
@@ -127,4 +135,57 @@ void Icosphere::Draw() {
   glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
   glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
                  indices_array_);
+}
+
+void Icosphere::SplitTriangles() {
+  const unsigned n_triangles = triangles_.size();
+  const unsigned n_vertices = vertices_.size();
+  const unsigned n_edges = edges_.size();
+
+  unsigned new_n_vertices = n_vertices + 3 * n_triangles / 2;
+  unsigned new_n_triangles = n_triangles * 4;
+
+  float* new_vertices = new float[3 * new_n_vertices];
+  float* new_normals = new float[3 * new_n_triangles];
+  unsigned short* new_indices = new unsigned short[3 * new_n_triangles];
+  memcpy(new_vertices, vertices_array_, sizeof(float) * 3 * n_vertices);
+
+  delete[] vertices_array_;
+  delete[] normals_array_;
+  delete[] indices_array_;
+  vertices_array_ = new_vertices;
+  normals_array_ = new_normals;
+  indices_array_ = new_indices;
+
+  // Split each edge in halfs.
+  Point3f* middle_point;
+  for (unsigned i = 0; i < n_edges; ++i) {
+    middle_point = new Point3f(0, 0, 0, n_vertices + i);
+    edges_[i]->MiddlePoint(middle_point);
+    middle_point->Normalize(radius_);
+    middle_point->GetCoordinates(vertices_array_ + (n_vertices + i) * 3);
+    vertices_.push_back(middle_point);
+  }
+
+  // Create new triangles.
+  Triangle* triangle;
+  unsigned short triangle_vertices[3];
+  unsigned short middle_points[3];
+  for (unsigned i = 0; i < n_triangles; ++i) {
+    triangle = triangles_.front();
+    triangles_.erase(triangles_.begin());
+    triangle->GetIndices(triangle_vertices);
+    triangle->GetMiddlePointsIndices(middle_points);
+    delete triangle;
+
+    AddTriangle(triangle_vertices[0], middle_points[0], middle_points[2]);
+    AddTriangle(middle_points[0], triangle_vertices[1], middle_points[1]);
+    AddTriangle(middle_points[2], middle_points[1], triangle_vertices[2]);
+    AddTriangle(middle_points[0], middle_points[1], middle_points[2]);
+  }
+
+  for (unsigned i = 0; i < new_n_triangles; ++i) {
+    triangles_[i]->GetNormal(normals_array_ + i * 3);
+    triangles_[i]->GetIndices(indices_array_ + i * 3);
+  }
 }
