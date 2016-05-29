@@ -59,24 +59,12 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
     ys[i] = points_[i]->data[1];
     zs[i] = points_[i]->data[2];
   }
-
-  normal_.data[0] = ys[0] * (zs[1] - zs[2]) + ys[1] * (zs[2] - zs[0]) +
-                    ys[2] * (zs[0] - zs[1]);
-  normal_.data[1] = xs[0] * (zs[2] - zs[1]) + xs[1] * (zs[0] - zs[2]) +
-                    xs[2] * (zs[1] - zs[0]);
-  normal_.data[2] = xs[0] * (ys[1] - ys[2]) + xs[1] * (ys[2] - ys[0]) +
-                    xs[2] * (ys[0] - ys[1]);
-  normal_.Normalize(1);
 }
 
 void Triangle::GetIndices(unsigned short* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
     dst[i] = points_[i]->id;
   }
-}
-
-void Triangle::GetNormal(float* dst) const {
-  normal_.GetCoordinates(dst);
 }
 
 void Triangle::GetMiddlePointsIndices(unsigned short* dst) const {

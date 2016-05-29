@@ -37,11 +37,8 @@ struct Triangle {
 
   void GetMiddlePointsIndices(unsigned short* dst) const;
 
-  void GetNormal(float* dst) const;
-
   Edge* edges_[3];
   const Point3f* points_[3];
-  Point3f normal_;
 };
 
 #endif  // INCLUDE_STRUCTURES_H_

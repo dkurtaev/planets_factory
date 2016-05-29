@@ -50,8 +50,8 @@ SphericalCS::SphericalCS(float radius, float azimuth, float zenith,
 }
 
 SphericalCS::~SphericalCS() {
-  delete local_model_matrix_;
-  delete global_model_matrix_;
+  delete[] local_model_matrix_;
+  delete[] global_model_matrix_;
 }
 
 void SphericalCS::Rotate(unsigned axis_id, float angle) {

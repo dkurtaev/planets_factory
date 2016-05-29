@@ -29,7 +29,7 @@ Icosphere* icosphere;
 int main(int argc, char** argv) {
   camera = new Camera(&camera_cs);
   planet = new Planet(5);
-  icosphere = new Icosphere(2);
+  icosphere = new Icosphere(4);
 
   InitWindow();
   InitGL();
@@ -44,33 +44,21 @@ void InitWindow() {
   glutInitWindowSize(display_width, display_height);
   glutInitWindowPosition(0, 0);
   window_handle = glutCreateWindow("Planets factory");
-//  glutSetCursor(GLUT_CURSOR_NONE);
-//  glutIgnoreKeyRepeat(1);
-//  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
   glutDisplayFunc(Display);
   glutIdleFunc(Display);
   glutReshapeFunc(Reshape);
-//  glutKeyboardFunc(KeyPressed);
-//  glutKeyboardUpFunc(KeyReleased);
   glutSpecialFunc(SpecialKeyPressed);
-//  glutSpecialUpFunc(SpecialKeyReleased);
-//  glutEntryFunc(MouseEntry);
-//  glutPassiveMotionFunc(MouseMove);
-//  glutMouseFunc(MouseFunc);
 }
 
 void InitGL() {
   glClearColor(0, 0, 0, 1);
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_SMOOTH);
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_BLEND);
-  glEnable(GL_NORMALIZE);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CCW);
 
   glEnable(GL_LIGHT0);
   GLfloat ambient[] = { 0.2, 0.2, 0.2, 1 };
@@ -93,7 +81,6 @@ void Display() {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-//  planet->Draw();
   icosphere->Draw();
 
   glBegin(GL_LINES);
