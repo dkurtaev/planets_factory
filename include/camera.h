@@ -31,7 +31,7 @@ class Camera {
 
  private:
   static const float kRotationDelta = 8.0f;
-  static const float kRotationAroundNormalDelta = 10.0f;
+  static const float kRotationAroundNormalDelta = 25.0f;
   static const float kMovementAcceleration = -1.0f;
   // If time between last mouse moving and releasing less than constant,
   // acceleration is activating. (time in milliseconds).

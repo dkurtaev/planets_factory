@@ -97,8 +97,6 @@ void Camera::MouseFunc(int button, int state, int x, int y) {
 }
 
 void Camera::MouseMove(int x, int y) {
-  static const float kRotationAroundNormalMaxAngle = 30 * M_PI / 180;
-
   if (left_button_pressed_) {
     if (!ctrl_key_pressed_) {
       gettimeofday(&init_tv_, 0);
@@ -116,9 +114,11 @@ void Camera::MouseMove(int x, int y) {
       // previous and new mouse points.
       float a = atan2(n_x * n_last_y - n_last_x * n_y,
                       n_x * n_last_x + n_y * n_last_y);
-      if (fabs(a) < kRotationAroundNormalMaxAngle) {
-        camera_cs_->Rotate(SphericalCS::NORMAL, kRotationAroundNormalDelta * a);
-      }
+      // Normalized distance from center of display to new mouse point.
+      float ratio = 0.5 * sqrt(pow(n_x / display_width_, 2) + 
+                               pow(n_y / display_height_, 2));
+      camera_cs_->Rotate(SphericalCS::NORMAL,
+                         kRotationAroundNormalDelta * a * sqrt(ratio));
     }
     last_mouse_x_ = x;
     last_mouse_y_ = y;
