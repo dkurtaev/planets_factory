@@ -16,6 +16,12 @@ void Display();
 
 void SpecialKeyPressed(int key, int x, int y);
 
+void SpecialKeyReleased(int key, int x, int y);
+
+void MouseFunc(int button, int state, int x, int y);
+
+void MouseMove(int x, int y);
+
 int display_width = 500;
 int display_height = 500;
 int window_handle;
@@ -49,6 +55,9 @@ void InitWindow() {
   glutIdleFunc(Display);
   glutReshapeFunc(Reshape);
   glutSpecialFunc(SpecialKeyPressed);
+  glutMotionFunc(MouseMove);
+  glutMouseFunc(MouseFunc);
+  glutSpecialUpFunc(SpecialKeyReleased);
 }
 
 void InitGL() {
@@ -95,10 +104,17 @@ void Display() {
 }
 
 void SpecialKeyPressed(int key, int x, int y) {
-  switch (key) {
-    case GLUT_KEY_UP: camera_cs.Rotate(SphericalCS::ORDINATE, -5); break;
-    case GLUT_KEY_DOWN: camera_cs.Rotate(SphericalCS::ORDINATE, 5); break;
-    case GLUT_KEY_LEFT: camera_cs.Rotate(SphericalCS::ABSCISSA, 5); break;
-    case GLUT_KEY_RIGHT: camera_cs.Rotate(SphericalCS::ABSCISSA, -5); break;
-  }
+  camera->SpecialKeyPressed(key, x, y);
+}
+
+void SpecialKeyReleased(int key, int x, int y) {
+  camera->SpecialKeyReleased(key, x, y);
+}
+
+void MouseFunc(int button, int state, int x, int y) {
+  camera->MouseFunc(button, state, x, y);
+}
+
+void MouseMove(int x, int y) {
+  camera->MouseMove(x, y);
 }

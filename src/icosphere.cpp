@@ -129,15 +129,23 @@ void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
 }
 
 void Icosphere::Draw() {
-  glColor3f(0, 0.8, 0);
+  for (int i = 0; i < 2; ++i) {
+    if (i) {
+      glColor3f(0.8, 0, 0);
+      glPolygonMode(GL_FRONT, GL_LINE);
+      glLineWidth(2);   
+    } else {
+      glColor3f(0, 0.8, 0);
+      glPolygonMode(GL_FRONT, GL_FILL);
+    }
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, normals_array_);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, normals_array_);
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
-  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
-                 indices_array_);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
+    glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
+                   indices_array_);
+  }
 }
 
 void Icosphere::SplitTriangles() {
