@@ -101,3 +101,16 @@ bool SphericalCS::GlobalMatrixNeedsToUpdate() {
   return update_global_matrix_ ||
       center_ != 0 && center_->GlobalMatrixNeedsToUpdate();
 }
+
+void SphericalCS::SetRadius(float radius) {
+  float ratio = radius / radius_;
+  local_model_matrix_[POSITION_X] *= ratio;
+  local_model_matrix_[POSITION_Y] *= ratio;
+  local_model_matrix_[POSITION_Z] *= ratio;
+  radius_ = radius;
+  update_global_matrix_ = true;
+}
+
+float SphericalCS::GetRadius() const {
+  return radius_;
+}
