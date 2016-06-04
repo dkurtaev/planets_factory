@@ -8,13 +8,26 @@
 
 #include <GL/freeglut.h>
 
-Icosphere::Icosphere(float edge_length) {
+Icosphere::Icosphere(float radius) {
   static const unsigned kNumTriangles = 20;
   static const unsigned kNumVertices = 12;
 
-  float base_plane_height = edge_length / 2;
-  float base_plane_width = (1 + sqrt(5)) * edge_length / 4;
-  radius_ = sqrt(pow(base_plane_height, 2) + pow(base_plane_width, 2));
+  // e - edges length
+  // h - base plane half-height
+  // w - base plane half-width
+  // r - radius on icosphere
+  // h = e / 2
+  // w = e * (1 + sqrt(5)) / 4 
+  // rr = hh + ww
+  // Let r known.
+  // rr = hh + hh (1+sqrt(5))^2 / 4
+  // h = sqrt(rr / (1 + (1+sqrt(5))^2 / 4))
+  // h = sqrt(rr / (1 + (1+5+2sqrt(5)) / 4))
+  // h = sqrt(rr / (1 + 1.5 + sqrt(5) / 2))
+
+  float base_plane_height = sqrt(radius * radius / (2.5 + 0.5 * sqrt(5)));
+  float base_plane_width = 0.5 * (1 + sqrt(5)) * base_plane_height;
+  radius_ = radius;
 
   // Vertices.
   vertices_.resize(kNumVertices);

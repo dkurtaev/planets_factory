@@ -7,7 +7,7 @@
 
 class Icosphere {
  public:
-  Icosphere(float edge_length);
+  Icosphere(float radius);
 
   ~Icosphere();
 
