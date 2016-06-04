@@ -15,7 +15,7 @@
 
 class Camera {
  public:
-  Camera(SphericalCS* camera_cs);
+  explicit Camera(SphericalCS* camera_cs);
 
   ~Camera();
 
@@ -36,7 +36,7 @@ class Camera {
   // If time between last mouse moving and releasing less than constant,
   // acceleration is activating. (time in milliseconds).
   static const float kAccelerationDelay = 20.0f;
-  // If speed dx*dx+dy*dy less than constant, inertial movement deactivating. 
+  // If speed dx*dx+dy*dy less than constant, inertial movement deactivating.
   static const float kMinimalSpeed = 1e-2f;
   // Radius incrementing value if wheel used.
   static const float kRadiusIncrement = 0.7f;

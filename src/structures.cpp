@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-Point3f::Point3f(float x, float y, float z, unsigned short id)
+Point3f::Point3f(float x, float y, float z, uint16_t id)
   : id(id) {
   data[0] = x;
   data[1] = y;
@@ -61,13 +61,13 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
   }
 }
 
-void Triangle::GetIndices(unsigned short* dst) const {
+void Triangle::GetIndices(uint16_t* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
     dst[i] = points_[i]->id;
   }
 }
 
-void Triangle::GetMiddlePointsIndices(unsigned short* dst) const {
+void Triangle::GetMiddlePointsIndices(uint16_t* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
     dst[i] = edges_[i]->MiddlePoint()->id;
   }

@@ -17,7 +17,7 @@ Icosphere::Icosphere(float radius) {
   // w - base plane half-width
   // r - radius on icosphere
   // h = e / 2
-  // w = e * (1 + sqrt(5)) / 4 
+  // w = e * (1 + sqrt(5)) / 4
   // rr = hh + ww
   // Let r known.
   // rr = hh + hh (1+sqrt(5))^2 / 4
@@ -73,7 +73,7 @@ Icosphere::Icosphere(float radius) {
 
   vertices_array_ = new float[3 * kNumVertices];
   normals_array_ = new float[3 * kNumVertices];
-  indices_array_ = new unsigned short[3 * kNumTriangles];
+  indices_array_ = new uint16_t[3 * kNumTriangles];
 
   for (unsigned i = 0; i < kNumVertices; ++i) {
     vertices_[i]->GetCoordinates(vertices_array_ + i * 3);
@@ -146,7 +146,7 @@ void Icosphere::Draw() {
     if (i) {
       glColor3f(0.8, 0, 0);
       glPolygonMode(GL_FRONT, GL_LINE);
-      glLineWidth(2);   
+      glLineWidth(2);
     } else {
       glColor3f(0, 0.8, 0);
       glPolygonMode(GL_FRONT, GL_FILL);
@@ -197,8 +197,8 @@ void Icosphere::SplitTriangles() {
 
   // Create new triangles.
   Triangle* triangle;
-  unsigned short triangle_verts[n_triangles][3];
-  unsigned short middle_points[n_triangles][3];
+  uint16_t triangle_verts[n_triangles][3];
+  uint16_t middle_points[n_triangles][3];
   for (unsigned i = 0; i < n_triangles; ++i) {
     triangle = triangles_[i];
     triangle->GetIndices(triangle_verts[i]);
@@ -208,7 +208,7 @@ void Icosphere::SplitTriangles() {
   triangles_.clear();
 
   for (unsigned i = 0; i < n_edges; ++i) {
-   delete edges_[i];
+    delete edges_[i];
   }
   edges_.clear();
 
@@ -220,7 +220,7 @@ void Icosphere::SplitTriangles() {
   }
 
   delete[] indices_array_;
-  indices_array_ = new unsigned short[3 * new_n_triangles];
+  indices_array_ = new uint16_t[3 * new_n_triangles];
   for (unsigned i = 0; i < new_n_triangles; ++i) {
     triangle = triangles_[i];
     triangle->GetIndices(indices_array_ + i * 3);

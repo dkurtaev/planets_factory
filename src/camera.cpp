@@ -50,7 +50,7 @@ void Camera::SpecialKeyPressed(int key, int x, int y) {
       camera_cs_->Rotate(SphericalCS::ABSCISSA, -kRotationDelta); break;
     case GLUT_KEY_CTRL_L: case GLUT_KEY_CTRL_R:
       ctrl_key_pressed_ = true;
-      break; 
+      break;
     default: break;
   }
 }
@@ -115,7 +115,7 @@ void Camera::MouseMove(int x, int y) {
       float a = atan2(n_x * n_last_y - n_last_x * n_y,
                       n_x * n_last_x + n_y * n_last_y);
       // Normalized distance from center of display to new mouse point.
-      float ratio = 0.5 * sqrt(pow(n_x / display_width_, 2) + 
+      float ratio = 0.5 * sqrt(pow(n_x / display_width_, 2) +
                                pow(n_y / display_height_, 2));
       camera_cs_->Rotate(SphericalCS::NORMAL,
                          kRotationAroundNormalDelta * a * sqrt(ratio));
@@ -130,8 +130,8 @@ void Camera::MouseMove(int x, int y) {
 void Camera::MoveCamera() {
   float exp_acc_t = exp(kMovementAcceleration * TimeFrom(init_tv_) * 1e-3);
   float dx = kRotationDelta * init_dx_ * exp_acc_t;
-  float dy = -kRotationDelta * init_dy_ * exp_acc_t;   
-  
+  float dy = -kRotationDelta * init_dy_ * exp_acc_t;
+
   camera_cs_->Rotate(SphericalCS::ABSCISSA, dx);
   camera_cs_->Rotate(SphericalCS::ORDINATE, dy);
   if (is_inertial_moving_ && dx * dx + dy * dy < kMinimalSpeed) {

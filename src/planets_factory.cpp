@@ -3,8 +3,6 @@
 #include "include/camera.h"
 #include "include/icosphere.h"
 
-#include <iostream>
-
 void InitWindow();
 
 void InitGL();

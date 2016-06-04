@@ -1,13 +1,15 @@
 #ifndef INCLUDE_ICOSPHERE_H_
 #define INCLUDE_ICOSPHERE_H_
 
+#include <stdint.h>
+
 #include <vector>
 
 #include "include/structures.h"
 
 class Icosphere {
  public:
-  Icosphere(float radius);
+  explicit Icosphere(float radius);
 
   ~Icosphere();
 
@@ -25,7 +27,7 @@ class Icosphere {
 
   float* vertices_array_;
   float* normals_array_;
-  unsigned short* indices_array_;
+  uint16_t* indices_array_;
 
   float radius_;
 };

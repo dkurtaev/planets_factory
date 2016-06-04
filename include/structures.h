@@ -1,14 +1,16 @@
 #ifndef INCLUDE_STRUCTURES_H_
 #define INCLUDE_STRUCTURES_H_
 
+#include <stdint.h>
+
 struct Point3f {
-  Point3f(float x = 0, float y = 0, float z = 0, unsigned short id = 0);
+  explicit Point3f(float x = 0, float y = 0, float z = 0, uint16_t id = 0);
 
   void Normalize(float target_norm);
 
   void GetCoordinates(float* dst) const;
 
-  unsigned short id;
+  uint16_t id;
   float data[3];
 };
 
@@ -33,9 +35,9 @@ struct Triangle {
   Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
            Edge* e1, Edge* e2, Edge* e3);
 
-  void GetIndices(unsigned short* dst) const;
+  void GetIndices(uint16_t* dst) const;
 
-  void GetMiddlePointsIndices(unsigned short* dst) const;
+  void GetMiddlePointsIndices(uint16_t* dst) const;
 
   Edge* edges_[3];
   const Point3f* points_[3];
