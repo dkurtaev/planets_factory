@@ -31,6 +31,10 @@ class SphericalCS {
 
   void GetModelMatrix(float* matrix);
 
+  void SetRadius(float radius);
+
+  float GetRadius() const;
+
  private:
   bool GlobalMatrixNeedsToUpdate();
 

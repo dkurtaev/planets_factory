@@ -81,6 +81,17 @@ void Camera::MouseFunc(int button, int state, int x, int y) {
       }
       break;
     }
+    case GLUT_WHEEL_UP: {
+      float radius = camera_cs_->GetRadius();
+      if (radius > kRadiusIncrement) {
+        camera_cs_->SetRadius(radius - kRadiusIncrement);
+      }
+      break;
+    }
+    case GLUT_WHEEL_DOWN: {
+      camera_cs_->SetRadius(camera_cs_->GetRadius() + kRadiusIncrement);
+      break;
+    }
     default: break;
   }
 }
@@ -118,11 +129,14 @@ void Camera::MouseMove(int x, int y) {
 
 void Camera::MoveCamera() {
   float exp_acc_t = exp(kMovementAcceleration * TimeFrom(init_tv_) * 1e-3);
-  float current_speed_x_ = kRotationDelta * init_dx_ * exp_acc_t;
-  float current_speed_y_ = -kRotationDelta * init_dy_ * exp_acc_t;   
+  float dx = kRotationDelta * init_dx_ * exp_acc_t;
+  float dy = -kRotationDelta * init_dy_ * exp_acc_t;   
   
-  camera_cs_->Rotate(SphericalCS::ABSCISSA, current_speed_x_);
-  camera_cs_->Rotate(SphericalCS::ORDINATE, current_speed_y_);
+  camera_cs_->Rotate(SphericalCS::ABSCISSA, dx);
+  camera_cs_->Rotate(SphericalCS::ORDINATE, dy);
+  if (is_inertial_moving_ && dx * dx + dy * dy < kMinimalSpeed) {
+    is_inertial_moving_ = false;
+  }
 }
 
 float Camera::TimeBetween(const timeval& tv1, const timeval& tv2) {
