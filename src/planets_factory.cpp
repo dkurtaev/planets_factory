@@ -1,7 +1,6 @@
 #include <GL/freeglut.h>
 
 #include "include/camera.h"
-#include "include/planet.h"
 #include "include/icosphere.h"
 
 #include <iostream>
@@ -23,12 +22,10 @@ int window_handle;
 SphericalCS planet_cs;
 SphericalCS camera_cs(20, 0, 80, 0, &planet_cs);
 Camera* camera;
-Planet* planet;
 Icosphere* icosphere;
 
 int main(int argc, char** argv) {
   camera = new Camera(&camera_cs);
-  planet = new Planet(5);
   icosphere = new Icosphere(4);
 
   InitWindow();
