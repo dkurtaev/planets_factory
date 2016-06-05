@@ -2,6 +2,7 @@
 
 #include "include/camera.h"
 #include "include/icosphere.h"
+#include "include/camera_mover.h"
 
 void InitWindow();
 
@@ -27,8 +28,10 @@ SphericalCS planet_cs;
 SphericalCS camera_cs(20, 0, 80, 0, &planet_cs);
 Camera* camera;
 Icosphere* icosphere;
+std::vector<GLViewListener*> glview_listeners;
 
 int main(int argc, char** argv) {
+  glview_listeners.push_back(new CameraMover(&camera_cs));
   camera = new Camera(&camera_cs);
   icosphere = new Icosphere(4);
 
@@ -74,12 +77,21 @@ void InitGL() {
 }
 
 void Reshape(int width, int height) {
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->Reshape(width, height);
+  }
   display_width = width;
   display_height = height;
   glViewport(0, 0, width, height);
 }
 
 void Display() {
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->DoEvents();
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   camera->Setup(display_width, display_height);
 
@@ -99,17 +111,29 @@ void Display() {
 }
 
 void SpecialKeyPressed(int key, int x, int y) {
-  camera->SpecialKeyPressed(key, x, y);
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->SpecialKeyPressed(key, x, y);
+  }
 }
 
 void SpecialKeyReleased(int key, int x, int y) {
-  camera->SpecialKeyReleased(key, x, y);
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->SpecialKeyReleased(key, x, y);
+  }
 }
 
 void MouseFunc(int button, int state, int x, int y) {
-  camera->MouseFunc(button, state, x, y);
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->MouseFunc(button, state, x, y);
+  }
 }
 
 void MouseMove(int x, int y) {
-  camera->MouseMove(x, y);
+  const unsigned n_listeners = glview_listeners.size();
+  for (unsigned i = 0; i < n_listeners; ++i) {
+    glview_listeners[i]->MouseMove(x, y);
+  }
 }
