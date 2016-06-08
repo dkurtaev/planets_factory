@@ -1,23 +1,26 @@
 #include "include/glview.h"
 
+#include <vector>
+#include <string>
+
 #include <GL/freeglut.h>
-#include <iostream>
+
 std::vector<GLView*> GLView::inherited_views_;
 
-GLView::GLView(int display_width, int display_height)
+GLView::GLView(int display_width, int display_height, std::string window_header)
   : display_width_(display_width), display_height_(display_height) {
-  InitWindow();
+  InitWindow(window_header);
   InitGL();
   inherited_views_.push_back(this);
 }
 
-void GLView::InitWindow() {
+void GLView::InitWindow(std::string window_header) {
   int tmp = 0;
   glutInit(&tmp, 0);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
   glutInitWindowSize(display_width_, display_height_);
   glutInitWindowPosition(0, 0);
-  window_handle_ = glutCreateWindow("Planets factory");
+  window_handle_ = glutCreateWindow(window_header.c_str());
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
   glutDisplayFunc(IdleDisplay);
@@ -47,7 +50,7 @@ void GLView::InitGL() {
   glLightfv(GL_LIGHT0, GL_POSITION, position);
 }
 
-void GLView::AddListener(GLViewListener* listener){
+void GLView::AddListener(GLViewListener* listener) {
   listeners_.push_back(listener);
 }
 
@@ -98,7 +101,7 @@ void GLView::IdleDisplay() {
   GLView* active_view = GetActiveGLView();
   const unsigned n_listeners = active_view->listeners_.size();
   for (unsigned i = 0; i < n_listeners; ++i) {
-    // active_view->listeners_[i]->DoEvents();
+    active_view->listeners_[i]->DoEvents();
   }
   active_view->Display();
 }

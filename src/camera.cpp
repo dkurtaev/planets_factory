@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <GL/freeglut.h>
-#include <iostream>
 
 Camera::Camera(SphericalCS* camera_cs) {
   model_matrix_ = new float[16];

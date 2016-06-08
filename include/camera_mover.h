@@ -33,7 +33,7 @@ class CameraMover : public GLViewListener {
   static const float kRadiusIncrement = 0.7f;
 
   static float TimeFrom(const timeval& tv);
-  
+
   void MoveCamera();
 
   SphericalCS* camera_cs_;

@@ -2,23 +2,24 @@
 #define INCLUDE_GLVIEW_H_
 
 #include <vector>
+#include <string>
 
 #include "include/glview_listener.h"
 
 class GLView {
  public:
-  GLView(int display_width, int display_height);
+  GLView(int display_width, int display_height, std::string window_header);
 
   void AddListener(GLViewListener* listener);
 
  protected:
-  virtual void Display() {};
+  virtual void Display() {}
 
   int display_width_;
   int display_height_;
 
  private:
-  void InitWindow();
+  void InitWindow(std::string window_header);
 
   void InitGL();
 

@@ -10,7 +10,7 @@
 class PlanetView : public GLView {
  public:
   PlanetView();
-  
+
   ~PlanetView();
 
   virtual void Display();

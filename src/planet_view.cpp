@@ -1,14 +1,14 @@
 #include "include/planet_view.h"
 
 #include <GL/freeglut.h>
-#include <iostream>
+
 PlanetView::PlanetView()
-  : GLView(500, 500) {
- camera_cs_ = new SphericalCS(20, 0, 80, 0, &planet_cs_); 
- camera_ = new Camera(camera_cs_);
- icosphere = new Icosphere(4);
- camera_mover_ = new CameraMover(camera_cs_);
- AddListener(camera_mover_);
+  : GLView(500, 500, "Planets factory") {
+  camera_cs_ = new SphericalCS(20, 0, 80, 0, &planet_cs_);
+  camera_ = new Camera(camera_cs_);
+  icosphere = new Icosphere(4);
+  camera_mover_ = new CameraMover(camera_cs_);
+  AddListener(camera_mover_);
 }
 
 PlanetView::~PlanetView() {
