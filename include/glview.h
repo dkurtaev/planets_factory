@@ -35,6 +35,8 @@ class GLView {
 
   static void MouseMove(int x, int y);
 
+  static void CloseFunc();
+
   static GLView* GetActiveGLView();
 
   static std::vector<GLView*> inherited_views_;

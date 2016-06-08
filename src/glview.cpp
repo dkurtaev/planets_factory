@@ -15,9 +15,11 @@ GLView::GLView(int display_width, int display_height, std::string window_header)
 }
 
 void GLView::InitWindow(std::string window_header) {
-  int tmp = 0;
-  glutInit(&tmp, 0);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
+  if (inherited_views_.empty()) {
+    int tmp = 0;
+    glutInit(&tmp, 0);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
+  }
   glutInitWindowSize(display_width_, display_height_);
   glutInitWindowPosition(0, 0);
   window_handle_ = glutCreateWindow(window_header.c_str());
@@ -30,6 +32,7 @@ void GLView::InitWindow(std::string window_header) {
   glutMotionFunc(MouseMove);
   glutMouseFunc(MouseFunc);
   glutSpecialUpFunc(SpecialKeyReleased);
+  glutCloseFunc(CloseFunc);
 }
 
 void GLView::InitGL() {
@@ -98,12 +101,16 @@ void GLView::MouseMove(int x, int y) {
 }
 
 void GLView::IdleDisplay() {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    active_view->listeners_[i]->DoEvents();
+  const unsigned n_views = inherited_views_.size();
+  for (unsigned i = 0; i < n_views; ++i) {
+    GLView* view = inherited_views_[i];
+    const unsigned n_listeners = view->listeners_.size();
+    for (unsigned i = 0; i < n_listeners; ++i) {
+      view->listeners_[i]->DoEvents();
+    }
+    glutSetWindow(view->window_handle_);
+    view->Display();
   }
-  active_view->Display();
 }
 
 GLView* GLView::GetActiveGLView() {
@@ -115,4 +122,15 @@ GLView* GLView::GetActiveGLView() {
     }
   }
   return 0;
+}
+
+void GLView::CloseFunc() {
+  GLView* active_view = GetActiveGLView();
+  std::vector<GLView*>::iterator it = inherited_views_.begin();
+  for (it; it != inherited_views_.end(); ++it) {
+    if (*it == active_view) {
+      inherited_views_.erase(it);
+      break;
+    }
+  }
 }
