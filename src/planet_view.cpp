@@ -9,6 +9,7 @@ PlanetView::PlanetView()
   icosphere = new Icosphere(4);
   camera_mover_ = new CameraMover(camera_cs_);
   AddListener(camera_mover_);
+  InitGL();
 }
 
 PlanetView::~PlanetView() {
@@ -35,4 +36,22 @@ void PlanetView::Display() {
   glEnd();
 
   glutSwapBuffers();
+}
+
+void PlanetView::InitGL() {
+  glClearColor(0, 0, 0, 1);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_DEPTH_TEST);
+
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CCW);
+
+  glEnable(GL_LIGHT0);
+  GLfloat ambient[] = { 0.2, 0.2, 0.2, 1 };
+  GLfloat diffuse[] = { 0.8, 0.8, 0.8, 1 };
+  GLfloat position[] = { 100, 100, 100, 1 };
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+  glLightfv(GL_LIGHT0, GL_POSITION, position);
 }

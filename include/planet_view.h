@@ -16,6 +16,8 @@ class PlanetView : public GLView {
   virtual void Display();
 
  private:
+  void InitGL();
+
   Camera* camera_;
   SphericalCS planet_cs_;
   SphericalCS* camera_cs_;
