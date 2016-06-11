@@ -15,11 +15,15 @@ class GLViewListener {
 
   virtual void MouseMove(int x, int y) {}
 
+  virtual void PassiveMouseMove(int x, int y) {}
+
   virtual void SpecialKeyPressed(int key, int x, int y) {}
 
   virtual void SpecialKeyReleased(int key, int x, int y) {}
 
   virtual void DoEvents() {}
+
+  virtual void EntryFunc(int state) {}
 
   void Reshape(int display_width, int display_height) {
     display_width_ = display_width;

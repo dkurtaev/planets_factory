@@ -47,13 +47,23 @@ class GLView {
 
   static void MouseMove(int x, int y);
 
+  static void PassiveMouseMove(int x, int y);
+
   static void CloseFunc();
+
+  static void EntryFunc(int state);
 
   static GLView* GetActiveGLView();
 
   static std::vector<GLView*> inherited_views_;
   int window_handle_;
   std::vector<GLViewListener*> listeners_;
+
+  // Using for detecting mouse entry/leave for ROIs.
+  unsigned last_mouse_x_;
+  unsigned last_mouse_y_;
+  // For ROIs first mouse movement as entry event.
+  bool mouse_moved_;
 };
 
 #endif  // INCLUDE_GLVIEW_H_

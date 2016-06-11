@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+#include <GL/freeglut.h>
+
 #include "include/glview_listener.h"
 
 class Button : public GLViewListener {
@@ -15,6 +17,20 @@ class Button : public GLViewListener {
   virtual void MouseFunc(int button, int state, int x, int y) {
     if (!state) {
       std::cout << msg_ << std::endl;
+    }
+  }
+
+  virtual void MouseMove(int x, int y) {
+    glutSetCursor(GLUT_CURSOR_INFO);
+  }
+
+  virtual void PassiveMouseMove(int x, int y) {
+    glutSetCursor(GLUT_CURSOR_INFO);
+  }
+
+  virtual void EntryFunc(int state) {
+    if (state == GLUT_LEFT) {
+      glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
     }
   }
 
