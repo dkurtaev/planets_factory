@@ -9,8 +9,25 @@
 #include <GL/freeglut.h>
 
 Icosphere::Icosphere(float radius) {
-  static const unsigned kNumTriangles = 20;
-  static const unsigned kNumVertices = 12;
+  // Characteristics of icosahedron.
+  static const unsigned kInitNumTriangles = 20;
+  static const unsigned kInitNumVertices = 12;
+  static const unsigned kInitNumEdges = 30;
+  // Number of triangles splitting procedure calls.
+  static const unsigned kNumSplits = 3;
+  // Characteristics of final icosphere.
+  // After each split:
+  // new_n_trianlges = 4 * prev_n_triangles
+  // new_n_vertices = prev_n_vertices + 1.5 * (prev_n_triangles)
+  static const unsigned kNumTriangles = kInitNumTriangles * pow(4, kNumSplits);
+  static const unsigned kNumVertices =
+      kInitNumVertices + 0.5f * (kNumTriangles - kInitNumTriangles);
+  static const unsigned kNumEdges = (3 * kNumTriangles) / 2;
+
+  vertices_array_ = new float[3 * kNumVertices];
+  normals_array_ = new float[3 * kNumVertices];
+  colors_array_ = new uint8_t[3 * kNumVertices];
+  indices_array_ = new uint16_t[3 * kNumTriangles];
 
   // e - edges length
   // h - base plane half-height
@@ -24,27 +41,22 @@ Icosphere::Icosphere(float radius) {
   // h = sqrt(rr / (1 + (1+sqrt(5))^2 / 4))
   // h = sqrt(rr / (1 + (1+5+2sqrt(5)) / 4))
   // h = sqrt(rr / (1 + 1.5 + sqrt(5) / 2))
-
-  float base_plane_height = sqrt(radius * radius / (2.5 + 0.5 * sqrt(5)));
-  float base_plane_width = 0.5 * (1 + sqrt(5)) * base_plane_height;
+  const float h = sqrt(radius * radius / (2.5 + 0.5 * sqrt(5)));
+  const float w = 0.5 * (1 + sqrt(5)) * h;
   radius_ = radius;
 
   // Vertices.
-  vertices_.resize(kNumVertices);
-  vertices_[0] = new Point3f(base_plane_width, -base_plane_height, 0, 0);
-  vertices_[1] = new Point3f(base_plane_width, base_plane_height, 0, 1);
-  vertices_[2] = new Point3f(-base_plane_width, base_plane_height, 0, 2);
-  vertices_[3] = new Point3f(-base_plane_width, -base_plane_height, 0, 3);
-  vertices_[4] = new Point3f(0, base_plane_width, -base_plane_height, 4);
-  vertices_[5] = new Point3f(0, base_plane_width, base_plane_height, 5);
-  vertices_[6] = new Point3f(0, -base_plane_width, base_plane_height, 6);
-  vertices_[7] = new Point3f(0, -base_plane_width, -base_plane_height, 7);
-  vertices_[8] = new Point3f(-base_plane_height, 0, base_plane_width, 8);
-  vertices_[9] = new Point3f(base_plane_height, 0, base_plane_width, 9);
-  vertices_[10] = new Point3f(base_plane_height, 0, -base_plane_width, 10);
-  vertices_[11] = new Point3f(-base_plane_height, 0, -base_plane_width, 11);
+  vertices_.resize(kInitNumVertices);
+  vertices_.reserve(kNumVertices);
+  float xs[] = {w, w, -w, -w, 0, 0, 0, 0, -h, h, h, -h};
+  float ys[] = {-h, h, h, -h, w, w, -w, -w, 0, 0, 0, 0};
+  float zs[] = {0, 0, 0, 0, -h, h, h, -h, w, w, -w, -w};
+  for (unsigned i = 0; i < kInitNumVertices; ++i) {
+    vertices_[i] = new Point3f(i, xs[i], ys[i], zs[i], vertices_array_ + i * 3,
+                               colors_array_ + i * 3);
+  }
 
-  edges_.reserve(30);
+  edges_.reserve(kNumEdges);
   triangles_.reserve(kNumTriangles);
 
   AddTriangle(5, 9, 1);
@@ -71,22 +83,18 @@ Icosphere::Icosphere(float radius) {
   AddTriangle(3, 7, 6);
   AddTriangle(3, 8, 2);
 
-  vertices_array_ = new float[3 * kNumVertices];
-  normals_array_ = new float[3 * kNumVertices];
-  indices_array_ = new uint16_t[3 * kNumTriangles];
+  for (unsigned i = 0; i < kNumSplits; ++i) {
+    SplitTriangles();
+  }
 
-  for (unsigned i = 0; i < kNumVertices; ++i) {
-    vertices_[i]->GetCoordinates(vertices_array_ + i * 3);
-    for (unsigned j = 0; j < 3; ++j) {
-      normals_array_[i * 3 + j] = vertices_[i]->data[j] / radius_;
-    }
+  memset(colors_array_, kInitialColor, sizeof(uint8_t) * 3 * kNumVertices);
+  memcpy(normals_array_, vertices_array_, sizeof(float) * 3 * kNumVertices);
+  const unsigned dim = 3 * kNumVertices;
+  for (unsigned i = 0; i < dim; ++i) {
+    normals_array_[i] /= radius_;
   }
   for (unsigned i = 0; i < kNumTriangles; ++i) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
-  }
-
-  for (unsigned i = 0; i < 3; ++i) {
-    SplitTriangles();
   }
 }
 
@@ -109,6 +117,7 @@ Icosphere::~Icosphere() {
   delete[] vertices_array_;
   delete[] normals_array_;
   delete[] indices_array_;
+  delete[] colors_array_;
 }
 
 void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
@@ -141,24 +150,17 @@ void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
   triangles_.push_back(new_triangle);
 }
 
-void Icosphere::Draw() {
-  for (int i = 0; i < 2; ++i) {
-    if (i) {
-      glColor3f(0.8, 0, 0);
-      glPolygonMode(GL_FRONT, GL_LINE);
-      glLineWidth(2);
-    } else {
-      glColor3f(0, 0.8, 0);
-      glPolygonMode(GL_FRONT, GL_FILL);
-    }
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glNormalPointer(GL_FLOAT, 0, normals_array_);
+void Icosphere::Draw() const {
+  glEnableClientState(GL_COLOR_ARRAY);
+  glColorPointer(3, GL_UNSIGNED_BYTE, 0, colors_array_);
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
-    glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
-                   indices_array_);
-  }
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glNormalPointer(GL_FLOAT, 0, normals_array_);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
+  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
+                 indices_array_);
 }
 
 void Icosphere::SplitTriangles() {
@@ -166,32 +168,14 @@ void Icosphere::SplitTriangles() {
   const unsigned n_vertices = vertices_.size();
   const unsigned n_edges = edges_.size();
 
-  unsigned new_n_vertices = n_vertices + 3 * n_triangles / 2;
-  unsigned new_n_triangles = n_triangles * 4;
-
-  float* new_vertices = new float[3 * new_n_vertices];
-  float* new_normals = new float[3 * new_n_vertices];
-  memcpy(new_vertices, vertices_array_, sizeof(float) * 3 * n_vertices);
-  memcpy(new_normals, normals_array_, sizeof(float) * 3 * n_vertices);
-  delete[] vertices_array_;
-  delete[] normals_array_;
-  vertices_array_ = new_vertices;
-  normals_array_ = new_normals;
-  new_vertices = 0;
-  new_normals = 0;
-
   // Split each edge in halfs.
   Point3f* middle_point;
-  unsigned offset;
   for (unsigned i = 0; i < n_edges; ++i) {
-    offset = n_vertices + i;
-    middle_point = new Point3f(0, 0, 0, offset);
+    const unsigned id = n_vertices + i;
+    middle_point = new Point3f(id, 0, 0, 0, vertices_array_ + id * 3,
+                               colors_array_ + id * 3);
     edges_[i]->MiddlePoint(middle_point);
     middle_point->Normalize(radius_);
-    middle_point->GetCoordinates(vertices_array_ + offset * 3);
-    for (unsigned j = 0; j < 3; ++j) {
-      normals_array_[offset * 3 + j] = middle_point->data[j] / radius_;
-    }
     vertices_.push_back(middle_point);
   }
 
@@ -218,11 +202,9 @@ void Icosphere::SplitTriangles() {
     AddTriangle(middle_points[i][2], middle_points[i][1], triangle_verts[i][2]);
     AddTriangle(middle_points[i][0], middle_points[i][1], middle_points[i][2]);
   }
+}
 
-  delete[] indices_array_;
-  indices_array_ = new uint16_t[3 * new_n_triangles];
-  for (unsigned i = 0; i < new_n_triangles; ++i) {
-    triangle = triangles_[i];
-    triangle->GetIndices(indices_array_ + i * 3);
-  }
+void Icosphere::GetVertices(std::vector<Point3f*>* vertices) {
+  vertices->resize(vertices_.size());
+  std::copy(vertices_.begin(), vertices_.end(), vertices->begin());
 }
