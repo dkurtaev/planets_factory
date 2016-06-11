@@ -5,6 +5,17 @@
 
 #include <GL/freeglut.h>
 
+#define FOREACH_LISTENER_IN_ROI \
+  GLView* active_view = GetActiveGLView(); \
+  const unsigned n_listeners = active_view->listeners_.size(); \
+  const float float_x = static_cast<float>(x) / active_view->display_width_; \
+  const float float_y = static_cast<float>(y) / active_view->display_height_; \
+  for (unsigned i = 0; i < n_listeners; ++i) { \
+    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) { \
+      active_view->listeners_[i]-> \
+
+#define END_FOREACH ;}}
+
 std::vector<GLView*> GLView::inherited_views_;
 
 GLView::GLView(int display_width, int display_height, std::string window_header)
@@ -51,51 +62,19 @@ void GLView::Reshape(int width, int height) {
 }
 
 void GLView::SpecialKeyPressed(int key, int x, int y) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  const float float_x = static_cast<float>(x) / active_view->display_width_;
-  const float float_y = static_cast<float>(y) / active_view->display_height_;
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) {
-      active_view->listeners_[i]->SpecialKeyPressed(key, x, y);
-    }
-  }
+  FOREACH_LISTENER_IN_ROI SpecialKeyPressed(key, x, y) END_FOREACH
 }
 
 void GLView::SpecialKeyReleased(int key, int x, int y) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  const float float_x = static_cast<float>(x) / active_view->display_width_;
-  const float float_y = static_cast<float>(y) / active_view->display_height_;
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) {
-      active_view->listeners_[i]->SpecialKeyReleased(key, x, y);
-    }
-  }
+  FOREACH_LISTENER_IN_ROI SpecialKeyReleased(key, x, y) END_FOREACH
 }
 
 void GLView::MouseFunc(int button, int state, int x, int y) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  const float float_x = static_cast<float>(x) / active_view->display_width_;
-  const float float_y = static_cast<float>(y) / active_view->display_height_;
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) {
-      active_view->listeners_[i]->MouseFunc(button, state, x, y);
-    }
-  }
+  FOREACH_LISTENER_IN_ROI MouseFunc(button, state, x, y) END_FOREACH
 }
 
 void GLView::MouseMove(int x, int y) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  const float float_x = static_cast<float>(x) / active_view->display_width_;
-  const float float_y = static_cast<float>(y) / active_view->display_height_;
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) {
-      active_view->listeners_[i]->MouseMove(x, y);
-    }
-  }
+  FOREACH_LISTENER_IN_ROI MouseMove(x, y) END_FOREACH
 }
 
 void GLView::IdleDisplay() {
@@ -123,10 +102,10 @@ GLView* GLView::GetActiveGLView() {
 }
 
 void GLView::CloseFunc() {
-  GLView* active_view = GetActiveGLView();
+  const int handle = glutGetWindow();
   std::vector<GLView*>::iterator it = inherited_views_.begin();
   for (it; it != inherited_views_.end(); ++it) {
-    if (*it == active_view) {
+    if ((*it)->window_handle_ == handle) {
       inherited_views_.erase(it);
       break;
     }
