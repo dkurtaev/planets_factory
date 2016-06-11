@@ -30,6 +30,7 @@ class GLView {
 
   int display_width_;
   int display_height_;
+  std::vector<Roi> listeners_rois_;
 
  private:
   void InitWindow(std::string window_header);
@@ -53,7 +54,6 @@ class GLView {
   static std::vector<GLView*> inherited_views_;
   int window_handle_;
   std::vector<GLViewListener*> listeners_;
-  std::vector<Roi> listeners_rois_;
 };
 
 #endif  // INCLUDE_GLVIEW_H_
