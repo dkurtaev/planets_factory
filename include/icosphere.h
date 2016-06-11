@@ -15,10 +15,12 @@ class Icosphere {
 
   void Draw() const;
 
+  void GetVertices(std::vector<Point3f*>* vertices);
+
  private:
   static const uint8_t kInitialColor = 204;
 
-  // Used for building icosahedron.
+  // Used for building.
   void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 
   void SplitTriangles();
