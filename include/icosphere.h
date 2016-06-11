@@ -13,9 +13,11 @@ class Icosphere {
 
   ~Icosphere();
 
-  void Draw();
+  void Draw() const;
 
  private:
+  static const uint8_t kInitialColor = 204;
+
   // Used for building icosahedron.
   void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 
@@ -27,6 +29,7 @@ class Icosphere {
 
   float* vertices_array_;
   float* normals_array_;
+  uint8_t* colors_array_;
   uint16_t* indices_array_;
 
   float radius_;
