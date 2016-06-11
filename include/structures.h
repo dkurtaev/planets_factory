@@ -3,15 +3,31 @@
 
 #include <stdint.h>
 
-struct Point3f {
-  explicit Point3f(float x = 0, float y = 0, float z = 0, uint16_t id = 0);
+class Point3f {
+ public:
+  Point3f(uint16_t id, float x, float y, float z, float* vertices_array_offset,
+          uint8_t* colors_array_offset);
+
+  static void MiddlePoint(const Point3f& p1, const Point3f& p2,
+                          Point3f* middle_point);
+
+  float SquaredDistanceTo(float x, float y, float z);
 
   void Normalize(float target_norm);
 
-  void GetCoordinates(float* dst) const;
+  void SetPosition(float x, float y, float z);
 
-  uint16_t id;
-  float data[3];
+  void SetColor(uint8_t r, uint8_t g, uint8_t b);
+
+  float GetNorm() const { return norm_; }
+
+  uint16_t GetId() const { return id_; }
+
+ private:
+  uint16_t id_;
+  float* vertices_array_offset_;
+  uint8_t* colors_array_offset_;
+  float norm_;
 };
 
 class Edge {
@@ -23,7 +39,7 @@ class Edge {
   // (or null if not called yet).
   const Point3f* MiddlePoint(Point3f* middle_point = 0);
 
-  bool CompareTo(unsigned p1_id, unsigned p2_id) const;
+  bool CompareTo(uint16_t p1_id, uint16_t p2_id) const;
 
  private:
   const Point3f* p1_;
