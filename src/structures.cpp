@@ -4,26 +4,46 @@
 #include <string.h>
 #include <math.h>
 
-Point3f::Point3f(float x, float y, float z, uint16_t id)
-  : id(id) {
-  data[0] = x;
-  data[1] = y;
-  data[2] = z;
+Point3f::Point3f(uint16_t id, float x, float y, float z,
+                 float* vertices_array_offset, uint8_t* colors_array_offset)
+  : id_(id), vertices_array_offset_(vertices_array_offset),
+    colors_array_offset_(colors_array_offset) {
+  SetPosition(x, y, z);
 }
 
 void Point3f::Normalize(float target_norm) {
-  float norm = 0;
-  for (unsigned i = 0; i < 3; ++i) {
-    norm += pow(data[i], 2);
-  }
-  norm = target_norm / sqrt(norm);
-  for (unsigned i = 0; i < 3; ++i) {
-    data[i] *= norm;
-  }
+  float coeff = target_norm / norm_;
+  vertices_array_offset_[0] *= coeff;
+  vertices_array_offset_[1] *= coeff;
+  vertices_array_offset_[2] *= coeff;
+  norm_ = target_norm;
 }
 
-void Point3f::GetCoordinates(float* dst) const {
-  memcpy(dst, data, 3 * sizeof(float));
+void Point3f::SetPosition(float x, float y, float z) {
+  vertices_array_offset_[0] = x;
+  vertices_array_offset_[1] = y;
+  vertices_array_offset_[2] = z;
+  norm_ = sqrt(x * x + y * y + z * z);
+}
+
+void Point3f::SetColor(uint8_t r, uint8_t g, uint8_t b) {
+  colors_array_offset_[0] = r;
+  colors_array_offset_[1] = g;
+  colors_array_offset_[2] = b;
+}
+
+void Point3f::MiddlePoint(const Point3f& p1, const Point3f& p2,
+                          Point3f* middle_point) {
+  middle_point->SetPosition(
+    0.5f * (p1.vertices_array_offset_[0] + p2.vertices_array_offset_[0]),
+    0.5f * (p1.vertices_array_offset_[1] + p2.vertices_array_offset_[1]),
+    0.5f * (p1.vertices_array_offset_[2] + p2.vertices_array_offset_[2]));
+}
+
+float Point3f::SquaredDistanceTo(float x, float y, float z) {
+  return pow(vertices_array_offset_[0] - x, 2) +
+         pow(vertices_array_offset_[1] - y, 2) +
+         pow(vertices_array_offset_[2] - z, 2);
 }
 
 Edge::Edge(const Point3f* p1, const Point3f* p2)
@@ -31,17 +51,18 @@ Edge::Edge(const Point3f* p1, const Point3f* p2)
 
 const Point3f* Edge::MiddlePoint(Point3f* middle_point) {
   if (middle_point) {
-    middle_point->data[0] = (p1_->data[0] + p2_->data[0]) / 2;
-    middle_point->data[1] = (p1_->data[1] + p2_->data[1]) / 2;
-    middle_point->data[2] = (p1_->data[2] + p2_->data[2]) / 2;
+    Point3f::MiddlePoint(*p1_, *p2_, middle_point);
     middle_point_ = middle_point;
   }
   return middle_point_;
 }
 
-bool Edge::CompareTo(unsigned p1_id, unsigned p2_id) const {
-  return p1_->id == p1_id && p2_->id == p2_id ||
-         p1_->id == p2_id && p2_->id == p1_id;
+bool Edge::CompareTo(uint16_t p1_id, uint16_t p2_id) const {
+  uint16_t self_p1_id = p1_->GetId();
+  uint16_t self_p2_id = p2_->GetId();
+
+  return self_p1_id == p1_id && self_p2_id == p2_id ||
+         self_p1_id == p2_id && self_p2_id == p1_id;
 }
 
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
@@ -52,23 +73,16 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
   edges_[0] = e1;
   edges_[1] = e2;
   edges_[2] = e3;
-
-  float xs[3], ys[3], zs[3];
-  for (unsigned i = 0; i < 3; ++i) {
-    xs[i] = points_[i]->data[0];
-    ys[i] = points_[i]->data[1];
-    zs[i] = points_[i]->data[2];
-  }
 }
 
 void Triangle::GetIndices(uint16_t* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
-    dst[i] = points_[i]->id;
+    dst[i] = points_[i]->GetId();
   }
 }
 
 void Triangle::GetMiddlePointsIndices(uint16_t* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
-    dst[i] = edges_[i]->MiddlePoint()->id;
+    dst[i] = edges_[i]->MiddlePoint()->GetId();
   }
 }
