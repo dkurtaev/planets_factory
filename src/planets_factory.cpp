@@ -8,13 +8,10 @@
 int main(int argc, char** argv) {
   PlanetView planet_view;
 
-  std::vector<std::string> actions_titles;
-  std::vector<GLViewListener*> buttons;
-  actions_titles.push_back("first action");
-  actions_titles.push_back("second action");
+  std::vector<Button*> buttons;
   buttons.push_back(new Button("first button pressed"));
   buttons.push_back(new Button("second button pressed"));
-  ActionsView actions_view(buttons, actions_titles);
+  ActionsView actions_view(buttons);
   
   glutMainLoop();
   return 0;

@@ -2,14 +2,14 @@
 #define INCLUDE_ACTIONS_VIEW_H_
 
 #include <vector>
-#include <string>
 
 #include "include/glview.h"
+#include "include/button.h"
+#include "include/layout.h"
 
 class ActionsView : public GLView {
  public:
-  ActionsView(const std::vector<GLViewListener*>& actions,
-              const std::vector<std::string>& actions_titles);
+  ActionsView(std::vector<Button*> buttons);
 
   virtual void Display();
 
@@ -22,7 +22,8 @@ class ActionsView : public GLView {
   static const float kTopIdent = 0.1f;
   static const float kBottomIdent = 0.1f;
 
-  std::vector<std::string> actions_titles_;
+  std::vector<Button*> buttons_;
+  Layout layout_;
 };
 
 #endif  // INCLUDE_ACTIONS_VIEW_H_

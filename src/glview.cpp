@@ -5,41 +5,11 @@
 
 #include <GL/freeglut.h>
 
-#define FOREACH_LISTENER_IN_ROI \
+#define FOREACH_LISTENER \
   GLView* active_view = GetActiveGLView(); \
   const unsigned n_listeners = active_view->listeners_.size(); \
-  const float float_x = static_cast<float>(x) / active_view->display_width_; \
-  const float float_y = static_cast<float>(y) / active_view->display_height_; \
   for (unsigned i = 0; i < n_listeners; ++i) \
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) \
-      active_view->listeners_[i]-> \
-
-#define FOREACH_LISTENER_IN_ROI_ENTRY_CONTROL \
-  GLView* active_view = GetActiveGLView(); \
-  const unsigned n_listeners = active_view->listeners_.size(); \
-  const unsigned width = active_view->display_width_; \
-  const unsigned height = active_view->display_height_; \
-  const float float_x = static_cast<float>(x) / width; \
-  const float float_y = static_cast<float>(y) / height; \
-  const float last_x = static_cast<float>(active_view->last_mouse_x_) / width; \
-  const float last_y = static_cast<float>(active_view->last_mouse_y_) / height;\
-  active_view->last_mouse_x_ = x; \
-  active_view->last_mouse_y_ = y; \
-  \
-  for (unsigned i = 0; i < n_listeners; ++i) \
-    if (!active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) { \
-      if (active_view->listeners_rois_[i].IsIncludes(last_x, last_y)) { \
-        active_view->listeners_[i]->EntryFunc(GLUT_LEFT); \
-      } \
-    } \
-    else \
-      if (!active_view->mouse_moved_ && \
-          !active_view->listeners_rois_[i].IsIncludes(last_x, last_y)) { \
-        active_view->listeners_[i]->EntryFunc(GLUT_ENTERED); \
-      } \
-      else \
-        active_view->listeners_[i]->
-
+    active_view->listeners_[i]->
 
 std::vector<GLView*> GLView::inherited_views_;
 
@@ -72,46 +42,35 @@ void GLView::InitWindow(std::string window_header) {
   glutEntryFunc(EntryFunc);
 }
 
-void GLView::AddListener(GLViewListener* listener, const Roi& roi) {
+void GLView::AddListener(GLViewListener* listener) {
   listeners_.push_back(listener);
-  listeners_rois_.push_back(roi);
 }
 
 void GLView::Reshape(int width, int height) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    active_view->listeners_[i]->Reshape(width, height);
-  }
+  FOREACH_LISTENER Reshape(width, height);
   active_view->display_width_ = width;
   active_view->display_height_ = height;
   glViewport(0, 0, width, height);
 }
 
 void GLView::SpecialKeyPressed(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyPressed(key, x, y);
+  FOREACH_LISTENER SpecialKeyPressed(key, x, y);
 }
 
 void GLView::SpecialKeyReleased(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyReleased(key, x, y);
+  FOREACH_LISTENER SpecialKeyReleased(key, x, y);
 }
 
 void GLView::MouseFunc(int button, int state, int x, int y) {
-  FOREACH_LISTENER_IN_ROI MouseFunc(button, state, x, y);
+  FOREACH_LISTENER MouseFunc(button, state, x, y);
 }
 
 void GLView::MouseMove(int x, int y) {
-  FOREACH_LISTENER_IN_ROI_ENTRY_CONTROL MouseMove(x, y);
-  if (!active_view->mouse_moved_) {
-    active_view->mouse_moved_ = true;
-  }
+  FOREACH_LISTENER MouseMove(x, y);
 }
 
 void GLView::PassiveMouseMove(int x, int y) {
-  FOREACH_LISTENER_IN_ROI_ENTRY_CONTROL PassiveMouseMove(x, y);
-  if (!active_view->mouse_moved_) {
-    active_view->mouse_moved_ = true;
-  }
+  FOREACH_LISTENER PassiveMouseMove(x, y);
 }
 
 void GLView::IdleDisplay() {
@@ -150,24 +109,5 @@ void GLView::CloseFunc() {
 }
 
 void GLView::EntryFunc(int state) {
-  GLView* active_view = GetActiveGLView();
-  if (state == GLUT_LEFT) {
-    const unsigned n_listeners = active_view->listeners_.size();
-    const unsigned width = active_view->display_width_;
-    const unsigned height = active_view->display_height_;
-    const float x = static_cast<float>(active_view->last_mouse_x_) / width;
-    const float y = static_cast<float>(active_view->last_mouse_y_) / height;
-    for (unsigned i = 0; i < n_listeners; ++i) {
-      if (active_view->listeners_rois_[i].IsIncludes(x, y)) {
-        active_view->listeners_[i]->EntryFunc(GLUT_LEFT);
-      }
-    }
-  } else {
-    active_view->mouse_moved_ = false;
-  }
-}
-
-bool Roi::IsIncludes(float x, float y) {
-  return (x >= left && x <= left + width &&
-          y >= top && y <= top + height);
+  FOREACH_LISTENER EntryFunc(state);
 }

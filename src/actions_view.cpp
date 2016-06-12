@@ -5,19 +5,18 @@
 
 #include <GL/freeglut.h>
 
-ActionsView::ActionsView(const std::vector<GLViewListener*>& actions,
-                         const std::vector<std::string>& actions_titles)
-  : GLView(kInitButtonRoiWidth, kInitButtonRoiHeight * actions.size(),
+ActionsView::ActionsView(std::vector<Button*> buttons)
+  : GLView(kInitButtonRoiWidth, kInitButtonRoiHeight * buttons.size(),
            "Actions"),
-    actions_titles_(actions_titles) {
-  const unsigned n_actions = actions.size();
-  const float roi_height = 1.0f / n_actions;
-  const float button_height = roi_height - kBottomIdent - kTopIdent;
-  const float button_width = 1 - kRightIdent - kLeftIdent;
-  for (unsigned i = 0; i < n_actions; ++i) {
-    AddListener(actions[i], Roi(i * roi_height + kTopIdent, kLeftIdent,
-                                button_height, button_width));
+    buttons_(buttons) {
+  const unsigned n_buttons = buttons.size();
+  const float roi_height = 1.0f / n_buttons;
+  for (unsigned i = 0; i < n_buttons; ++i) {
+    layout_.AddListener(buttons[i], Roi(kLeftIdent, 1 - kRightIdent,
+                                        i * roi_height + kTopIdent,
+                                        (i + 1) * roi_height - kBottomIdent));
   }
+  AddListener(&layout_);
 }
 
 void ActionsView::Display() {
@@ -35,25 +34,26 @@ void ActionsView::Display() {
   glPushMatrix();
   glLoadIdentity();
 
-  const unsigned n_actions = actions_titles_.size();
   const float font_height = static_cast<float>(kFontHeight) / display_height_;
-  for (unsigned i = 0; i < n_actions; ++i) {
-    Roi roi = listeners_rois_[i];
 
+  const unsigned n_buttons = buttons_.size();
+  const float roi_height = 1.0f / n_buttons;
+
+  for (unsigned i = 0; i < n_buttons; ++i) {
     // Button.
     glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
-      glVertex2f(roi.left, roi.top);
-      glVertex2f(roi.left, roi.top + roi.height);
-      glVertex2f(roi.left + roi.width, roi.top + roi.height);
-      glVertex2f(roi.left + roi.width, roi.top);
+      glVertex2f(kLeftIdent, i * roi_height + kTopIdent);
+      glVertex2f(kLeftIdent, (i + 1) * roi_height - kBottomIdent);
+      glVertex2f(1 - kRightIdent, (i + 1) * roi_height - kBottomIdent);
+      glVertex2f(1 - kRightIdent, i * roi_height + kTopIdent);
     glEnd();
 
-    // Text.
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glRasterPos2f(roi.left, roi.top + (roi.height + font_height) / 2);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18,
-      reinterpret_cast<const unsigned char*>(actions_titles_[i].c_str()));
+    // // Text.
+    // glColor3f(0.0f, 0.0f, 0.0f);
+    // glRasterPos2f(roi.left, roi.top + (roi.height + font_height) / 2);
+    // glutBitmapString(GLUT_BITMAP_HELVETICA_18,
+    //   reinterpret_cast<const unsigned char*>(actions_titles_[i].c_str()));
   }
 
   glPopMatrix();
