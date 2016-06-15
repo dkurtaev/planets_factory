@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
   std::vector<Button*> buttons;
   buttons.push_back(new Button("first button pressed"));
   buttons.push_back(new Button("second button pressed"));
-  ActionsView actions_view(buttons);
+  ActionsView actions_view(buttons, &planet_view);
   
   glutMainLoop();
   return 0;

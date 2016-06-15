@@ -13,21 +13,28 @@
 
 std::vector<GLView*> GLView::inherited_views_;
 
-GLView::GLView(int display_width, int display_height, std::string window_header)
+GLView::GLView(int display_width, int display_height, std::string window_header,
+               GLView* parent, int sub_x, int sub_y)
   : display_width_(display_width), display_height_(display_height) {
-  InitWindow(window_header);
+  InitWindow(window_header, parent, sub_x, sub_y);
   inherited_views_.push_back(this);
 }
 
-void GLView::InitWindow(std::string window_header) {
+void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,
+                        int sub_y) {
   if (inherited_views_.empty()) {
     int tmp = 0;
     glutInit(&tmp, 0);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
   }
-  glutInitWindowSize(display_width_, display_height_);
-  glutInitWindowPosition(0, 0);
-  window_handle_ = glutCreateWindow(window_header.c_str());
+  if (parent) {
+    window_handle_ = glutCreateSubWindow(parent->window_handle_, sub_x, sub_y,
+                                         display_width_, display_height_);
+  } else {
+    glutInitWindowSize(display_width_, display_height_);
+    glutInitWindowPosition(0, 0);
+    window_handle_ = glutCreateWindow(window_header.c_str());
+  }
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
   glutDisplayFunc(IdleDisplay);

@@ -8,7 +8,8 @@
 
 class GLView {
  public:
-  GLView(int display_width, int display_height, std::string window_header);
+  GLView(int display_width, int display_height, std::string window_header,
+         GLView* parent = 0, int sub_x = 0, int sub_y = 0);
 
   void AddListener(GLViewListener* listener);
 
@@ -19,7 +20,8 @@ class GLView {
   int display_height_;
 
  private:
-  void InitWindow(std::string window_header);
+  void InitWindow(std::string window_header, GLView* parent, int sub_x,
+                  int sub_y);
 
   static void Reshape(int width, int height);
 

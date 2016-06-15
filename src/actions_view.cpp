@@ -5,9 +5,10 @@
 
 #include <GL/freeglut.h>
 
-ActionsView::ActionsView(std::vector<Button*> buttons)
+ActionsView::ActionsView(std::vector<Button*> buttons, GLView* parent,
+                         int sub_x, int sub_y)
   : GLView(kInitButtonRoiWidth, kInitButtonRoiHeight * buttons.size(),
-           "Actions"),
+           "Actions", parent, sub_x, sub_y),
     buttons_(buttons) {
   const unsigned n_buttons = buttons.size();
   const float roi_height = 1.0f / n_buttons;

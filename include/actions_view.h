@@ -9,7 +9,8 @@
 
 class ActionsView : public GLView {
  public:
-  ActionsView(std::vector<Button*> buttons);
+  ActionsView(std::vector<Button*> buttons, GLView* parent = 0, int sub_x = 0,
+              int sub_y = 0);
 
   virtual void Display();
 
