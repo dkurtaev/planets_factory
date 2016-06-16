@@ -25,6 +25,7 @@ class ActionsView : public GLView {
 
   std::vector<Button*> buttons_;
   Layout layout_;
+  std::vector<Roi> buttons_rois_;
 };
 
 #endif  // INCLUDE_ACTIONS_VIEW_H_

@@ -25,7 +25,8 @@ void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,
   if (inherited_views_.empty()) {
     int tmp = 0;
     glutInit(&tmp, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA |
+                        GLUT_STENCIL);
   }
   if (parent) {
     window_handle_ = glutCreateSubWindow(parent->window_handle_, sub_x, sub_y,

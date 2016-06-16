@@ -55,7 +55,15 @@ class Roi {
   unsigned GetHeight(unsigned display_height) const {
     return (bottom_ - top_) * display_height;
   }
- 
+
+  void Get(unsigned display_width, unsigned display_height,
+           unsigned* left, unsigned* right, unsigned* top, unsigned* bottom) {
+    *top = top_ * display_height;
+    *left = left_ * display_width;
+    *right = right_ * display_width;
+    *bottom = bottom_ * display_height;
+  }
+
  private:
   float top_;
   float left_;
