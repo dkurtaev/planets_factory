@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <GL/freeglut.h>
-
 #include "include/glview_listener.h"
 
 class Button : public GLViewListener {
@@ -28,6 +26,8 @@ class Button : public GLViewListener {
 
  protected:
   std::string text_;
+  float font_color_[3];
+  float button_color_[3];
 };
 
 #endif  // INCLUDE_BUTTON_H_
