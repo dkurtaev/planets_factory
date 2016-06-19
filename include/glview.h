@@ -6,24 +6,12 @@
 
 #include "include/glview_listener.h"
 
-struct Roi {
-  float top;
-  float left;
-  float height;
-  float width;
-
-  Roi(float top = 0.0f, float left = 0.0f,
-      float height = 1.0f, float width = 1.0f)
-    : top(top), left(left), height(height), width(width) {}
-
-  bool IsIncludes(float x, float y);
-};
-
 class GLView {
  public:
-  GLView(int display_width, int display_height, std::string window_header);
+  GLView(int display_width, int display_height, std::string window_header,
+         GLView* parent = 0, int sub_x = 0, int sub_y = 0);
 
-  void AddListener(GLViewListener* listener, const Roi& roi = Roi());
+  void AddListener(GLViewListener* listener);
 
  protected:
   virtual void Display() = 0;
@@ -32,7 +20,8 @@ class GLView {
   int display_height_;
 
  private:
-  void InitWindow(std::string window_header);
+  void InitWindow(std::string window_header, GLView* parent, int sub_x,
+                  int sub_y);
 
   static void Reshape(int width, int height);
 
@@ -46,14 +35,17 @@ class GLView {
 
   static void MouseMove(int x, int y);
 
+  static void PassiveMouseMove(int x, int y);
+
   static void CloseFunc();
+
+  static void EntryFunc(int state);
 
   static GLView* GetActiveGLView();
 
   static std::vector<GLView*> inherited_views_;
   int window_handle_;
   std::vector<GLViewListener*> listeners_;
-  std::vector<Roi> listeners_rois_;
 };
 
 #endif  // INCLUDE_GLVIEW_H_

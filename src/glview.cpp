@@ -5,34 +5,38 @@
 
 #include <GL/freeglut.h>
 
-#define FOREACH_LISTENER_IN_ROI \
+#define FOREACH_LISTENER \
   GLView* active_view = GetActiveGLView(); \
   const unsigned n_listeners = active_view->listeners_.size(); \
-  const float float_x = static_cast<float>(x) / active_view->display_width_; \
-  const float float_y = static_cast<float>(y) / active_view->display_height_; \
-  for (unsigned i = 0; i < n_listeners; ++i) { \
-    if (active_view->listeners_rois_[i].IsIncludes(float_x, float_y)) { \
-      active_view->listeners_[i]-> \
-
-#define END_FOREACH ;}}
+  for (unsigned i = 0; i < n_listeners; ++i) \
+    if (active_view->listeners_[i]->IsEnabled()) \
+      active_view->listeners_[i]->
 
 std::vector<GLView*> GLView::inherited_views_;
 
-GLView::GLView(int display_width, int display_height, std::string window_header)
+GLView::GLView(int display_width, int display_height, std::string window_header,
+               GLView* parent, int sub_x, int sub_y)
   : display_width_(display_width), display_height_(display_height) {
-  InitWindow(window_header);
+  InitWindow(window_header, parent, sub_x, sub_y);
   inherited_views_.push_back(this);
 }
 
-void GLView::InitWindow(std::string window_header) {
+void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,
+                        int sub_y) {
   if (inherited_views_.empty()) {
     int tmp = 0;
     glutInit(&tmp, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA |
+                        GLUT_STENCIL);
   }
-  glutInitWindowSize(display_width_, display_height_);
-  glutInitWindowPosition(0, 0);
-  window_handle_ = glutCreateWindow(window_header.c_str());
+  if (parent) {
+    window_handle_ = glutCreateSubWindow(parent->window_handle_, sub_x, sub_y,
+                                         display_width_, display_height_);
+  } else {
+    glutInitWindowSize(display_width_, display_height_);
+    glutInitWindowPosition(0, 0);
+    window_handle_ = glutCreateWindow(window_header.c_str());
+  }
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
   glutDisplayFunc(IdleDisplay);
@@ -40,41 +44,42 @@ void GLView::InitWindow(std::string window_header) {
   glutReshapeFunc(Reshape);
   glutSpecialFunc(SpecialKeyPressed);
   glutMotionFunc(MouseMove);
+  glutPassiveMotionFunc(PassiveMouseMove);
   glutMouseFunc(MouseFunc);
   glutSpecialUpFunc(SpecialKeyReleased);
   glutCloseFunc(CloseFunc);
+  glutEntryFunc(EntryFunc);
 }
 
-void GLView::AddListener(GLViewListener* listener, const Roi& roi) {
+void GLView::AddListener(GLViewListener* listener) {
   listeners_.push_back(listener);
-  listeners_rois_.push_back(roi);
 }
 
 void GLView::Reshape(int width, int height) {
-  GLView* active_view = GetActiveGLView();
-  const unsigned n_listeners = active_view->listeners_.size();
-  for (unsigned i = 0; i < n_listeners; ++i) {
-    active_view->listeners_[i]->Reshape(width, height);
-  }
+  FOREACH_LISTENER Reshape(width, height);
   active_view->display_width_ = width;
   active_view->display_height_ = height;
   glViewport(0, 0, width, height);
 }
 
 void GLView::SpecialKeyPressed(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyPressed(key, x, y) END_FOREACH
+  FOREACH_LISTENER SpecialKeyPressed(key, x, y);
 }
 
 void GLView::SpecialKeyReleased(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyReleased(key, x, y) END_FOREACH
+  FOREACH_LISTENER SpecialKeyReleased(key, x, y);
 }
 
 void GLView::MouseFunc(int button, int state, int x, int y) {
-  FOREACH_LISTENER_IN_ROI MouseFunc(button, state, x, y) END_FOREACH
+  FOREACH_LISTENER MouseFunc(button, state, x, y);
 }
 
 void GLView::MouseMove(int x, int y) {
-  FOREACH_LISTENER_IN_ROI MouseMove(x, y) END_FOREACH
+  FOREACH_LISTENER MouseMove(x, y);
+}
+
+void GLView::PassiveMouseMove(int x, int y) {
+  FOREACH_LISTENER PassiveMouseMove(x, y);
 }
 
 void GLView::IdleDisplay() {
@@ -83,7 +88,9 @@ void GLView::IdleDisplay() {
     GLView* view = inherited_views_[i];
     const unsigned n_listeners = view->listeners_.size();
     for (unsigned i = 0; i < n_listeners; ++i) {
-      view->listeners_[i]->DoEvents();
+      if (view->listeners_[i]->IsEnabled()) {
+        view->listeners_[i]->DoEvents();
+      }
     }
     glutSetWindow(view->window_handle_);
     view->Display();
@@ -112,7 +119,6 @@ void GLView::CloseFunc() {
   }
 }
 
-bool Roi::IsIncludes(float x, float y) {
-  return (x >= left && x <= left + width &&
-          y >= top && y <= top + height);
+void GLView::EntryFunc(int state) {
+  FOREACH_LISTENER EntryFunc(state);
 }
