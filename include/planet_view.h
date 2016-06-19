@@ -6,6 +6,7 @@
 #include "include/camera.h"
 #include "include/camera_mover.h"
 #include "include/icosphere.h"
+#include "include/vertices_colorizer.h"
 
 class PlanetView : public GLView {
  public:
@@ -23,6 +24,7 @@ class PlanetView : public GLView {
   SphericalCS* camera_cs_;
   CameraMover* camera_mover_;
   Icosphere* icosphere;
+  VerticesColorizer* vertices_colorizer_;
 };
 
 #endif  // INCLUDE_PLANET_VIEW_H_

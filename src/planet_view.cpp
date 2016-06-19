@@ -8,7 +8,12 @@ PlanetView::PlanetView()
   camera_ = new Camera(camera_cs_);
   icosphere = new Icosphere(4);
   camera_mover_ = new CameraMover(camera_cs_);
+
+  std::vector<Point3f*>* vertices = new std::vector<Point3f*>();
+  icosphere->GetVertices(vertices);
+  vertices_colorizer_ = new VerticesColorizer(vertices);
   AddListener(camera_mover_);
+  AddListener(vertices_colorizer_);
   InitGL();
 }
 
