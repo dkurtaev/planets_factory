@@ -9,7 +9,8 @@
   GLView* active_view = GetActiveGLView(); \
   const unsigned n_listeners = active_view->listeners_.size(); \
   for (unsigned i = 0; i < n_listeners; ++i) \
-    active_view->listeners_[i]->
+    if (active_view->listeners_[i]->IsEnabled()) \
+      active_view->listeners_[i]->
 
 std::vector<GLView*> GLView::inherited_views_;
 
@@ -87,7 +88,9 @@ void GLView::IdleDisplay() {
     GLView* view = inherited_views_[i];
     const unsigned n_listeners = view->listeners_.size();
     for (unsigned i = 0; i < n_listeners; ++i) {
-      view->listeners_[i]->DoEvents();
+      if (view->listeners_[i]->IsEnabled()) {
+        view->listeners_[i]->DoEvents();
+      }
     }
     glutSetWindow(view->window_handle_);
     view->Display();

@@ -8,7 +8,8 @@
   const float float_y = static_cast<float>(y) / display_height_; \
   for (unsigned i = 0; i < n_listeners; ++i) \
     if (listeners_rois_[i].IsIncludes(float_x, float_y)) \
-      listeners_[i]->
+      if (listeners_[i]->IsEnabled()) \
+        listeners_[i]->
 
 void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
   listeners_.push_back(listener);
@@ -36,19 +37,21 @@ void Layout::MouseMove(bool passive, int x, int y) {
   last_mouse_x_ = x;
   last_mouse_y_ = y;
   for (unsigned i = 0; i < n_listeners; ++i) {
-    const Roi* roi = &listeners_rois_[i];
-    if (!roi->IsIncludes(float_x, float_y)) {
-      if (roi->IsIncludes(last_x, last_y)) {
-        listeners_[i]->EntryFunc(GLUT_LEFT);
-      }
-    } else {
-      if (!roi->IsIncludes(last_x, last_y)) {
-        listeners_[i]->EntryFunc(GLUT_ENTERED);        
+    if (listeners_[i]->IsEnabled()) {
+      const Roi* roi = &listeners_rois_[i];
+      if (!roi->IsIncludes(float_x, float_y)) {
+        if (roi->IsIncludes(last_x, last_y)) {
+          listeners_[i]->EntryFunc(GLUT_LEFT);
+        }
       } else {
-        if (passive) {
-          listeners_[i]->PassiveMouseMove(x, y);          
+        if (!roi->IsIncludes(last_x, last_y)) {
+          listeners_[i]->EntryFunc(GLUT_ENTERED);
         } else {
-          listeners_[i]->MouseMove(x, y);
+          if (passive) {
+            listeners_[i]->PassiveMouseMove(x, y);
+          } else {
+            listeners_[i]->MouseMove(x, y);
+          }
         }
       }
     }
@@ -66,7 +69,9 @@ void Layout::SpecialKeyReleased(int key, int x, int y) {
 void Layout::DoEvents() {
   const unsigned n_listeners = listeners_.size();
   for (unsigned i = 0; i < n_listeners; ++i) {
-    listeners_[i]->DoEvents();
+    if (listeners_[i]->IsEnabled()) {
+      listeners_[i]->DoEvents();
+    }
   }
 }
 
@@ -74,16 +79,18 @@ void Layout::EntryFunc(int state) {
   if (state == GLUT_LEFT) {
     unsigned x = last_mouse_x_;
     unsigned y = last_mouse_y_;
-    FOREACH_LISTENER_IN_ROI EntryFunc(GLUT_LEFT);    
+    FOREACH_LISTENER_IN_ROI EntryFunc(GLUT_LEFT);
   }
 }
 
 void Layout::Reshape(int display_width, int display_height) {
   const unsigned n_listeners = listeners_.size();  
   for (unsigned i = 0; i < n_listeners; ++i) {
-    const Roi* roi = &listeners_rois_[i];
-    listeners_[i]->Reshape(roi->GetWidth(display_width),
-                           roi->GetHeight(display_height));
+    if (listeners_[i]->IsEnabled()) {
+      const Roi* roi = &listeners_rois_[i];
+      listeners_[i]->Reshape(roi->GetWidth(display_width),
+                             roi->GetHeight(display_height));
+    }
   }
   display_width_ = display_width;
   display_height_ = display_height;

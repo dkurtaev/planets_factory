@@ -11,6 +11,8 @@
 
 class GLViewListener {
  public:
+  GLViewListener() { is_enabled_ = true; }
+
   virtual void MouseFunc(int button, int state, int x, int y) {}
 
   virtual void MouseMove(int x, int y) {}
@@ -30,9 +32,16 @@ class GLViewListener {
     display_height_ = display_height;
   }
 
+  void Enable() { is_enabled_ = true; }
+
+  void Disable() { is_enabled_ = false; }
+
+  bool IsEnabled() { return is_enabled_; }
+
  protected:
   float display_width_;
   float display_height_;
+  bool is_enabled_;
 };
 
 #endif  // INCLUDE_GLVIEW_LISTENER_H_

@@ -17,6 +17,8 @@ class Button : public GLViewListener {
 
   virtual void EntryFunc(int state);
 
+  virtual void MouseFunc(int button, int state, int x, int y) = 0;
+
   // Expected coordinate system in pixels:
   //     |(0, 0)
   // ----+----> x
@@ -24,7 +26,7 @@ class Button : public GLViewListener {
   //     v  y
   void Display(int semiwidth, int semiheight);
 
- private:
+ protected:
   std::string text_;
 };
 
