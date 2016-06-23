@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <algorithm>
+#include <vector>
 
 #include <GL/freeglut.h>
 
@@ -95,6 +96,13 @@ Icosphere::Icosphere(float radius) {
   }
   for (unsigned i = 0; i < kNumTriangles; ++i) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
+  }
+  Point3f* p1;
+  Point3f* p2;
+  for (unsigned i = 0; i < kNumEdges; ++i) {
+    edges_[i]->GetPoints(&p1, &p2);
+    p1->AddNeighbor(p2);
+    p2->AddNeighbor(p1);
   }
 }
 

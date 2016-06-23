@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <vector>
+
 class Point3f {
  public:
   Point3f(uint16_t id, float x, float y, float z, float* vertices_array_offset,
@@ -23,16 +25,21 @@ class Point3f {
 
   uint16_t GetId() const { return id_; }
 
+  void AddNeighbor(Point3f* point);
+
+  void GetNeighborhood(std::vector<Point3f*>* neighborhood);
+
  private:
   uint16_t id_;
   float* vertices_array_offset_;
   uint8_t* colors_array_offset_;
   float norm_;
+  std::vector<Point3f*> neighborhood_;
 };
 
 class Edge {
  public:
-  Edge(const Point3f* p1, const Point3f* p2);
+  Edge(Point3f* p1, Point3f* p2);
 
   // Write middle point's coordinates into input Point3f.
   // If null as input - returns last passed middle point
@@ -41,9 +48,11 @@ class Edge {
 
   bool CompareTo(uint16_t p1_id, uint16_t p2_id) const;
 
+  void GetPoints(Point3f** p1, Point3f** p2);
+
  private:
-  const Point3f* p1_;
-  const Point3f* p2_;
+  Point3f* p1_;
+  Point3f* p2_;
   const Point3f* middle_point_;
 };
 

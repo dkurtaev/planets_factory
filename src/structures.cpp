@@ -4,11 +4,15 @@
 #include <string.h>
 #include <math.h>
 
+#include <algorithm>
+#include <vector>
+
 Point3f::Point3f(uint16_t id, float x, float y, float z,
                  float* vertices_array_offset, uint8_t* colors_array_offset)
   : id_(id), vertices_array_offset_(vertices_array_offset),
     colors_array_offset_(colors_array_offset) {
   SetPosition(x, y, z);
+  neighborhood_.reserve(6);  // Maximal numer of neighbors.
 }
 
 void Point3f::Normalize(float target_norm) {
@@ -46,7 +50,17 @@ float Point3f::SquaredDistanceTo(float x, float y, float z) {
          pow(vertices_array_offset_[2] - z, 2);
 }
 
-Edge::Edge(const Point3f* p1, const Point3f* p2)
+void Point3f::AddNeighbor(Point3f* point) {
+  neighborhood_.push_back(point);
+}
+
+void Point3f::GetNeighborhood(std::vector<Point3f*>* neighborhood) {
+  neighborhood->resize(neighborhood_.size());
+  std::copy(neighborhood_.begin(), neighborhood_.end(), neighborhood->begin());
+}
+
+
+Edge::Edge(Point3f* p1, Point3f* p2)
   : p1_(p1), p2_(p2), middle_point_(0) {}
 
 const Point3f* Edge::MiddlePoint(Point3f* middle_point) {
@@ -63,6 +77,11 @@ bool Edge::CompareTo(uint16_t p1_id, uint16_t p2_id) const {
 
   return self_p1_id == p1_id && self_p2_id == p2_id ||
          self_p1_id == p2_id && self_p2_id == p1_id;
+}
+
+void Edge::GetPoints(Point3f** p1, Point3f** p2) {
+  *p1 = p1_;
+  *p2 = p2_;
 }
 
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,

@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "include/planet_view.h"
 #include "include/actions_view.h"
 #include "include/glview_listener.h"
@@ -23,7 +25,7 @@ int main(int argc, char** argv) {
   buttons.push_back(new ListenerEnabler("Camera", &camera_mover));
   buttons.push_back(new ListenerEnabler("Color", &vertices_colorizer));
   ActionsView actions_view(buttons, &planet_view);
-  
+
   glutMainLoop();
   return 0;
 }

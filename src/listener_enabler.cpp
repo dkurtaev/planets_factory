@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <string>
+
 static const float kPressedButtonColor[3] = { 0.95f, 0.72f, 0.09f };
 
 ListenerEnabler::ListenerEnabler(std::string text, GLViewListener* listener)
@@ -21,6 +23,6 @@ void ListenerEnabler::MouseFunc(int button, int state, int x, int y) {
     } else {
       listener_->Enable();
       memcpy(button_color_, kPressedButtonColor, sizeof(float) * 3);
-    }      
+    }
   }
 }

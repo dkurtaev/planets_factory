@@ -2,18 +2,17 @@
 #define INCLUDE_VERTICES_COLORIZER_H_
 
 #include <vector>
+#include <utility>
 
-#include "include/glview_listener.h"
+#include "include/vertices_toucher.h"
 #include "include/structures.h"
 
-class VerticesColorizer : public GLViewListener {
+class VerticesColorizer : public VerticesToucher {
  public:
-  VerticesColorizer(std::vector<Point3f*>* vertices);
+  explicit VerticesColorizer(std::vector<Point3f*>* vertices);
 
-  virtual void MouseFunc(int button, int state, int x, int y);
- 
  private:
-  std::vector<Point3f*>* vertices_;
+  virtual void DoAction(std::vector<std::pair<int, Point3f*> >* area);
 };
 
 #endif  // INCLUDE_VERTICES_COLORIZER_H_

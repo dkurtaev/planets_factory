@@ -61,7 +61,6 @@ void ActionsView::Display() {
     glTranslatef((left + right) / 2, (top + botttom) / 2, 0);
     buttons_[i]->Display((right - left) / 2, (botttom - top) / 2);
     glPopMatrix();
-
   }
   glDisable(GL_STENCIL_TEST);
 
