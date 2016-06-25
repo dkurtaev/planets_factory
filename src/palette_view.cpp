@@ -10,7 +10,7 @@
 
 PaletteView::PaletteView()
   : GLView(kViewWidth, kViewHeight, "Select color"),
-    v_palette_listener_(this), hs_palette_listener_(this) {
+    v_palette_listener_(VALUE, this), hs_palette_listener_(HUESAT, this) {
   const int hs_palette_width = (kHSPaletteRight - kHSPaletteLeft + 1);
   const int hs_palette_height = (kHSPaletteTop - kHSPaletteBottom + 1);
   const int v_palette_width = (kVPaletteRight - kVPaletteLeft + 1);
