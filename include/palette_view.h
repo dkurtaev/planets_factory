@@ -10,6 +10,8 @@ class PaletteView : public GLView {
  public:
   PaletteView();
 
+  ~PaletteView();
+
   virtual void Display();
  
  private:
@@ -23,24 +25,32 @@ class PaletteView : public GLView {
   // | +--------+ +---+ | 0.1
   // +------------------+
   //             0.8 0.9
-  static const float kHSPaletteTop = 0.9f;
-  static const float kHSPaletteLeft = 0.1f;
-  static const float kHSPaletteRight = 0.7f;
-  static const float kHSPaletteBottom = 0.1f;
-  static const float kVPaletteTop = 0.9f;
-  static const float kVPaletteLeft = 0.8f;
-  static const float kVPaletteRight = 0.9f;
-  static const float kVPaletteBottom = 0.1f;
+  static const float kHSPaletteTop = kViewHeight * 0.9f;
+  static const float kHSPaletteLeft = kViewWidth * 0.1f;
+  static const float kHSPaletteRight = kViewWidth * 0.7f;
+  static const float kHSPaletteBottom = kViewHeight * 0.1f;
+  static const float kVPaletteTop = kViewHeight * 0.9f;
+  static const float kVPaletteLeft = kViewWidth * 0.8f;
+  static const float kVPaletteRight = kViewWidth * 0.9f;
+  static const float kVPaletteBottom = kViewHeight * 0.1f;
 
   // h, s, v in [0, 1]
   // r, g, b in [0, 255]
   void HSVtoRGB(float h, float s, float v, uint8_t* colors_array_offset_);
 
+  void UpdateVPaletteColors();
+
   Layout layout_;
-  int* points_array_;
-  unsigned n_color_points_;
-  uint8_t* colors_array_;
-  uint8_t selected_solor_[3];
+
+  int* hs_palette_points_;
+  unsigned n_hs_palette_points_;
+  uint8_t* hs_palette_colors_;
+
+  int* v_palette_points_;
+  unsigned n_v_palette_points_;
+  uint8_t* v_palette_colors_;
+  
+  float selected_hsv_[3];
 };
 
 #endif  // INCLUDE_PALETTE_VIEW_H_
