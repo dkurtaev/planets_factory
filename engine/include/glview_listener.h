@@ -27,7 +27,7 @@ class GLViewListener {
 
   virtual void EntryFunc(int state) {}
 
-  void Reshape(int display_width, int display_height) {
+  virtual void Reshape(int display_width, int display_height) {
     display_width_ = display_width;
     display_height_ = display_height;
   }

@@ -5,6 +5,7 @@
 
 #include "include/glview.h"
 #include "include/layout.h"
+#include "include/value_palette_listener.h"
 
 class PaletteView : public GLView {
  public:
@@ -16,6 +17,7 @@ class PaletteView : public GLView {
 
   void SetHueSaturation(float hue, float saturation);
 
+  // Value in [0, 1].
   void SetValue(float value);
   
  private:
@@ -54,6 +56,7 @@ class PaletteView : public GLView {
   void UpdateVPaletteColors();
 
   Layout layout_;
+  ValuePaletteListener v_palette_listener_;
 
   int* hs_palette_points_;
   unsigned n_hs_palette_points_;

@@ -8,8 +8,7 @@
   const float float_y = static_cast<float>(y) / display_height_; \
   for (unsigned i = 0; i < n_listeners; ++i) \
     if (listeners_rois_[i].IsIncludes(float_x, float_y)) \
-      if (listeners_[i]->IsEnabled()) \
-        listeners_[i]->
+      if (listeners_[i]->IsEnabled())
 
 void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
   listeners_.push_back(listener);
@@ -17,7 +16,12 @@ void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
 }
 
 void Layout::MouseFunc(int button, int state, int x, int y) {
-  FOREACH_LISTENER_IN_ROI MouseFunc(button, state, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->MouseFunc(button, state, x - left, y - top);
+  }
 }
 
 void Layout::MouseMove(int x, int y) {
@@ -36,6 +40,7 @@ void Layout::MouseMove(bool passive, int x, int y) {
   const float last_y = static_cast<float>(last_mouse_y_) / display_height_;
   last_mouse_x_ = x;
   last_mouse_y_ = y;
+  unsigned top, left, right, bottom;
   for (unsigned i = 0; i < n_listeners; ++i) {
     if (listeners_[i]->IsEnabled()) {
       const Roi* roi = &listeners_rois_[i];
@@ -47,10 +52,12 @@ void Layout::MouseMove(bool passive, int x, int y) {
         if (!roi->IsIncludes(last_x, last_y)) {
           listeners_[i]->EntryFunc(GLUT_ENTERED);
         } else {
+          roi->Get(display_width_, display_height_, &left, &right, &top,
+                   &bottom);
           if (passive) {
-            listeners_[i]->PassiveMouseMove(x, y);
+            listeners_[i]->PassiveMouseMove(x - left, y - top);
           } else {
-            listeners_[i]->MouseMove(x, y);
+            listeners_[i]->MouseMove(x - left, y - top);
           }
         }
       }
@@ -59,11 +66,21 @@ void Layout::MouseMove(bool passive, int x, int y) {
 }
 
 void Layout::SpecialKeyPressed(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyPressed(key, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->SpecialKeyPressed(key, x - left, y - top);
+  }
 }
 
 void Layout::SpecialKeyReleased(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyReleased(key, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->SpecialKeyReleased(key, x - left, y - top);
+  }
 }
 
 void Layout::DoEvents() {
@@ -79,7 +96,9 @@ void Layout::EntryFunc(int state) {
   if (state == GLUT_LEFT) {
     unsigned x = last_mouse_x_;
     unsigned y = last_mouse_y_;
-    FOREACH_LISTENER_IN_ROI EntryFunc(GLUT_LEFT);
+    FOREACH_LISTENER_IN_ROI {
+      listeners_[i]->EntryFunc(GLUT_LEFT);
+    }
   }
 }
 

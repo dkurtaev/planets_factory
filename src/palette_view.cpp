@@ -9,7 +9,8 @@
 #include <GL/freeglut.h>
 
 PaletteView::PaletteView()
-  : GLView(kViewWidth, kViewHeight, "Select color") {
+  : GLView(kViewWidth, kViewHeight, "Select color"),
+    v_palette_listener_(this) {
   const int hs_palette_width = (kHSPaletteRight - kHSPaletteLeft + 1);
   const int hs_palette_height = (kHSPaletteTop - kHSPaletteBottom + 1);
   const int v_palette_width = (kVPaletteRight - kVPaletteLeft + 1);
@@ -49,6 +50,13 @@ PaletteView::PaletteView()
   selected_hsv_[2] = 0.5f;
 
   UpdateVPaletteColors();
+
+  Roi roi(static_cast<float>(kVPaletteLeft) / kViewWidth,
+          static_cast<float>(kVPaletteRight) / kViewWidth,
+          static_cast<float>(kVPaletteBottom) / kViewHeight,
+          static_cast<float>(kVPaletteTop) / kViewHeight);
+  layout_.AddListener(&v_palette_listener_, roi);
+  AddListener(&layout_);
 }
 
 PaletteView::~PaletteView() {
@@ -141,4 +149,8 @@ void PaletteView::UpdateVPaletteColors() {
       colors_array_offset_ += 3;
     }
   }
+}
+
+void PaletteView::SetValue(float value) {
+  selected_hsv_[2] = std::max(0.0f, std::min(value, 1.0f));
 }

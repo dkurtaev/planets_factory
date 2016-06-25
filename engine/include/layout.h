@@ -26,7 +26,7 @@ class Layout : public GLViewListener {
 
   virtual void EntryFunc(int state);
 
-  void Reshape(int display_width, int display_height);
+  virtual void Reshape(int display_width, int display_height);
 
  private:
   void MouseMove(bool passive, int x, int y);
@@ -57,7 +57,8 @@ class Roi {
   }
 
   void Get(unsigned display_width, unsigned display_height,
-           unsigned* left, unsigned* right, unsigned* top, unsigned* bottom) {
+           unsigned* left, unsigned* right, unsigned* top,
+           unsigned* bottom) const {
     *top = top_ * display_height;
     *left = left_ * display_width;
     *right = right_ * display_width;
