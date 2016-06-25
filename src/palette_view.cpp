@@ -69,21 +69,42 @@ void PaletteView::Display() {
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glLoadIdentity();
+    glLoadIdentity();
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, hs_palette_colors_);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(2, GL_INT, 0, hs_palette_points_);
-  glDrawArrays(GL_POINTS, 0, n_hs_palette_points_);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(3, GL_UNSIGNED_BYTE, 0, hs_palette_colors_);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_INT, 0, hs_palette_points_);
+    glDrawArrays(GL_POINTS, 0, n_hs_palette_points_);
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, v_palette_colors_);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(2, GL_INT, 0, v_palette_points_);
-  glDrawArrays(GL_POINTS, 0, n_v_palette_points_);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(3, GL_UNSIGNED_BYTE, 0, v_palette_colors_);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_INT, 0, v_palette_points_);
+    glDrawArrays(GL_POINTS, 0, n_v_palette_points_);
 
-  glMatrixMode(GL_MODELVIEW);
+    // Draw selected color markers.
+    const int hs_palette_width = (kHSPaletteRight - kHSPaletteLeft + 1);
+    const int hs_palette_height = (kHSPaletteTop - kHSPaletteBottom + 1);
+    glPointSize(kHSPaletteMarkerRadius);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glBegin(GL_POINTS);
+      glVertex2i(kHSPaletteLeft + selected_hsv_[0] * hs_palette_width,
+                 kHSPaletteBottom + selected_hsv_[1] * hs_palette_height);
+    glEnd();
+
+    const int v_palette_height = (kVPaletteTop - kVPaletteBottom + 1);
+    const int tangency_point_y = kVPaletteBottom + selected_hsv_[2] *
+                                 v_palette_height;
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_TRIANGLES);
+      glVertex2i(kVPaletteRight, tangency_point_y);
+      glVertex2i(kVPaletteRight + kVPaletteMarkerWidth,
+                 tangency_point_y - kVPaletteMarkerWidth);
+      glVertex2i(kVPaletteRight + kVPaletteMarkerWidth,
+                 tangency_point_y + kVPaletteMarkerWidth);
+    glEnd();
+
   glPopMatrix();
 
   glMatrixMode(GL_PROJECTION);

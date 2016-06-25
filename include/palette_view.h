@@ -13,7 +13,11 @@ class PaletteView : public GLView {
   ~PaletteView();
 
   virtual void Display();
- 
+
+  void SetHueSaturation(float hue, float saturation);
+
+  void SetValue(float value);
+  
  private:
   static const int kViewHeight = 300;
   static const int kViewWidth = 500;
@@ -33,6 +37,15 @@ class PaletteView : public GLView {
   static const float kVPaletteLeft = kViewWidth * 0.8f;
   static const float kVPaletteRight = kViewWidth * 0.9f;
   static const float kVPaletteBottom = kViewHeight * 0.1f;
+  // Color selection markers.
+  // Hue-Saturation plane, black circle.
+  static const unsigned kHSPaletteMarkerRadius = 8;
+  // Value bar marker, white triangle.
+  // ....| , 
+  // ....|/|
+  // ....|\|
+  // ....| '
+  static const unsigned kVPaletteMarkerWidth = 8;
 
   // h, s, v in [0, 1]
   // r, g, b in [0, 255]
