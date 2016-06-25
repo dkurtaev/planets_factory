@@ -10,7 +10,7 @@
 
 PaletteView::PaletteView()
   : GLView(kViewWidth, kViewHeight, "Select color"),
-    v_palette_listener_(this) {
+    v_palette_listener_(this), hs_palette_listener_(this) {
   const int hs_palette_width = (kHSPaletteRight - kHSPaletteLeft + 1);
   const int hs_palette_height = (kHSPaletteTop - kHSPaletteBottom + 1);
   const int v_palette_width = (kVPaletteRight - kVPaletteLeft + 1);
@@ -51,11 +51,17 @@ PaletteView::PaletteView()
 
   UpdateVPaletteColors();
 
-  Roi roi(static_cast<float>(kVPaletteLeft) / kViewWidth,
-          static_cast<float>(kVPaletteRight) / kViewWidth,
-          static_cast<float>(kVPaletteBottom) / kViewHeight,
-          static_cast<float>(kVPaletteTop) / kViewHeight);
-  layout_.AddListener(&v_palette_listener_, roi);
+  Roi v_palette_roi(static_cast<float>(kVPaletteLeft) / kViewWidth,
+                    static_cast<float>(kVPaletteRight) / kViewWidth,
+                    static_cast<float>(kVPaletteBottom) / kViewHeight,
+                    static_cast<float>(kVPaletteTop) / kViewHeight);
+  layout_.AddListener(&v_palette_listener_, v_palette_roi);
+
+  Roi hs_palette_roi(static_cast<float>(kHSPaletteLeft) / kViewWidth,
+                     static_cast<float>(kHSPaletteRight) / kViewWidth,
+                     static_cast<float>(kHSPaletteBottom) / kViewHeight,
+                     static_cast<float>(kHSPaletteTop) / kViewHeight);
+  layout_.AddListener(&hs_palette_listener_, hs_palette_roi);
   AddListener(&layout_);
 }
 
@@ -153,4 +159,10 @@ void PaletteView::UpdateVPaletteColors() {
 
 void PaletteView::SetValue(float value) {
   selected_hsv_[2] = std::max(0.0f, std::min(value, 1.0f));
+}
+
+void PaletteView::SetHueSaturation(float hue, float saturation) {
+  selected_hsv_[0] = std::max(0.0f, std::min(hue, 1.0f));
+  selected_hsv_[1] = std::max(0.0f, std::min(saturation, 1.0f));
+  UpdateVPaletteColors();
 }

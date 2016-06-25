@@ -6,6 +6,7 @@
 #include "include/glview.h"
 #include "include/layout.h"
 #include "include/value_palette_listener.h"
+#include "include/hue_sat_palette_listener.h"
 
 class PaletteView : public GLView {
  public:
@@ -57,6 +58,7 @@ class PaletteView : public GLView {
 
   Layout layout_;
   ValuePaletteListener v_palette_listener_;
+  HueSatPaletteListener hs_palette_listener_;
 
   int* hs_palette_points_;
   unsigned n_hs_palette_points_;
