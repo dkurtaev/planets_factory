@@ -3,8 +3,24 @@
 #include <iostream>
 
 ChangeColorButton::ChangeColorButton()
-  : Button("Change color") {}
+  : Button("Change color") {
+  palette_view_ = new PaletteView();
+}
+
+ChangeColorButton::~ChangeColorButton() {
+  delete palette_view_;
+}
 
 void ChangeColorButton::MouseFunc(int button, int state, int x, int y) {
-  std::cout << "Change color!" << std::endl;
+  if (!state) {
+    PaletteView* new_palette_view_ = new PaletteView(palette_view_);
+    delete palette_view_;
+    palette_view_ = new_palette_view_;
+  }
+}
+
+void ChangeColorButton::GetSelectedColor(uint8_t* rgb) const {
+  if (palette_view_) {
+    palette_view_->GetSelectedColor(rgb);
+  }
 }

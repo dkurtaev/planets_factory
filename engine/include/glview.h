@@ -11,6 +11,8 @@ class GLView {
   GLView(int display_width, int display_height, std::string window_header,
          GLView* parent = 0, int sub_x = 0, int sub_y = 0);
 
+  ~GLView();
+
   void AddListener(GLViewListener* listener);
 
  protected:

@@ -9,7 +9,7 @@
 
 class PaletteView : public GLView {
  public:
-  PaletteView();
+  explicit PaletteView(const PaletteView* palette_view = 0);
 
   ~PaletteView();
 
@@ -19,6 +19,8 @@ class PaletteView : public GLView {
 
   // Value in [0, 1].
   void SetValue(float value);
+
+  void GetSelectedColor(uint8_t* rgb) const;
   
  private:
   static const int kViewHeight = 300;
@@ -51,7 +53,7 @@ class PaletteView : public GLView {
 
   // h, s, v in [0, 1]
   // r, g, b in [0, 255]
-  void HSVtoRGB(float h, float s, float v, uint8_t* colors_array_offset_);
+  void HSVtoRGB(float h, float s, float v, uint8_t* colors_array_offset_) const;
 
   void UpdateVPaletteColors();
 
@@ -59,12 +61,10 @@ class PaletteView : public GLView {
   HSVPaletteListener v_palette_listener_;
   HSVPaletteListener hs_palette_listener_;
 
-  int* hs_palette_points_;
-  unsigned n_hs_palette_points_;
+  unsigned hs_palette_texture_id_;
   uint8_t* hs_palette_colors_;
 
-  int* v_palette_points_;
-  unsigned n_v_palette_points_;
+  unsigned v_palette_texture_id_;
   uint8_t* v_palette_colors_;
   
   float selected_hsv_[3];
