@@ -56,16 +56,23 @@ class Edge {
   const Point3f* middle_point_;
 };
 
-struct Triangle {
+class Triangle {
+ public:
   Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
            Edge* e1, Edge* e2, Edge* e3);
+
+  ~Triangle();
 
   void GetIndices(uint16_t* dst) const;
 
   void GetMiddlePointsIndices(uint16_t* dst) const;
 
-  Edge* edges_[3];
-  const Point3f* points_[3];
+  void SetTexCoords(const float* src);
+
+ private:
+  Edge** edges_;
+  const Point3f** points_;
+  float* texture_coordinates_;
 };
 
 #endif  // INCLUDE_STRUCTURES_H_

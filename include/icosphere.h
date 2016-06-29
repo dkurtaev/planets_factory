@@ -20,6 +20,8 @@ class Icosphere {
  private:
   static const uint8_t kInitialColor = 204;
 
+  void SetTexCoords();
+
   // Used for building.
   void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 

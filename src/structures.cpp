@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 
+// Point3f ---------------------------------------------------------------------
 Point3f::Point3f(uint16_t id, float x, float y, float z,
                  float* vertices_array_offset, uint8_t* colors_array_offset)
   : id_(id), vertices_array_offset_(vertices_array_offset),
@@ -59,7 +60,7 @@ void Point3f::GetNeighborhood(std::vector<Point3f*>* neighborhood) {
   std::copy(neighborhood_.begin(), neighborhood_.end(), neighborhood->begin());
 }
 
-
+// Edge ---------------------------------------------------------------------
 Edge::Edge(Point3f* p1, Point3f* p2)
   : p1_(p1), p2_(p2), middle_point_(0) {}
 
@@ -84,14 +85,24 @@ void Edge::GetPoints(Point3f** p1, Point3f** p2) {
   *p2 = p2_;
 }
 
+// Triangle ---------------------------------------------------------------------
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
+  edges_ = new Edge*[3];
+  points_ = new const Point3f*[3];
+  texture_coordinates_ = new float[6];
   points_[0] = v1;
   points_[1] = v2;
   points_[2] = v3;
   edges_[0] = e1;
   edges_[1] = e2;
   edges_[2] = e3;
+}
+
+Triangle::~Triangle() {
+  delete[] texture_coordinates_;
+  delete[] points_;
+  delete[] edges_;
 }
 
 void Triangle::GetIndices(uint16_t* dst) const {
@@ -104,4 +115,8 @@ void Triangle::GetMiddlePointsIndices(uint16_t* dst) const {
   for (unsigned i = 0; i < 3; ++i) {
     dst[i] = edges_[i]->MiddlePoint()->GetId();
   }
+}
+
+void Triangle::SetTexCoords(const float* src) {
+  memcpy(texture_coordinates_, src, sizeof(float) * 6);
 }

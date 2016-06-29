@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 #include <GL/freeglut.h>
 
@@ -60,32 +61,23 @@ Icosphere::Icosphere(float radius) {
   edges_.reserve(kNumEdges);
   triangles_.reserve(kNumTriangles);
 
-  AddTriangle(5, 9, 1);
-  AddTriangle(5, 1, 4);
-  AddTriangle(5, 4, 2);
-  AddTriangle(5, 2, 8);
-  AddTriangle(5, 8, 9);
+  uint8_t triangles_ids[][3] = {
+      {5, 9, 1}, {5, 1, 4}, {5, 4, 2}, {5, 2, 8}, {5, 8, 9}, {0, 1, 9},
+      {0, 9, 6}, {0, 6, 7}, {0, 7, 10}, {0, 10, 1}, {11, 2, 4}, {11, 4, 10},
+      {11, 10, 7}, {11, 7, 3}, {11, 3, 2}, {4, 1, 10}, {6, 9, 8}, {6, 8, 3},
+      {3, 7, 6}, {3, 8, 2}};
 
-  AddTriangle(0, 1, 9);
-  AddTriangle(0, 9, 6);
-  AddTriangle(0, 6, 7);
-  AddTriangle(0, 7, 10);
-  AddTriangle(0, 10, 1);
-
-  AddTriangle(11, 2, 4);
-  AddTriangle(11, 4, 10);
-  AddTriangle(11, 10, 7);
-  AddTriangle(11, 7, 3);
-  AddTriangle(11, 3, 2);
-
-  AddTriangle(4, 1, 10);
-  AddTriangle(6, 9, 8);
-  AddTriangle(6, 8, 3);
-  AddTriangle(3, 7, 6);
-  AddTriangle(3, 8, 2);
+  for (unsigned i = 0; i < kInitNumTriangles; ++i) {
+    AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2]);
+  }
 
   for (unsigned i = 0; i < kNumSplits; ++i) {
     SplitTriangles();
+  }
+
+  if (triangles_.size() != kNumTriangles || edges_.size() != kNumEdges ||
+      vertices_.size() != kNumVertices) {
+    std::cout << "Icosphere building failed." << std::endl;
   }
 
   memset(colors_array_, kInitialColor, sizeof(uint8_t) * 3 * kNumVertices);
@@ -169,6 +161,13 @@ void Icosphere::Draw() const {
   glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
   glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
                  indices_array_);
+
+  glDisableClientState(GL_COLOR_ARRAY);
+  glColor3f(0, 0.8, 0);
+  glPolygonMode(GL_FRONT, GL_LINE);
+  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
+                 indices_array_);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Icosphere::SplitTriangles() {
@@ -215,4 +214,61 @@ void Icosphere::SplitTriangles() {
 void Icosphere::GetVertices(std::vector<Point3f*>* vertices) {
   vertices->resize(vertices_.size());
   std::copy(vertices_.begin(), vertices_.end(), vertices->begin());
+}
+
+void Icosphere::SetTexCoords() {
+// [01] - triangle idx.
+// 01 - vertex idx.
+// Above hardcoded triangles indices. We use it for map texture coordinates.
+// Unwrapped icosahedron:
+//     0.00  0.09  0.18  0.27  0.36  0.45  0.54  0.63  0.72  0.81  0.90  1.00
+//      +------------------------------------------------------------------+
+// 0.00 |*****/\**********/\**********/\**********/\**********/\***********|
+//      |****/05\********/05\********/05\********/05\********/05\**********|
+//      |***/    \******/    \******/    \******/    \******/    \*********|
+//      |**/ [00] \****/ [01] \****/ [02] \****/ [03] \****/ [04] \********|
+//      |*/        \**/        \**/        \**/        \**/        \*******|
+// 0.33 |/09 ____ 01\/01 ____ 04\/04 ____ 02\/02 ____ 08\/08 ____ 09\******|
+//      |\09      01/\01      04/\04      02/\02      08/\08      09/\*****|
+//      |*\        /01\        /04\        /02\        /08\        /09\****|
+//      |**\ [05] /    \ [15] /    \ [10] /    \ [19] /    \ [16] /    \***|
+//      |***\    / [09] \    / [11] \    / [14] \    / [17] \    / [06] \**|
+//      |****\00/        \10/        \11/        \03/        \06/        \*|
+// 0.66 |*****\/00 ____ 10\/10 ____ 11\/11 ____ 03\/03 ____ 06\/06 ____ 00\|
+//      |******\00      10/\10      11/\11      03/\03      06/\06      00/|
+//      |*******\        /**\        /**\        /**\        /**\        /*|
+//      |********\ [08] /****\ [12] /****\ [13] /****\ [18] /****\ [07] /**|
+//      |*********\    /******\    /******\    /******\    /******\    /***|
+//      |**********\07/********\07/********\07/********\07/********\07/****|
+// 1.00 |***********\/**********\/**********\/**********\/**********\/*****|
+//      +------------------------------------------------------------------+
+  float texture_coordinates[][6] = {
+    { 0.09f, 0.00f, 0.00f, 0.33f, 0.18f, 0.33f },  // [00]: {05,09,01}
+    { 0.27f, 0.00f, 0.18f, 0.33f, 0.36f, 0.33f },  // [01]: {05,01,04}
+    { 0.45f, 0.00f, 0.36f, 0.33f, 0.54f, 0.33f },  // [02]: {05,04,02}
+    { 0.63f, 0.00f, 0.54f, 0.33f, 0.72f, 0.33f },  // [03]: {05,02,08}
+    { 0.81f, 0.00f, 0.72f, 0.33f, 0.90f, 0.33f },  // [04]: {05,08,09}
+    { 0.09f, 0.66f, 0.18f, 0.33f, 0.00f, 0.33f },  // [05]: {00,01,09}
+    { 1.00f, 0.66f, 0.90f, 0.33f, 0.81f, 0.66f },  // [06]: {00,09,06}
+    { 1.00f, 0.66f, 0.81f, 0.66f, 0.90f, 1.00f },  // [07]: {00,06,07}
+    { 0.09f, 0.66f, 0.18f, 1.00f, 0.27f, 0.66f },  // [08]: {00,07,10}
+    { 0.09f, 0.66f, 0.27f, 0.66f, 0.18f, 0.33f },  // [09]: {00,10,01}
+    { 0.45f, 0.66f, 0.54f, 0.33f, 0.36f, 0.33f },  // [10]: {11,02,04}
+    { 0.45f, 0.66f, 0.36f, 0.33f, 0.27f, 0.66f },  // [11]: {11,04,10}
+    { 0.45f, 0.66f, 0.27f, 0.66f, 0.36f, 1.00f },  // [12]: {11,10,07}
+    { 0.45f, 0.66f, 0.54f, 1.00f, 0.63f, 0.66f },  // [13]: {11,07,03}
+    { 0.45f, 0.66f, 0.63f, 0.66f, 0.54f, 0.33f },  // [14]: {11,03,02}
+    { 0.36f, 0.33f, 0.18f, 0.33f, 0.27f, 0.66f },  // [15]: {04,01,10}
+    { 0.81f, 0.66f, 0.90f, 0.33f, 0.72f, 0.33f },  // [16]: {06,09,08}
+    { 0.81f, 0.66f, 0.72f, 0.33f, 0.63f, 0.66f },  // [17]: {06,08,03}
+    { 0.63f, 0.66f, 0.72f, 1.00f, 0.81f, 0.66f },  // [18]: {03,07,06}
+    { 0.63f, 0.66f, 0.72f, 0.33f, 0.54f, 0.33f }   // [19]: {03,08,02}
+  };
+  if (triangles_.size() != 20) {
+    std::cout << "Use testure coordinates setting before icosphere building."
+              << std::endl;
+  }
+  for (unsigned i = 0; i < 20; ++i) {
+    triangles_[i]->SetTexCoords(texture_coordinates[i]);
+  }
 }
