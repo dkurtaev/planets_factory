@@ -1,6 +1,8 @@
 #ifndef INCLUDE_PLANET_VIEW_H_
 #define INCLUDE_PLANET_VIEW_H_
 
+#include <opencv2/opencv.hpp>
+
 #include "include/glview.h"
 #include "include/spherical_cs.h"
 #include "include/camera.h"
@@ -18,8 +20,12 @@ class PlanetView : public GLView {
  private:
   void InitGL();
 
+  void LoadTexture();
+
   Camera camera_;
   const Icosphere* icosphere_;
+  unsigned texture_id_;
+  cv::Mat texture_;
 };
 
 #endif  // INCLUDE_PLANET_VIEW_H_

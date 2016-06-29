@@ -10,7 +10,8 @@
 
 #include <GL/freeglut.h>
 
-Icosphere::Icosphere(float radius) {
+Icosphere::Icosphere(float radius)
+  : radius_(radius) {
   // Characteristics of icosahedron.
   static const unsigned kInitNumTriangles = 20;
   static const unsigned kInitNumVertices = 12;
@@ -30,6 +31,7 @@ Icosphere::Icosphere(float radius) {
   normals_array_ = new float[3 * kNumVertices];
   colors_array_ = new uint8_t[3 * kNumVertices];
   indices_array_ = new uint16_t[3 * kNumTriangles];
+  tex_coord_array_ = new float[6 * kNumTriangles];
 
   // e - edges length
   // h - base plane half-height
@@ -45,7 +47,6 @@ Icosphere::Icosphere(float radius) {
   // h = sqrt(rr / (1 + 1.5 + sqrt(5) / 2))
   const float h = sqrt(radius * radius / (2.5 + 0.5 * sqrt(5)));
   const float w = 0.5 * (1 + sqrt(5)) * h;
-  radius_ = radius;
 
   // Vertices.
   vertices_.resize(kInitNumVertices);
@@ -71,6 +72,8 @@ Icosphere::Icosphere(float radius) {
     AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2]);
   }
 
+  SetTexCoords();
+
   for (unsigned i = 0; i < kNumSplits; ++i) {
     SplitTriangles();
   }
@@ -88,6 +91,7 @@ Icosphere::Icosphere(float radius) {
   }
   for (unsigned i = 0; i < kNumTriangles; ++i) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
+    triangles_[i]->GetTexCoords(tex_coord_array_ + i * 6);
   }
   Point3f* p1;
   Point3f* p2;
@@ -118,6 +122,7 @@ Icosphere::~Icosphere() {
   delete[] normals_array_;
   delete[] indices_array_;
   delete[] colors_array_;
+  delete[] tex_coord_array_;
 }
 
 void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
@@ -151,22 +156,49 @@ void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
 }
 
 void Icosphere::Draw() const {
+  // Mesh.
+  const unsigned n_tris = triangles_.size();
+  float* vertices = new float[9 * n_tris];
+  float* normals = new float[9 * n_tris];
+  uint8_t* colors = new uint8_t[9 * n_tris];
+
+  const unsigned n_indices = 3 * n_tris;
+  unsigned offset;
+  float* vertices_indent = vertices - 3;
+  float* normals_indent = normals - 3;
+  uint8_t* colors_indent = colors - 3;
+
+  const uint8_t sizeof_float_x3 = sizeof(float) * 3;
+  const uint8_t sizeof_uint8_t_x3 = sizeof(uint8_t) * 3;
+  for (unsigned i = 0; i < n_indices; ++i) {
+    offset = indices_array_[i] * 3;
+    memcpy(vertices_indent += 3, vertices_array_ + offset, sizeof_float_x3);
+    memcpy(normals_indent += 3, normals_array_ + offset, sizeof_float_x3);
+    memcpy(colors_indent += 3, colors_array_ + offset, sizeof_uint8_t_x3);
+  }
+
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  glTexCoordPointer(2, GL_FLOAT, 0, tex_coord_array_);
+
   glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, colors_array_);
+  glColorPointer(3, GL_UNSIGNED_BYTE, 0, colors);
 
   glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, normals_array_);
+  glNormalPointer(GL_FLOAT, 0, normals);
 
   glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
-  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
-                 indices_array_);
+  glVertexPointer(3, GL_FLOAT, 0, vertices);
+  glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
 
+  delete[] vertices;
+  delete[] normals;
+  delete[] colors;
+
+  // Grid.
   glDisableClientState(GL_COLOR_ARRAY);
   glColor3f(0, 0.8, 0);
   glPolygonMode(GL_FRONT, GL_LINE);
-  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
-                 indices_array_);
+  glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
@@ -239,6 +271,7 @@ void Icosphere::SplitTriangles() {
                tex_coords_with_middle_points + orders[j][k] * 2,
                sizeof(float) * 2);
       }
+      triangle->SetTexCoords(combined_tex_coords);
     }
   }
 }

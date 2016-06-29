@@ -1,5 +1,7 @@
 #include "include/planet_view.h"
 
+#include <iostream>
+
 #include <GL/freeglut.h>
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
@@ -9,6 +11,7 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
   AddListener(camera_mover);
   AddListener(vertices_colorizer);
   InitGL();
+  LoadTexture();
 }
 
 void PlanetView::Display() {
@@ -17,7 +20,11 @@ void PlanetView::Display() {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
   icosphere_->Draw();
+  glDisable(GL_TEXTURE_2D);
 
   glBegin(GL_LINES);
   for (int i = 0; i < 3; ++i) {
@@ -46,4 +53,19 @@ void PlanetView::InitGL() {
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
   glLightfv(GL_LIGHT0, GL_POSITION, position);
+}
+
+void PlanetView::LoadTexture() {
+  texture_ = cv::imread("./texture.png");
+  if (!texture_.data) {
+    std::cout << "Texture not found" << std::endl;
+    return;
+  }
+  glGenTextures(1, &texture_id_);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_.cols, texture_.rows,
+               0, GL_RGB, GL_UNSIGNED_BYTE, texture_.data);
 }
