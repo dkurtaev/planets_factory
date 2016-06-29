@@ -69,6 +69,8 @@ class Triangle {
 
   void SetTexCoords(const float* src);
 
+  void GetTexCoords(float* dst) const;
+
  private:
   Edge** edges_;
   const Point3f** points_;

@@ -190,10 +190,12 @@ void Icosphere::SplitTriangles() {
   Triangle* triangle;
   uint16_t triangle_verts[n_triangles][3];
   uint16_t middle_points[n_triangles][3];
+  float tex_coords[n_triangles][6];
   for (unsigned i = 0; i < n_triangles; ++i) {
     triangle = triangles_[i];
     triangle->GetIndices(triangle_verts[i]);
     triangle->GetMiddlePointsIndices(middle_points[i]);
+    triangle->GetTexCoords(tex_coords[i]);
     delete triangle;
   }
   triangles_.clear();
@@ -203,11 +205,41 @@ void Icosphere::SplitTriangles() {
   }
   edges_.clear();
 
+  // Split each triangle. ti - i-th old triangle's vertex,
+  //                      mj - middle point of j-th edge.
+  // t0_____m0_____t1
+  // \      /\      /
+  //  \    /  \    /
+  //   \  /    \  /
+  // m2 \/______\/ m1
+  //     \      /
+  //      \    /
+  //       \  /
+  //        \/ t2
+  static const int orders[][3] = {{0, 3, 5}, {3, 1, 4}, {5, 4, 2}, {3, 4, 5}};
+  float tex_coords_with_middle_points[12];  // t0, t1, t2, m0, m1, m2.
+  uint16_t ids[6];  // t0, t1, t2, m0, m1, m2.
+  float combined_tex_coords[6];
   for (unsigned i = 0; i < n_triangles; ++i) {
-    AddTriangle(triangle_verts[i][0], middle_points[i][0], middle_points[i][2]);
-    AddTriangle(middle_points[i][0], triangle_verts[i][1], middle_points[i][1]);
-    AddTriangle(middle_points[i][2], middle_points[i][1], triangle_verts[i][2]);
-    AddTriangle(middle_points[i][0], middle_points[i][1], middle_points[i][2]);
+    memcpy(ids, triangle_verts[i], sizeof(uint16_t) * 3);
+    memcpy(ids + 3, middle_points[i], sizeof(uint16_t) * 3);
+    memcpy(tex_coords_with_middle_points, tex_coords[i], sizeof(float) * 6);
+    for (unsigned j = 0; j < 3; ++j) {
+      for (unsigned k = 0; k < 2; ++k) {
+        tex_coords_with_middle_points[6 + j * 2 + k] =
+            (tex_coords[i][j * 2 + k] +
+             tex_coords[i][((j + 1) % 3) * 2 + k]) / 2;
+      }
+    }
+    for (unsigned j = 0; j < 4; ++j) {
+      AddTriangle(ids[orders[j][0]], ids[orders[j][1]], ids[orders[j][2]]);
+      triangle = triangles_.back();
+      for (unsigned k = 0; k < 3; ++k) {
+        memcpy(combined_tex_coords + k * 2,
+               tex_coords_with_middle_points + orders[j][k] * 2,
+               sizeof(float) * 2);
+      }
+    }
   }
 }
 

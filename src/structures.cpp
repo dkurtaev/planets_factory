@@ -120,3 +120,7 @@ void Triangle::GetMiddlePointsIndices(uint16_t* dst) const {
 void Triangle::SetTexCoords(const float* src) {
   memcpy(texture_coordinates_, src, sizeof(float) * 6);
 }
+
+void Triangle::GetTexCoords(float* dst) const {
+  memcpy(dst, texture_coordinates_, sizeof(float) * 6);
+}
