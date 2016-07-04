@@ -27,13 +27,19 @@ void PlanetView::Display() {
   //
   float modelview_matrix[16];
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
-  unsigned loc = glGetUniformLocation(planet_shader_program_, "modelview_matrix");
+  unsigned loc = glGetUniformLocation(planet_shader_program_,
+                                      "u_modelview_matrix");
   glUniformMatrix4fv(loc, 1, false, modelview_matrix);
 
   float projection_matrix[16];
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
-  loc = glGetUniformLocation(planet_shader_program_, "projection_matrix");
+  loc = glGetUniformLocation(planet_shader_program_,
+                             "u_projection_matrix");
   glUniformMatrix4fv(loc, 1, false, projection_matrix);
+
+  loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
+  glUniform3f(loc, -100, -100, -100);
+
   //
   icosphere_->Draw();
   glUseProgram(0);  // Disable shader program.

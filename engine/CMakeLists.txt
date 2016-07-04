@@ -31,5 +31,6 @@ add_library(${PROJECT_NAME} STATIC ${sources} ${headers})
 target_link_libraries(${PROJECT_NAME}
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARIES}
+  glog
 )
 

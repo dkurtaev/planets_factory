@@ -44,6 +44,7 @@ unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
 
   glBindAttribLocation(program, 0, "a_position");
   glBindAttribLocation(program, 1, "a_color");
+  glBindAttribLocation(program, 2, "a_normal");
 
   glLinkProgram(program);
   GLint success = GL_FALSE;
@@ -59,8 +60,6 @@ unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
   glDeleteShader(vert_shader);
   glDeleteShader(frag_shader);
 
-  CHECK(glGetAttribLocation(program, "a_position") == 0);
-  CHECK(glGetAttribLocation(program, "a_color") == 1);
   return program;
 }
 
