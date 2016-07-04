@@ -19,6 +19,7 @@ include_directories(
 file(GLOB_RECURSE sources "${PROJECT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE headers "${PROJECT_INCLUDE_DIR}/*.h")
 
+add_subdirectory(3rdparty/glog)
 add_subdirectory(engine)
 
 add_executable(${CMAKE_PROJECT_NAME} ${sources} ${headers})
@@ -27,4 +28,5 @@ target_link_libraries(
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARIES}
   engine
+  glog
 )
