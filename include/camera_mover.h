@@ -50,11 +50,4 @@ class CameraMover : public GLViewListener {
   timeval last_mouse_move_;
 };
 
- const float CameraMover::kRotationDelta;
- const float CameraMover::kRotationAroundNormalDelta;
- const float CameraMover::kMovementAcceleration;
- const float CameraMover::kAccelerationDelay;
- const float CameraMover::kMinimalSpeed;
- const float CameraMover::kRadiusIncrement;
-
 #endif  // INCLUDE_CAMERA_MOVER_H_
