@@ -3,7 +3,7 @@ language: cpp
 notifications:
   email: false
 
-sudo: false
+sudo: required
 
 compiler: gcc
 
