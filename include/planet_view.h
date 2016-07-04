@@ -22,10 +22,6 @@ class PlanetView : public GLView {
  private:
   void InitGL();
 
-  void CreateShaderProgram();
-
-  static unsigned CreateShader(GLenum type, const char* src);
-
   Camera camera_;
   const Icosphere* icosphere_;
   unsigned planet_shader_program_;

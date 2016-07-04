@@ -4,16 +4,18 @@ project(engine)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(sources
-  src/glview.cpp
   src/button.cpp
+  src/glview.cpp
   src/layout.cpp
+  src/shaders_factory.cpp
 )
 
 set(headers	
-  include/layout.h
-  include/glview_listener.h
-  include/glview.h
   include/button.h
+  include/glview.h
+  include/glview_listener.h
+  include/layout.h
+  include/shaders_factory.h
 )
 
 find_package(OpenGL REQUIRED)
