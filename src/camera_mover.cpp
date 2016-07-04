@@ -4,6 +4,14 @@
 
 #include <GL/freeglut.h>
 
+#ifndef GLUT_KEY_CTRL_L
+  #define GLUT_KEY_CTRL_L 114
+#endif
+
+#ifndef GLUT_KEY_CTRL_R
+  #define GLUT_KEY_CTRL_R 115
+#endif
+
 CameraMover::CameraMover(SphericalCS* camera_cs)
   : camera_cs_(camera_cs), left_button_pressed_(false),
     ctrl_key_pressed_(false), is_inertial_moving_(false) {}
