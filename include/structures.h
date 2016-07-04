@@ -67,14 +67,14 @@ class Triangle {
 
   void GetMiddlePointsIndices(uint16_t* dst) const;
 
-  void SetTexCoords(const float* src);
+  void SetTexCoords(const uint16_t* src);
 
-  void GetTexCoords(float* dst) const;
+  void GetTexCoords(uint16_t* dst) const;
 
  private:
   Edge** edges_;
   const Point3f** points_;
-  float* texture_coordinates_;
+  uint16_t* texture_coordinates_;
 };
 
 #endif  // INCLUDE_STRUCTURES_H_

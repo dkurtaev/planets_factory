@@ -35,7 +35,7 @@ class Icosphere {
   float* normals_array_;
   uint8_t* colors_array_;
   uint16_t* indices_array_;
-  float* tex_coord_array_;
+  uint16_t* tex_coord_array_;
 
   float radius_;
 };

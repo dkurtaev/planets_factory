@@ -35,7 +35,7 @@ Icosphere::Icosphere(float radius)
   normals_array_ = new float[3 * kNumVertices];
   colors_array_ = new uint8_t[3 * kNumVertices];
   indices_array_ = new uint16_t[3 * kNumTriangles];
-  tex_coord_array_ = new float[6 * kNumTriangles];
+  tex_coord_array_ = new uint16_t[6 * kNumTriangles];
 
   // e - edges length
   // h - base plane half-height
@@ -218,9 +218,9 @@ void Icosphere::Draw() const {
   // Texture coordinates VBO.
   CHECK(vbo[3] != 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * triangles_.size(),
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
                tex_coord_array_, GL_STATIC_DRAW);
-  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(3, 2, GL_UNSIGNED_SHORT, true, 0, 0);
   glEnableVertexAttribArray(3);
 
   glDrawArrays(GL_TRIANGLES, 0, 3 * triangles_.size());
@@ -250,7 +250,7 @@ void Icosphere::SplitTriangles() {
   Triangle* triangle;
   uint16_t triangle_verts[n_triangles][3];
   uint16_t middle_points[n_triangles][3];
-  float tex_coords[n_triangles][6];
+  uint16_t tex_coords[n_triangles][6];
   for (unsigned i = 0; i < n_triangles; ++i) {
     triangle = triangles_[i];
     triangle->GetIndices(triangle_verts[i]);
@@ -277,18 +277,18 @@ void Icosphere::SplitTriangles() {
   //       \  /
   //        \/ t2
   static const int orders[][3] = {{0, 3, 5}, {3, 1, 4}, {5, 4, 2}, {3, 4, 5}};
-  float tex_coords_with_middle_points[12];  // t0, t1, t2, m0, m1, m2.
+  uint16_t tex_coords_with_middle_points[12];  // t0, t1, t2, m0, m1, m2.
   uint16_t ids[6];  // t0, t1, t2, m0, m1, m2.
-  float combined_tex_coords[6];
+  uint16_t combined_tex_coords[6];
   for (unsigned i = 0; i < n_triangles; ++i) {
     memcpy(ids, triangle_verts[i], sizeof(uint16_t) * 3);
     memcpy(ids + 3, middle_points[i], sizeof(uint16_t) * 3);
-    memcpy(tex_coords_with_middle_points, tex_coords[i], sizeof(float) * 6);
+    memcpy(tex_coords_with_middle_points, tex_coords[i], sizeof(uint16_t) * 6);
     for (unsigned j = 0; j < 3; ++j) {
       for (unsigned k = 0; k < 2; ++k) {
         tex_coords_with_middle_points[6 + j * 2 + k] =
-            (tex_coords[i][j * 2 + k] +
-             tex_coords[i][((j + 1) % 3) * 2 + k]) / 2;
+             tex_coords[i][j * 2 + k] / 2 +
+             tex_coords[i][((j + 1) % 3) * 2 + k] / 2;
       }
     }
     for (unsigned j = 0; j < 4; ++j) {
@@ -297,7 +297,7 @@ void Icosphere::SplitTriangles() {
       for (unsigned k = 0; k < 3; ++k) {
         memcpy(combined_tex_coords + k * 2,
                tex_coords_with_middle_points + orders[j][k] * 2,
-               sizeof(float) * 2);
+               sizeof(uint16_t) * 2);
       }
       triangle->SetTexCoords(combined_tex_coords);
     }
@@ -335,7 +335,8 @@ void Icosphere::SetTexCoords() {
 //      |**********\07/********\07/********\07/********\07/********\07/****|
 // 1.00 |***********\/**********\/**********\/**********\/**********\/*****|
 //      +------------------------------------------------------------------+
-  float texture_coordinates[][6] = {
+  CHECK(triangles_.size() == 20);
+  float normalized_texture_coordinates[][6] = {
     { 0.09f, 0.00f, 0.00f, 0.33f, 0.18f, 0.33f },  // [00]: {05,09,01}
     { 0.27f, 0.00f, 0.18f, 0.33f, 0.36f, 0.33f },  // [01]: {05,01,04}
     { 0.45f, 0.00f, 0.36f, 0.33f, 0.54f, 0.33f },  // [02]: {05,04,02}
@@ -357,11 +358,12 @@ void Icosphere::SetTexCoords() {
     { 0.63f, 0.66f, 0.72f, 1.00f, 0.81f, 0.66f },  // [18]: {03,07,06}
     { 0.63f, 0.66f, 0.72f, 0.33f, 0.54f, 0.33f }   // [19]: {03,08,02}
   };
-  if (triangles_.size() != 20) {
-    std::cout << "Use testure coordinates setting before icosphere building."
-              << std::endl;
-  }
-  for (unsigned i = 0; i < 20; ++i) {
-    triangles_[i]->SetTexCoords(texture_coordinates[i]);
+  uint16_t texture_coordinates[6];
+  for (uint8_t i = 0; i < 20; ++i) {
+    for (uint8_t j = 0; j < 6; ++j) {
+      texture_coordinates[j] = normalized_texture_coordinates[i][j] *
+                               UINT16_MAX;
+    }
+    triangles_[i]->SetTexCoords(texture_coordinates);
   }
 }

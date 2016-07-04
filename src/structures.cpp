@@ -90,7 +90,7 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
   edges_ = new Edge*[3];
   points_ = new const Point3f*[3];
-  texture_coordinates_ = new float[6];
+  texture_coordinates_ = new uint16_t[6];
   points_[0] = v1;
   points_[1] = v2;
   points_[2] = v3;
@@ -117,10 +117,10 @@ void Triangle::GetMiddlePointsIndices(uint16_t* dst) const {
   }
 }
 
-void Triangle::SetTexCoords(const float* src) {
-  memcpy(texture_coordinates_, src, sizeof(float) * 6);
+void Triangle::SetTexCoords(const uint16_t* src) {
+  memcpy(texture_coordinates_, src, sizeof(uint16_t) * 6);
 }
 
-void Triangle::GetTexCoords(float* dst) const {
-  memcpy(dst, texture_coordinates_, sizeof(float) * 6);
+void Triangle::GetTexCoords(uint16_t* dst) const {
+  memcpy(dst, texture_coordinates_, sizeof(uint16_t) * 6);
 }

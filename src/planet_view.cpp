@@ -26,11 +26,6 @@ void PlanetView::Display() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  // glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D, texture_id_);
-  // icosphere_->Draw();
-  // glDisable(GL_TEXTURE_2D);
-
   glUseProgram(planet_shader_program_);
   //
   float modelview_matrix[16];
