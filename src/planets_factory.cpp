@@ -6,10 +6,13 @@
 #include "include/button.h"
 #include "include/listener_enabler.h"
 #include "include/change_color_button.h"
+#include "include/glview.h"
 
 #include <GL/freeglut.h>
 
 int main(int argc, char** argv) {
+  GLView::InitGLContext();
+
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
   CameraMover camera_mover(&camera_cs);

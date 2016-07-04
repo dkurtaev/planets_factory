@@ -34,12 +34,6 @@ GLView::~GLView() {
 
 void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,
                         int sub_y) {
-  if (inherited_views_.empty()) {
-    int tmp = 0;
-    glutInit(&tmp, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA |
-                        GLUT_STENCIL);
-  }
   if (parent) {
     window_handle_ = glutCreateSubWindow(parent->window_handle_, sub_x, sub_y,
                                          display_width_, display_height_);
@@ -132,4 +126,14 @@ void GLView::CloseFunc() {
 
 void GLView::EntryFunc(int state) {
   FOREACH_LISTENER EntryFunc(state);
+}
+
+void GLView::InitGLContext() {
+  int tmp = 0;
+  glutInit(&tmp, 0);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_ALPHA |
+                      GLUT_STENCIL);
+  glutInitWindowSize(0, 0);
+  glutInitWindowPosition(0, 0);
+  glutDestroyWindow(glutCreateWindow(""));
 }

@@ -1,0 +1,17 @@
+uniform vec3 u_light_vector;
+uniform sampler2D u_texture;
+
+varying vec3 v_color;
+varying vec3 v_normal;
+varying vec2 v_tex_coord;
+
+void main() {
+  vec4 n_light_vector = vec4( normalize(u_light_vector), 0.0);
+  vec4 n_normal = vec4( normalize(v_normal), 0.0);
+
+  float dot_value = dot(n_light_vector, n_normal);
+  float lum_value = (dot_value + 2.0) / 3.0;
+
+  gl_FragColor = texture2D(u_texture, v_tex_coord) * lum_value;
+  // gl_FragColor = vec4(v_color * lum_value, 1.0);
+}

@@ -8,7 +8,11 @@
 #include <vector>
 #include <iostream>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <GL/freeglut.h>
+
+#include <glog/logging.h>
 
 Icosphere::Icosphere(float radius)
   : radius_(radius) {
@@ -177,29 +181,53 @@ void Icosphere::Draw() const {
     memcpy(colors_indent += 3, colors_array_ + offset, sizeof_uint8_t_x3);
   }
 
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2, GL_FLOAT, 0, tex_coord_array_);
+  // Grid.
+  // glDisableClientState(GL_COLOR_ARRAY);
+  // glColor3f(0, 0.8, 0);
+  // glPolygonMode(GL_FRONT, GL_LINE);
+  // glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, colors);
+  unsigned vbo[4];
+  glGenBuffers(4, vbo);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, normals);
+  // Coordinates VBO.
+  CHECK(vbo[0] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
+               vertices, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(0);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices);
-  glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
+  // Colors VBO.
+  CHECK(vbo[1] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 9 * n_tris,
+               colors, GL_STATIC_DRAW);
+  glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(1);
+
+  // Normals VBO.
+  CHECK(vbo[2] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
+               normals, GL_STATIC_DRAW);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(2);
+
+  // Texture coordinates VBO.
+  CHECK(vbo[3] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * triangles_.size(),
+               tex_coord_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(3);
+
+  glDrawArrays(GL_TRIANGLES, 0, 3 * triangles_.size());
 
   delete[] vertices;
   delete[] normals;
   delete[] colors;
-
-  // Grid.
-  glDisableClientState(GL_COLOR_ARRAY);
-  glColor3f(0, 0.8, 0);
-  glPolygonMode(GL_FRONT, GL_LINE);
-  glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Icosphere::SplitTriangles() {

@@ -1,8 +1,10 @@
 #include "include/planet_view.h"
+#include "include/shaders_factory.h"
 
-#include <iostream>
+#include <string>
 
 #include <GL/freeglut.h>
+#include <glog/logging.h>
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
              CameraMover* camera_mover, VerticesColorizer* vertices_colorizer)
@@ -12,6 +14,9 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
   AddListener(vertices_colorizer);
   InitGL();
   LoadTexture();
+  planet_shader_program_ = ShadersFactory::GetProgramFromFile(
+                               "../res/shaders/test_shader.vertex",
+                               "../res/shaders/test_shader.fragment");
 }
 
 void PlanetView::Display() {
@@ -21,10 +26,35 @@ void PlanetView::Display() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glEnable(GL_TEXTURE_2D);
+  // glEnable(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D, texture_id_);
+  // icosphere_->Draw();
+  // glDisable(GL_TEXTURE_2D);
+
+  glUseProgram(planet_shader_program_);
+  //
+  float modelview_matrix[16];
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
+  unsigned loc = glGetUniformLocation(planet_shader_program_,
+                                      "u_modelview_matrix");
+  glUniformMatrix4fv(loc, 1, false, modelview_matrix);
+
+  float projection_matrix[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
+  loc = glGetUniformLocation(planet_shader_program_,
+                             "u_projection_matrix");
+  glUniformMatrix4fv(loc, 1, false, projection_matrix);
+
+  loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
+  glUniform3f(loc, -100, -100, -100);
+
+  glUniform1i(3, 0);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
+
+  //
   icosphere_->Draw();
-  glDisable(GL_TEXTURE_2D);
+  glUseProgram(0);  // Disable shader program.
 
   glBegin(GL_LINES);
   for (int i = 0; i < 3; ++i) {
@@ -57,10 +87,8 @@ void PlanetView::InitGL() {
 
 void PlanetView::LoadTexture() {
   texture_ = cv::imread("./texture.png");
-  if (!texture_.data) {
-    std::cout << "Texture not found" << std::endl;
-    return;
-  }
+  CHECK(texture_.data) << "Texture not found"; 
+
   glGenTextures(1, &texture_id_);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

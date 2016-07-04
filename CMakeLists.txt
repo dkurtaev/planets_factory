@@ -15,13 +15,16 @@ include_directories(
   ${OpenGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  engine
+  "./engine"
 )
 
 file(GLOB_RECURSE sources "${PROJECT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE headers "${PROJECT_INCLUDE_DIR}/*.h")
 
-add_subdirectory(engine)
+add_subdirectory("./3rdparty/glog")
+add_subdirectory("./3rdparty/googletest")
+add_subdirectory("./engine")
+add_subdirectory("./test")
 
 add_executable(${CMAKE_PROJECT_NAME} ${sources} ${headers})
 target_link_libraries(
@@ -30,4 +33,5 @@ target_link_libraries(
   ${GLUT_LIBRARIES}
   ${OpenCV_LIBRARIES}
   engine
+  glog
 )

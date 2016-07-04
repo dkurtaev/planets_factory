@@ -10,6 +10,10 @@
 #include "include/icosphere.h"
 #include "include/vertices_colorizer.h"
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/freeglut.h>
+
 class PlanetView : public GLView {
  public:
   PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
@@ -26,6 +30,7 @@ class PlanetView : public GLView {
   const Icosphere* icosphere_;
   unsigned texture_id_;
   cv::Mat texture_;
+  unsigned planet_shader_program_;
 };
 
 #endif  // INCLUDE_PLANET_VIEW_H_
