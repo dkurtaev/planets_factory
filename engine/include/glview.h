@@ -1,5 +1,7 @@
-#ifndef INCLUDE_GLVIEW_H_
-#define INCLUDE_GLVIEW_H_
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
+#ifndef ENGINE_INCLUDE_GLVIEW_H_
+#define ENGINE_INCLUDE_GLVIEW_H_
 
 #include <vector>
 #include <string>
@@ -55,4 +57,4 @@ class GLView {
   std::vector<GLViewListener*> listeners_;
 };
 
-#endif  // INCLUDE_GLVIEW_H_
+#endif  // ENGINE_INCLUDE_GLVIEW_H_

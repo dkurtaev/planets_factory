@@ -1,5 +1,7 @@
-#ifndef INCLUDE_LAYOUT_H_
-#define INCLUDE_LAYOUT_H_
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
+#ifndef ENGINE_INCLUDE_LAYOUT_H_
+#define ENGINE_INCLUDE_LAYOUT_H_
 
 #include <vector>
 
@@ -44,33 +46,18 @@ class Roi {
   explicit Roi(float left = 0, float right = 1, float top = 0, float bottom = 1)
     : left_(left), right_(right), top_(top), bottom_(bottom) {}
 
-  bool IsIncludes(float x, float y) const {
-    return (x >= left_ && x <= right_ && y >= top_ && y <= bottom_);
-  }
+  bool IsIncludes(float x, float y) const;
 
-  unsigned GetWidth(unsigned display_width) const {
-    return (right_ - left_) * display_width;
-  }
+  unsigned GetWidth(unsigned display_width) const;
 
-  unsigned GetHeight(unsigned display_height) const {
-    return (bottom_ - top_) * display_height;
-  }
+  unsigned GetHeight(unsigned display_height) const;
 
   void Get(unsigned display_width, unsigned display_height,
            unsigned* left, unsigned* right, unsigned* top,
-           unsigned* bottom) const {
-    *top = top_ * display_height;
-    *left = left_ * display_width;
-    *right = right_ * display_width;
-    *bottom = bottom_ * display_height;
-  }
+           unsigned* bottom) const;
 
  private:
-  float top_;
-  float left_;
-  float right_;
-  float bottom_;
+  float top_, left_, right_, bottom_;
 };
 
-
-#endif  // INCLUDE_LAYOUT_H_
+#endif  // ENGINE_INCLUDE_LAYOUT_H_

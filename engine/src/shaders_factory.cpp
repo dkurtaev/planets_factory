@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/shaders_factory.h"
 
 #include <fstream>
@@ -34,7 +36,7 @@ unsigned ShadersFactory::GetProgramFromFile(const char* vert_shader_path,
 unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
                                               const char* frag_shader_src) {
   unsigned program = glCreateProgram();
-  CHECK(program != 0);
+  CHECK_NE(program, 0);
 
   unsigned vert_shader = CreateShader(GL_VERTEX_SHADER, vert_shader_src);
   unsigned frag_shader = CreateShader(GL_FRAGMENT_SHADER, frag_shader_src);
