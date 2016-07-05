@@ -13,6 +13,11 @@ class GLView {
 
   void AddListener(GLViewListener* listener);
 
+  // First opened window initializing OpenGL's context. After it we cannot use
+  // gl* functions like glGenBuffers for VBO. This function creates and destroy
+  // fictive window that initializing OpenGL's context.
+  static void InitGLContext();
+
  protected:
   virtual void Display() = 0;
 

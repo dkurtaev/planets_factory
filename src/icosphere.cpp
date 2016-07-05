@@ -6,7 +6,11 @@
 
 #include <algorithm>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <GL/freeglut.h>
+
+#include <glog/logging.h>
 
 Icosphere::Icosphere(float radius) {
   // Characteristics of icosahedron.
@@ -151,16 +155,41 @@ void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
 }
 
 void Icosphere::Draw() const {
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, colors_array_);
+  unsigned vbo[4];
+  glGenBuffers(4, vbo);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, 0, normals_array_);
+  // Coordinates VBO.
+  CHECK(vbo[0] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * vertices_.size(),
+               vertices_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(0);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, vertices_array_);
-  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT,
-                 indices_array_);
+  // Colors VBO.
+  CHECK(vbo[1] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 3 * vertices_.size(),
+               colors_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(1);
+
+  // Normals VBO.
+  CHECK(vbo[2] != 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * vertices_.size(),
+               normals_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(2);
+
+  // Indices VBO.
+  CHECK(vbo[3] != 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sizeof(uint16_t) * 3 * triangles_.size(),
+               indices_array_, GL_STATIC_DRAW);
+
+  glDrawElements(GL_TRIANGLES, 3 * triangles_.size(), GL_UNSIGNED_SHORT, 0);
 }
 
 void Icosphere::SplitTriangles() {

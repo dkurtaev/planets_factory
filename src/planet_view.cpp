@@ -1,5 +1,7 @@
 #include "include/planet_view.h"
+#include "include/shaders_factory.h"
 
+#include <string>
 #include <GL/freeglut.h>
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
@@ -9,6 +11,9 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
   AddListener(camera_mover);
   AddListener(vertices_colorizer);
   InitGL();
+  planet_shader_program_ = ShadersFactory::GetProgramFromFile(
+                               "../res/shaders/test_shader.vertex",
+                               "../res/shaders/test_shader.fragment");
 }
 
 void PlanetView::Display() {
@@ -17,7 +22,27 @@ void PlanetView::Display() {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
+  glUseProgram(planet_shader_program_);
+  //
+  float modelview_matrix[16];
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
+  unsigned loc = glGetUniformLocation(planet_shader_program_,
+                                      "u_modelview_matrix");
+  glUniformMatrix4fv(loc, 1, false, modelview_matrix);
+
+  float projection_matrix[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
+  loc = glGetUniformLocation(planet_shader_program_,
+                             "u_projection_matrix");
+  glUniformMatrix4fv(loc, 1, false, projection_matrix);
+
+  loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
+  glUniform3f(loc, -100, -100, -100);
+
+  //
   icosphere_->Draw();
+  glUseProgram(0);  // Disable shader program.
 
   glBegin(GL_LINES);
   for (int i = 0; i < 3; ++i) {
