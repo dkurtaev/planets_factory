@@ -32,7 +32,7 @@ Icosphere::Icosphere(float radius)
   static const unsigned kNumEdges = (3 * kNumTriangles) / 2;
 
   vertices_array_ = new float[3 * kNumVertices];
-  normals_array_ = new float[3 * kNumVertices];
+  normals_array_ = new int8_t[3 * kNumVertices];
   colors_array_ = new uint8_t[3 * kNumVertices];
   indices_array_ = new uint16_t[3 * kNumTriangles];
   tex_coord_array_ = new uint16_t[6 * kNumTriangles];
@@ -82,16 +82,14 @@ Icosphere::Icosphere(float radius)
     SplitTriangles();
   }
 
-  if (triangles_.size() != kNumTriangles || edges_.size() != kNumEdges ||
-      vertices_.size() != kNumVertices) {
-    std::cout << "Icosphere building failed." << std::endl;
-  }
+  CHECK(triangles_.size() == kNumTriangles);
+  CHECK(edges_.size() == kNumEdges);
+  CHECK(vertices_.size() == kNumVertices);
 
   memset(colors_array_, kInitialColor, sizeof(uint8_t) * 3 * kNumVertices);
-  memcpy(normals_array_, vertices_array_, sizeof(float) * 3 * kNumVertices);
   const unsigned dim = 3 * kNumVertices;
   for (unsigned i = 0; i < dim; ++i) {
-    normals_array_[i] /= radius_;
+    normals_array_[i] = (vertices_array_[i] / radius) * INT8_MAX;
   }
   for (unsigned i = 0; i < kNumTriangles; ++i) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
@@ -163,13 +161,13 @@ void Icosphere::Draw() const {
   // Mesh.
   const unsigned n_tris = triangles_.size();
   float* vertices = new float[9 * n_tris];
-  float* normals = new float[9 * n_tris];
+  int8_t* normals = new int8_t[9 * n_tris];
   uint8_t* colors = new uint8_t[9 * n_tris];
 
   const unsigned n_indices = 3 * n_tris;
   unsigned offset;
   float* vertices_indent = vertices - 3;
-  float* normals_indent = normals - 3;
+  int8_t* normals_indent = normals - 3;
   uint8_t* colors_indent = colors - 3;
 
   const uint8_t sizeof_float_x3 = sizeof(float) * 3;
@@ -177,7 +175,7 @@ void Icosphere::Draw() const {
   for (unsigned i = 0; i < n_indices; ++i) {
     offset = indices_array_[i] * 3;
     memcpy(vertices_indent += 3, vertices_array_ + offset, sizeof_float_x3);
-    memcpy(normals_indent += 3, normals_array_ + offset, sizeof_float_x3);
+    memcpy(normals_indent += 3, normals_array_ + offset, sizeof_uint8_t_x3);
     memcpy(colors_indent += 3, colors_array_ + offset, sizeof_uint8_t_x3);
   }
 
@@ -210,9 +208,9 @@ void Icosphere::Draw() const {
   // Normals VBO.
   CHECK(vbo[2] != 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris,
                normals, GL_STATIC_DRAW);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(2, 3, GL_BYTE, true, 0, 0);
   glEnableVertexAttribArray(2);
 
   // Texture coordinates VBO.
