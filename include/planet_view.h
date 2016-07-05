@@ -33,6 +33,7 @@ class PlanetView : public GLView {
   unsigned texture_id_;
   cv::Mat texture_;
   unsigned planet_shader_program_;
+  unsigned grid_shader_program_;
 };
 
 #endif  // INCLUDE_PLANET_VIEW_H_

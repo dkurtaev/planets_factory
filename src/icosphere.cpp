@@ -32,6 +32,9 @@ Icosphere::Icosphere(float radius)
   static const unsigned kNumVertices =
       kInitNumVertices + 0.5f * (kNumTriangles - kInitNumTriangles);
   static const unsigned kNumEdges = (3 * kNumTriangles) / 2;
+  // Colors of grid nodes.
+  static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
+  static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
 
   vertices_array_ = new float[3 * kNumVertices];
   normals_array_ = new int8_t[3 * kNumVertices];
@@ -61,8 +64,13 @@ Icosphere::Icosphere(float radius)
   float ys[] = {-h, h, h, -h, w, w, -w, -w, 0, 0, 0, 0};
   float zs[] = {0, 0, 0, 0, -h, h, h, -h, w, w, -w, -w};
   for (unsigned i = 0; i < kInitNumVertices; ++i) {
-    vertices_[i] = new Point3f(i, xs[i], ys[i], zs[i], vertices_array_ + i * 3,
-                               colors_array_ + i * 3);
+    vertices_[i] = new Point3f(i, xs[i], ys[i], zs[i],
+                               vertices_array_ + i * 3,  // Offsets to
+                               colors_array_ + i * 3);   // shared memory.
+    memcpy(colors_array_ + i * 3, kInitEdgesColor, sizeof(uint8_t) * 3);
+  }
+  for (unsigned i = kInitNumVertices; i < kNumVertices; ++i) {
+    memcpy(colors_array_ + i * 3, kSubEdgesColor, sizeof(uint8_t) * 3);
   }
 
   edges_.reserve(kNumEdges);
@@ -88,7 +96,6 @@ Icosphere::Icosphere(float radius)
   CHECK(edges_.size() == kNumEdges);
   CHECK(vertices_.size() == kNumVertices);
 
-  memset(colors_array_, kInitialColor, sizeof(uint8_t) * 3 * kNumVertices);
   const unsigned dim = 3 * kNumVertices;
   for (unsigned i = 0; i < dim; ++i) {
     normals_array_[i] = (vertices_array_[i] / radius) * INT8_MAX;
@@ -164,13 +171,11 @@ void Icosphere::Draw() const {
   const unsigned n_tris = triangles_.size();
   float* vertices = new float[9 * n_tris];
   int8_t* normals = new int8_t[9 * n_tris];
-  uint8_t* colors = new uint8_t[9 * n_tris];
 
   const unsigned n_indices = 3 * n_tris;
   unsigned offset;
   float* vertices_indent = vertices - 3;
   int8_t* normals_indent = normals - 3;
-  uint8_t* colors_indent = colors - 3;
 
   const uint8_t sizeof_float_x3 = sizeof(float) * 3;
   const uint8_t sizeof_uint8_t_x3 = sizeof(uint8_t) * 3;
@@ -178,15 +183,7 @@ void Icosphere::Draw() const {
     offset = indices_array_[i] * 3;
     memcpy(vertices_indent += 3, vertices_array_ + offset, sizeof_float_x3);
     memcpy(normals_indent += 3, normals_array_ + offset, sizeof_uint8_t_x3);
-    memcpy(colors_indent += 3, colors_array_ + offset, sizeof_uint8_t_x3);
   }
-
-  // Grid.
-  // glDisableClientState(GL_COLOR_ARRAY);
-  // glColor3f(0, 0.8, 0);
-  // glPolygonMode(GL_FRONT, GL_LINE);
-  // glDrawArrays(GL_TRIANGLES, 0, 3 * n_tris);
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   unsigned vbo[4];
   glGenBuffers(4, vbo);
@@ -198,14 +195,6 @@ void Icosphere::Draw() const {
                vertices, GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
-
-  // Colors VBO.
-  CHECK_NE(vbo[1], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 9 * n_tris,
-               colors, GL_STATIC_DRAW);
-  glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, true, 0, 0);
-  glEnableVertexAttribArray(1);
 
   // Normals VBO.
   CHECK_NE(vbo[2], 0);
@@ -227,7 +216,6 @@ void Icosphere::Draw() const {
 
   delete[] vertices;
   delete[] normals;
-  delete[] colors;
 }
 
 void Icosphere::SplitTriangles() {
@@ -239,8 +227,9 @@ void Icosphere::SplitTriangles() {
   Point3f* middle_point;
   for (unsigned i = 0; i < n_edges; ++i) {
     const unsigned id = n_vertices + i;
-    middle_point = new Point3f(id, 0, 0, 0, vertices_array_ + id * 3,
-                               colors_array_ + id * 3);
+    middle_point = new Point3f(id, 0, 0, 0,
+                               vertices_array_ + id * 3,  // Offsets to
+                               colors_array_ + id * 3);   // shared data.
     edges_[i]->MiddlePoint(middle_point);
     middle_point->Normalize(radius_);
     vertices_.push_back(middle_point);
@@ -366,4 +355,37 @@ void Icosphere::SetTexCoords() {
     }
     triangles_[i]->SetTexCoords(texture_coordinates);
   }
+}
+
+void Icosphere::DrawGrid() const {
+  const unsigned n_tris = triangles_.size();
+
+  unsigned vbo[3];
+  glGenBuffers(3, vbo);
+
+  // Coordinates VBO.
+  CHECK_NE(vbo[0], 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * vertices_.size(),
+               vertices_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(0);
+
+  // Colors VBO.
+  CHECK_NE(vbo[1], 1);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 3 * vertices_.size(),
+               colors_array_, GL_STATIC_DRAW);
+  glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(1);
+
+  // Indices VBO.
+  CHECK_NE(vbo[2], 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * 3 * n_tris,
+               indices_array_, GL_STATIC_DRAW);
+
+  glPolygonMode(GL_FRONT, GL_LINE);
+  glDrawElements(GL_TRIANGLES, 3 * n_tris, GL_UNSIGNED_SHORT, 0);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

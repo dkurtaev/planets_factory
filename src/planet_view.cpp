@@ -20,6 +20,9 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/test_shader.vertex",
                                "../res/shaders/test_shader.fragment");
+  grid_shader_program_ = ShadersFactory::GetProgramFromFile(
+                             "../res/shaders/icogrid_shader.vertex",
+                             "../res/shaders/icogrid_shader.fragment");
 }
 
 void PlanetView::Display() {
@@ -39,8 +42,7 @@ void PlanetView::Display() {
 
   float projection_matrix[16];
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
-  loc = glGetUniformLocation(planet_shader_program_,
-                             "u_projection_matrix");
+  loc = glGetUniformLocation(planet_shader_program_, "u_projection_matrix");
   glUniformMatrix4fv(loc, 1, false, projection_matrix);
 
   loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
@@ -52,6 +54,18 @@ void PlanetView::Display() {
 
   //
   icosphere_->Draw();
+
+  glUseProgram(grid_shader_program_);
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
+  loc = glGetUniformLocation(grid_shader_program_, "u_modelview_matrix");
+  glUniformMatrix4fv(loc, 1, false, modelview_matrix);
+
+  glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
+  loc = glGetUniformLocation(grid_shader_program_, "u_projection_matrix");
+  glUniformMatrix4fv(loc, 1, false, projection_matrix);
+
+  icosphere_->DrawGrid();
+
   glUseProgram(0);  // Disable shader program.
 
   glBegin(GL_LINES);
