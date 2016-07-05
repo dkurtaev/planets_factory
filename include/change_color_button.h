@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_CHANGE_COLOR_BUTTON_H_
 #define INCLUDE_CHANGE_COLOR_BUTTON_H_
 

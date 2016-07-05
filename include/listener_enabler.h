@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_LISTENER_ENABLER_H_
 #define INCLUDE_LISTENER_ENABLER_H_
 

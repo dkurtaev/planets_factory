@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/hsv_palette_listener.h"
 
 #include "include/palette_view.h"

@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/structures.h"
 
 #include <stdlib.h>
@@ -85,7 +87,7 @@ void Edge::GetPoints(Point3f** p1, Point3f** p2) {
   *p2 = p2_;
 }
 
-// Triangle ---------------------------------------------------------------------
+// Triangle --------------------------------------------------------------------
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
   edges_ = new Edge*[3];

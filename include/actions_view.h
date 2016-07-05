@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_ACTIONS_VIEW_H_
 #define INCLUDE_ACTIONS_VIEW_H_
 

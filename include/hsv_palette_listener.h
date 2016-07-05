@@ -1,5 +1,7 @@
-#ifndef INCLUDE_HSV_PALETTE_LISTENERS_H_
-#define INCLUDE_HSV_PALETTE_LISTENERS_H_
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
+#ifndef INCLUDE_HSV_PALETTE_LISTENER_H_
+#define INCLUDE_HSV_PALETTE_LISTENER_H_
 
 #include "include/glview_listener.h"
 
@@ -19,4 +21,4 @@ class HSVPaletteListener : public GLViewListener {
   PaletteView* palette_view_;
 };
 
-#endif  // INCLUDE_HSV_PALETTE_LISTENERS_H_
+#endif  // INCLUDE_HSV_PALETTE_LISTENER_H_

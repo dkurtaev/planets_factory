@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_PALETTE_VIEW_H_
 #define INCLUDE_PALETTE_VIEW_H_
 
@@ -21,7 +23,7 @@ class PaletteView : public GLView {
   void SetValue(float value);
 
   void GetSelectedColor(uint8_t* rgb) const;
-  
+
  private:
   static const int kViewHeight = 300;
   static const int kViewWidth = 500;
@@ -45,7 +47,7 @@ class PaletteView : public GLView {
   // Hue-Saturation plane, black circle.
   static const unsigned kHSPaletteMarkerRadius = 8;
   // Value bar marker, white triangle.
-  // ....| , 
+  // ....| ,
   // ....|/|
   // ....|\|
   // ....| '
@@ -66,7 +68,7 @@ class PaletteView : public GLView {
 
   unsigned v_palette_texture_id_;
   uint8_t* v_palette_colors_;
-  
+
   float selected_hsv_[3];
 };
 

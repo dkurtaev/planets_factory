@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/icosphere.h"
 
 #include <math.h>
@@ -190,7 +192,7 @@ void Icosphere::Draw() const {
   glGenBuffers(4, vbo);
 
   // Coordinates VBO.
-  CHECK(vbo[0] != 0);
+  CHECK_NE(vbo[0], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
                vertices, GL_STATIC_DRAW);
@@ -198,7 +200,7 @@ void Icosphere::Draw() const {
   glEnableVertexAttribArray(0);
 
   // Colors VBO.
-  CHECK(vbo[1] != 0);
+  CHECK_NE(vbo[1], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 9 * n_tris,
                colors, GL_STATIC_DRAW);
@@ -206,7 +208,7 @@ void Icosphere::Draw() const {
   glEnableVertexAttribArray(1);
 
   // Normals VBO.
-  CHECK(vbo[2] != 0);
+  CHECK_NE(vbo[2], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris,
                normals, GL_STATIC_DRAW);
@@ -214,7 +216,7 @@ void Icosphere::Draw() const {
   glEnableVertexAttribArray(2);
 
   // Texture coordinates VBO.
-  CHECK(vbo[3] != 0);
+  CHECK_NE(vbo[3], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
                tex_coord_array_, GL_STATIC_DRAW);
@@ -333,7 +335,7 @@ void Icosphere::SetTexCoords() {
 //      |**********\07/********\07/********\07/********\07/********\07/****|
 // 1.00 |***********\/**********\/**********\/**********\/**********\/*****|
 //      +------------------------------------------------------------------+
-  CHECK(triangles_.size() == 20);
+  CHECK_EQ(triangles_.size(), 20);
   float normalized_texture_coordinates[][6] = {
     { 0.09f, 0.00f, 0.00f, 0.33f, 0.18f, 0.33f },  // [00]: {05,09,01}
     { 0.27f, 0.00f, 0.18f, 0.33f, 0.36f, 0.33f },  // [01]: {05,01,04}

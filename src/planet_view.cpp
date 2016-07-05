@@ -1,10 +1,13 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/planet_view.h"
-#include "include/shaders_factory.h"
 
 #include <string>
 
 #include <GL/freeglut.h>
 #include <glog/logging.h>
+
+#include "include/shaders_factory.h"
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
              CameraMover* camera_mover, VerticesColorizer* vertices_colorizer)
@@ -82,7 +85,7 @@ void PlanetView::InitGL() {
 
 void PlanetView::LoadTexture() {
   texture_ = cv::imread("./texture.png");
-  CHECK(texture_.data) << "Texture not found"; 
+  CHECK(texture_.data) << "Texture not found";
 
   glGenTextures(1, &texture_id_);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
