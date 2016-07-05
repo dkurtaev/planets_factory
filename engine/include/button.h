@@ -1,5 +1,7 @@
-#ifndef INCLUDE_BUTTON_H_
-#define INCLUDE_BUTTON_H_
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
+#ifndef ENGINE_INCLUDE_BUTTON_H_
+#define ENGINE_INCLUDE_BUTTON_H_
 
 #include <string>
 
@@ -7,7 +9,7 @@
 
 class Button : public GLViewListener {
  public:
-  Button(std::string text);
+  explicit Button(std::string text);
 
   virtual void MouseMove(int x, int y);
 
@@ -30,4 +32,4 @@ class Button : public GLViewListener {
   float button_color_[3];
 };
 
-#endif  // INCLUDE_BUTTON_H_
+#endif  // ENGINE_INCLUDE_BUTTON_H_

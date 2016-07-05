@@ -1,7 +1,11 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/listener_enabler.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#include <string>
 
 static const float kPressedButtonColor[3] = { 0.95f, 0.72f, 0.09f };
 
@@ -21,6 +25,6 @@ void ListenerEnabler::MouseFunc(int button, int state, int x, int y) {
     } else {
       listener_->Enable();
       memcpy(button_color_, kPressedButtonColor, sizeof(float) * 3);
-    }      
+    }
   }
 }

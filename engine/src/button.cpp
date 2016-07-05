@@ -1,4 +1,9 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/button.h"
+
+#include <string>
+#include <algorithm>
 
 #include <GL/freeglut.h>
 
@@ -35,7 +40,7 @@ void Button::Display(int semiwidth, int semiheight) {
   glEnd();
 
   // Text.
-  const uint8_t* text = reinterpret_cast<const uint8_t*>(text_.c_str()); 
+  const uint8_t* text = reinterpret_cast<const uint8_t*>(text_.c_str());
   const int bmp_length = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
   const int bmp_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
   glColor3fv(font_color_);

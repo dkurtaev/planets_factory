@@ -8,11 +8,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${OpenGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   "./engine"
 )
 
@@ -29,6 +31,7 @@ target_link_libraries(
   ${CMAKE_PROJECT_NAME}
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARIES}
+  ${OpenCV_LIBRARIES}
   engine
   glog
 )

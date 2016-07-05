@@ -1,7 +1,11 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_STRUCTURES_H_
 #define INCLUDE_STRUCTURES_H_
 
 #include <stdint.h>
+
+#include <vector>
 
 class Point3f {
  public:
@@ -23,16 +27,21 @@ class Point3f {
 
   uint16_t GetId() const { return id_; }
 
+  void AddNeighbor(Point3f* point);
+
+  void GetNeighborhood(std::vector<Point3f*>* neighborhood);
+
  private:
   uint16_t id_;
   float* vertices_array_offset_;
   uint8_t* colors_array_offset_;
   float norm_;
+  std::vector<Point3f*> neighborhood_;
 };
 
 class Edge {
  public:
-  Edge(const Point3f* p1, const Point3f* p2);
+  Edge(Point3f* p1, Point3f* p2);
 
   // Write middle point's coordinates into input Point3f.
   // If null as input - returns last passed middle point
@@ -41,22 +50,33 @@ class Edge {
 
   bool CompareTo(uint16_t p1_id, uint16_t p2_id) const;
 
+  void GetPoints(Point3f** p1, Point3f** p2);
+
  private:
-  const Point3f* p1_;
-  const Point3f* p2_;
+  Point3f* p1_;
+  Point3f* p2_;
   const Point3f* middle_point_;
 };
 
-struct Triangle {
+class Triangle {
+ public:
   Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
            Edge* e1, Edge* e2, Edge* e3);
+
+  ~Triangle();
 
   void GetIndices(uint16_t* dst) const;
 
   void GetMiddlePointsIndices(uint16_t* dst) const;
 
-  Edge* edges_[3];
-  const Point3f* points_[3];
+  void SetTexCoords(const uint16_t* src);
+
+  void GetTexCoords(uint16_t* dst) const;
+
+ private:
+  Edge** edges_;
+  const Point3f** points_;
+  uint16_t* texture_coordinates_;
 };
 
 #endif  // INCLUDE_STRUCTURES_H_

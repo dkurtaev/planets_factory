@@ -1,5 +1,7 @@
-#ifndef INCLUDE_GLVIEW_LISTENER_H_
-#define INCLUDE_GLVIEW_LISTENER_H_
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
+#ifndef ENGINE_INCLUDE_GLVIEW_LISTENER_H_
+#define ENGINE_INCLUDE_GLVIEW_LISTENER_H_
 
 #ifndef GLUT_WHEEL_UP
   #define GLUT_WHEEL_UP 3
@@ -27,7 +29,7 @@ class GLViewListener {
 
   virtual void EntryFunc(int state) {}
 
-  void Reshape(int display_width, int display_height) {
+  virtual void Reshape(int display_width, int display_height) {
     display_width_ = display_width;
     display_height_ = display_height;
   }
@@ -44,4 +46,4 @@ class GLViewListener {
   bool is_enabled_;
 };
 
-#endif  // INCLUDE_GLVIEW_LISTENER_H_
+#endif  // ENGINE_INCLUDE_GLVIEW_LISTENER_H_

@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/actions_view.h"
 
 #include <vector>
@@ -61,7 +63,6 @@ void ActionsView::Display() {
     glTranslatef((left + right) / 2, (top + botttom) / 2, 0);
     buttons_[i]->Display((right - left) / 2, (botttom - top) / 2);
     glPopMatrix();
-
   }
   glDisable(GL_STENCIL_TEST);
 

@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/glview.h"
 
 #include <vector>
@@ -19,6 +21,17 @@ GLView::GLView(int display_width, int display_height, std::string window_header,
   : display_width_(display_width), display_height_(display_height) {
   InitWindow(window_header, parent, sub_x, sub_y);
   inherited_views_.push_back(this);
+}
+
+GLView::~GLView() {
+  std::vector<GLView*>::iterator it = inherited_views_.begin();
+  for (it; it != inherited_views_.end(); ++it) {
+    if ((*it)->window_handle_ == window_handle_) {
+      inherited_views_.erase(it);
+      glutDestroyWindow(window_handle_);
+      break;
+    }
+  }
 }
 
 void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,

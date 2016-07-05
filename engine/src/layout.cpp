@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/layout.h"
 
 #include <GL/freeglut.h>
@@ -8,16 +10,21 @@
   const float float_y = static_cast<float>(y) / display_height_; \
   for (unsigned i = 0; i < n_listeners; ++i) \
     if (listeners_rois_[i].IsIncludes(float_x, float_y)) \
-      if (listeners_[i]->IsEnabled()) \
-        listeners_[i]->
+      if (listeners_[i]->IsEnabled())
 
+// Layout ----------------------------------------------------------------------
 void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
   listeners_.push_back(listener);
   listeners_rois_.push_back(roi);
 }
 
 void Layout::MouseFunc(int button, int state, int x, int y) {
-  FOREACH_LISTENER_IN_ROI MouseFunc(button, state, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->MouseFunc(button, state, x - left, y - top);
+  }
 }
 
 void Layout::MouseMove(int x, int y) {
@@ -36,6 +43,7 @@ void Layout::MouseMove(bool passive, int x, int y) {
   const float last_y = static_cast<float>(last_mouse_y_) / display_height_;
   last_mouse_x_ = x;
   last_mouse_y_ = y;
+  unsigned top, left, right, bottom;
   for (unsigned i = 0; i < n_listeners; ++i) {
     if (listeners_[i]->IsEnabled()) {
       const Roi* roi = &listeners_rois_[i];
@@ -47,10 +55,12 @@ void Layout::MouseMove(bool passive, int x, int y) {
         if (!roi->IsIncludes(last_x, last_y)) {
           listeners_[i]->EntryFunc(GLUT_ENTERED);
         } else {
+          roi->Get(display_width_, display_height_, &left, &right, &top,
+                   &bottom);
           if (passive) {
-            listeners_[i]->PassiveMouseMove(x, y);
+            listeners_[i]->PassiveMouseMove(x - left, y - top);
           } else {
-            listeners_[i]->MouseMove(x, y);
+            listeners_[i]->MouseMove(x - left, y - top);
           }
         }
       }
@@ -59,11 +69,21 @@ void Layout::MouseMove(bool passive, int x, int y) {
 }
 
 void Layout::SpecialKeyPressed(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyPressed(key, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->SpecialKeyPressed(key, x - left, y - top);
+  }
 }
 
 void Layout::SpecialKeyReleased(int key, int x, int y) {
-  FOREACH_LISTENER_IN_ROI SpecialKeyReleased(key, x, y);
+  unsigned top, left, right, bottom;
+  FOREACH_LISTENER_IN_ROI {
+    listeners_rois_[i].Get(display_width_, display_height_, &left, &right,
+                           &top, &bottom);
+    listeners_[i]->SpecialKeyReleased(key, x - left, y - top);
+  }
 }
 
 void Layout::DoEvents() {
@@ -79,12 +99,14 @@ void Layout::EntryFunc(int state) {
   if (state == GLUT_LEFT) {
     unsigned x = last_mouse_x_;
     unsigned y = last_mouse_y_;
-    FOREACH_LISTENER_IN_ROI EntryFunc(GLUT_LEFT);
+    FOREACH_LISTENER_IN_ROI {
+      listeners_[i]->EntryFunc(GLUT_LEFT);
+    }
   }
 }
 
 void Layout::Reshape(int display_width, int display_height) {
-  const unsigned n_listeners = listeners_.size();  
+  const unsigned n_listeners = listeners_.size();
   for (unsigned i = 0; i < n_listeners; ++i) {
     if (listeners_[i]->IsEnabled()) {
       const Roi* roi = &listeners_rois_[i];
@@ -94,4 +116,26 @@ void Layout::Reshape(int display_width, int display_height) {
   }
   display_width_ = display_width;
   display_height_ = display_height;
+}
+
+// Roi -------------------------------------------------------------------------
+bool Roi::IsIncludes(float x, float y) const {
+  return (x >= left_ && x <= right_ && y >= top_ && y <= bottom_);
+}
+
+unsigned Roi::GetWidth(unsigned display_width) const {
+  return (right_ - left_) * display_width;
+}
+
+unsigned Roi::GetHeight(unsigned display_height) const {
+  return (bottom_ - top_) * display_height;
+}
+
+void Roi::Get(unsigned display_width, unsigned display_height,
+              unsigned* left, unsigned* right, unsigned* top,
+              unsigned* bottom) const {
+  *top = top_ * display_height;
+  *left = left_ * display_width;
+  *right = right_ * display_width;
+  *bottom = bottom_ * display_height;
 }

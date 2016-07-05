@@ -1,3 +1,5 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #ifndef INCLUDE_ICOSPHERE_H_
 #define INCLUDE_ICOSPHERE_H_
 
@@ -20,6 +22,8 @@ class Icosphere {
  private:
   static const uint8_t kInitialColor = 204;
 
+  void SetTexCoords();
+
   // Used for building.
   void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
 
@@ -30,9 +34,10 @@ class Icosphere {
   std::vector<Triangle*> triangles_;
 
   float* vertices_array_;
-  float* normals_array_;
+  int8_t* normals_array_;
   uint8_t* colors_array_;
   uint16_t* indices_array_;
+  uint16_t* tex_coord_array_;
 
   float radius_;
 };
