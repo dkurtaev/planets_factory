@@ -16,6 +16,8 @@
 
 #include <glog/logging.h>
 
+#include "include/shaders_factory.h"
+
 Icosphere::Icosphere(float radius)
   : radius_(radius) {
   // Characteristics of icosahedron.
@@ -211,27 +213,31 @@ void Icosphere::Draw() const {
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
                vertices, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(COORDS_ATTRIB);
 
   // Normals VBO.
   CHECK_NE(vbo[2], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris,
                normals, GL_STATIC_DRAW);
-  glVertexAttribPointer(2, 3, GL_BYTE, true, 0, 0);
-  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(NORMALS_ATTRIB, 3, GL_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(NORMALS_ATTRIB);
 
   // Texture coordinates VBO.
   CHECK_NE(vbo[3], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
                tex_coord_array_, GL_STATIC_DRAW);
-  glVertexAttribPointer(3, 2, GL_UNSIGNED_SHORT, true, 0, 0);
-  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(TEX_ATTRIB, 2, GL_UNSIGNED_SHORT, true, 0, 0);
+  glEnableVertexAttribArray(TEX_ATTRIB);
 
   glDrawArrays(GL_TRIANGLES, 0, 3 * triangles_.size());
 
+  glDisableVertexAttribArray(TEX_ATTRIB);
+  glDisableVertexAttribArray(NORMALS_ATTRIB);
+  glDisableVertexAttribArray(COORDS_ATTRIB);
+  glDeleteBuffers(4, vbo);
   delete[] vertices;
   delete[] normals;
 }
@@ -391,16 +397,16 @@ void Icosphere::DrawGrid() const {
   glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * vertices_.size(),
                vertices_array_, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(COORDS_ATTRIB);
 
   // Colors VBO.
   CHECK_NE(vbo[1], 1);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 3 * vertices_.size(),
                colors_array_, GL_STATIC_DRAW);
-  glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, true, 0, 0);
-  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(COLORS_ATTRIB, 3, GL_UNSIGNED_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(COLORS_ATTRIB);
 
   // Indices VBO.
   CHECK_NE(vbo[2], 0);
@@ -411,4 +417,8 @@ void Icosphere::DrawGrid() const {
   glPolygonMode(GL_FRONT, GL_LINE);
   glDrawElements(GL_TRIANGLES, 3 * n_tris, GL_UNSIGNED_SHORT, 0);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+  glDisableVertexAttribArray(COLORS_ATTRIB);
+  glDisableVertexAttribArray(COORDS_ATTRIB);
+  glDeleteBuffers(3, vbo);
 }

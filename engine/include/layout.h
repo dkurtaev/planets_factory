@@ -12,6 +12,8 @@
 class Roi;
 class Layout : public GLViewListener {
  public:
+  Layout();
+
   void AddListener(GLViewListener* listener, const Roi& roi);
 
   virtual void MouseFunc(int button, int state, int x, int y);
@@ -37,8 +39,8 @@ class Layout : public GLViewListener {
   std::vector<Roi> listeners_rois_;
 
   // Using for detecting mouse entry/leave for ROIs.
-  unsigned last_mouse_x_;
-  unsigned last_mouse_y_;
+  int last_mouse_x_;
+  int last_mouse_y_;
 };
 
 class Roi {

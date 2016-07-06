@@ -28,10 +28,4 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
                    static_cast<float>(texture_->rows) / UINT16_MAX;
 
   cv::circle(*texture_, cirle_center, 5, cv::Scalar(0, 204, 0), CV_FILLED);
-  cv::imwrite("./texture.png", *texture_);
-
-  // const unsigned n_vertices = area->size();
-  // for (unsigned i = 0; i < n_vertices; ++i) {
-  //   area->operator[](i).second->SetColor(color[0], color[1], color[2]);
-  // }
 }

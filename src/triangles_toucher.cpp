@@ -40,7 +40,7 @@ void TrianglesToucher::MouseFunc(int button, int state, int x, int y) {
   float bary_p1, bary_p2, bary_p3;
   for (unsigned i = 0; i < n_tris; ++i) {
     triangle = triangles_->operator[](i);
-    if (triangle->IsIncludes(world[0], world[1], world[2],  
+    if (triangle->IsIncludes(world[0], world[1], world[2],
                              &bary_p1, &bary_p2, &bary_p3)) {
       DoAction(triangle, bary_p1, bary_p2, bary_p3);
       break;

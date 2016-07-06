@@ -12,7 +12,7 @@ Camera::Camera(SphericalCS* camera_cs) {
 }
 
 Camera::~Camera() {
-  delete model_matrix_;
+  delete[] model_matrix_;
 }
 
 void Camera::Setup(int display_width, int display_height) {

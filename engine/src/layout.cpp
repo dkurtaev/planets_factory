@@ -13,6 +13,11 @@
       if (listeners_[i]->IsEnabled())
 
 // Layout ----------------------------------------------------------------------
+Layout::Layout() {
+  last_mouse_x_ = -1;
+  last_mouse_y_ = -1;
+}
+
 void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
   listeners_.push_back(listener);
   listeners_rois_.push_back(roi);
@@ -97,8 +102,8 @@ void Layout::DoEvents() {
 
 void Layout::EntryFunc(int state) {
   if (state == GLUT_LEFT) {
-    unsigned x = last_mouse_x_;
-    unsigned y = last_mouse_y_;
+    int x = last_mouse_x_;
+    int y = last_mouse_y_;
     FOREACH_LISTENER_IN_ROI {
       listeners_[i]->EntryFunc(GLUT_LEFT);
     }
