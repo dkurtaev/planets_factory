@@ -21,7 +21,11 @@ class Point3f {
 
   void SetPosition(float x, float y, float z);
 
+  void GetPosition(float* x, float* y, float* z) const;
+
   void SetColor(uint8_t r, uint8_t g, uint8_t b);
+
+  void SetColor(const uint8_t* src);
 
   float GetNorm() const { return norm_; }
 
@@ -52,7 +56,18 @@ class Edge {
 
   void GetPoints(Point3f** p1, Point3f** p2);
 
+  // Check that point inside cone based on vectors from (0, 0, 0) to p1 and p2.
+  //   \   *p     /
+  // p1 \        / p2
+  //     *------*
+  //      \    /
+  //       \  /
+  //        \/ 0
+  bool IsInsideEdgeCone(const Point3f& p);
+
  private:
+  float Determinant(float* col_1, float* col_2, float* col_3);
+
   Point3f* p1_;
   Point3f* p2_;
   const Point3f* middle_point_;

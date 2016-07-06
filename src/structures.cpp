@@ -39,6 +39,10 @@ void Point3f::SetColor(uint8_t r, uint8_t g, uint8_t b) {
   colors_array_offset_[2] = b;
 }
 
+void Point3f::SetColor(const uint8_t* src) {
+  memcpy(colors_array_offset_, src, sizeof(uint8_t) * 3);
+}
+
 void Point3f::MiddlePoint(const Point3f& p1, const Point3f& p2,
                           Point3f* middle_point) {
   middle_point->SetPosition(
@@ -60,6 +64,12 @@ void Point3f::AddNeighbor(Point3f* point) {
 void Point3f::GetNeighborhood(std::vector<Point3f*>* neighborhood) {
   neighborhood->resize(neighborhood_.size());
   std::copy(neighborhood_.begin(), neighborhood_.end(), neighborhood->begin());
+}
+
+void Point3f::GetPosition(float* x, float* y, float* z) const {
+  *x = vertices_array_offset_[0];
+  *y = vertices_array_offset_[1];
+  *z = vertices_array_offset_[2];
 }
 
 // Edge ---------------------------------------------------------------------
@@ -85,6 +95,56 @@ bool Edge::CompareTo(uint16_t p1_id, uint16_t p2_id) const {
 void Edge::GetPoints(Point3f** p1, Point3f** p2) {
   *p1 = p1_;
   *p2 = p2_;
+}
+
+bool Edge::IsInsideEdgeCone(const Point3f& p) {
+  // Define p1 as t, p2 as q.
+  // Let r - orthogonal to t and q.
+  // Check that p = a*t + b*q + c*r
+  // where a,b >= 0, c = 0. This gives p inside plane cone based on t and q.
+  //      t ^
+  //       /
+  //      /    p
+  //     /
+  // r (+)----------> q
+  //
+  // r = (tz*qy-ty*qz, tx*qz-tz*qx, ty*qx-tx*qy).
+  // Solving linear system:
+  // tx qx tz*qy-ty*qz | px
+  // ty qy tx*qz-tz*qx | py
+  // tz qz ty*qx-tx*qy | pz
+  static const float kZeroLimit = 1e-4f;
+
+  float px, py, pz, p1x, p1y, p1z, p2x, p2y, p2z;
+  p.GetPosition(&px, &py, &pz);
+  p1_->GetPosition(&p1x, &p1y, &p1z);
+  p2_->GetPosition(&p2x, &p2y, &p2z);
+
+  float cols[][3] = { {p1x, p1y, p1z},
+                      {p2x, p2y, p2z},
+                      {p1z * p2y - p1y * p2z,
+                       p1x * p2z - p1z * p2x,
+                       p1y * p2x - p1x * p2y},
+                      {px, py, pz}};
+  float c = Determinant(cols[0], cols[1], cols[3]);
+  if (abs(c) < kZeroLimit) {
+    float a = Determinant(cols[3], cols[1], cols[2]);
+    float b = Determinant(cols[0], cols[3], cols[2]);
+    float denominator = Determinant(cols[0], cols[1], cols[2]);
+    if (denominator > 0) {
+      return a >= 0 && b >= 0;
+    } else {
+      return a <= 0 && b <= 0;
+    }
+  } else {
+    return false;
+  }
+}
+
+float Edge::Determinant(float* col_1, float* col_2, float* col_3) {
+  return col_1[0] * (col_2[1] * col_3[2] - col_3[1] * col_2[2]) -
+         col_2[0] * (col_1[1] * col_3[2] - col_3[1] * col_1[2]) +
+         col_3[0] * (col_1[1] * col_2[2] - col_2[1] * col_1[2]);
 }
 
 // Triangle --------------------------------------------------------------------

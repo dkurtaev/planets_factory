@@ -67,10 +67,6 @@ Icosphere::Icosphere(float radius)
     vertices_[i] = new Point3f(i, xs[i], ys[i], zs[i],
                                vertices_array_ + i * 3,  // Offsets to
                                colors_array_ + i * 3);   // shared memory.
-    memcpy(colors_array_ + i * 3, kInitEdgesColor, sizeof(uint8_t) * 3);
-  }
-  for (unsigned i = kInitNumVertices; i < kNumVertices; ++i) {
-    memcpy(colors_array_ + i * 3, kSubEdgesColor, sizeof(uint8_t) * 3);
   }
 
   edges_.reserve(kNumEdges);
@@ -84,6 +80,11 @@ Icosphere::Icosphere(float radius)
 
   for (unsigned i = 0; i < kInitNumTriangles; ++i) {
     AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2]);
+  }
+
+  std::vector<Edge*> init_edges_(kInitNumEdges);
+  for (unsigned i = 0; i < kInitNumEdges; ++i) {
+    init_edges_[i] = new Edge(*edges_[i]);
   }
 
   SetTexCoords();
@@ -110,6 +111,23 @@ Icosphere::Icosphere(float radius)
     edges_[i]->GetPoints(&p1, &p2);
     p1->AddNeighbor(p2);
     p2->AddNeighbor(p1);
+  }
+
+  Point3f* vertex;
+  bool vertex_on_init_edge;
+  for (unsigned i = 0; i < kNumVertices; ++i) {
+    vertex = vertices_[i];
+    vertex_on_init_edge = false;
+    for (unsigned j = 0; j < kInitNumEdges; ++j) {
+      if (init_edges_[j]->IsInsideEdgeCone(*vertex)) {
+        vertex_on_init_edge = true;
+        break;
+      }
+    }
+    vertex->SetColor(vertex_on_init_edge ? kInitEdgesColor : kSubEdgesColor);
+  }
+  for (unsigned i = 0; i < kInitNumEdges; ++i) {
+    delete init_edges_[i];
   }
 }
 

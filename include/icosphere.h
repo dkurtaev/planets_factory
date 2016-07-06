@@ -39,11 +39,11 @@ class Icosphere {
 
   float* vertices_array_;
   int8_t* normals_array_;
+  uint16_t* indices_array_;
+  uint16_t* tex_coord_array_;
   // Using for drawing icosphere grid. One color for internal vertices, other
   // color for vertices on initial edges.
   uint8_t* colors_array_;
-  uint16_t* indices_array_;
-  uint16_t* tex_coord_array_;
 
   float radius_;
 };
