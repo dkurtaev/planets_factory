@@ -13,6 +13,7 @@
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
+#include <glog/logging.h>
 
 int main(int argc, char** argv) {
   GLView::InitGLContext();
@@ -26,11 +27,12 @@ int main(int argc, char** argv) {
   std::vector<Triangle*> triangles;
   icosphere.GetTriangles(&triangles);
 
-  cv::Mat texture = cv::imread("./texture2.png");
+  cv::Mat texture = cv::imread("./texture.png");
+  CHECK(texture.data);
   TextureColorizer texture_colorizer(&texture, &triangles,
                                      &change_color_button);
 
-  PlanetView planet_view(&icosphere, &camera_cs);
+  PlanetView planet_view(&icosphere, &camera_cs, &texture);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
 

@@ -9,9 +9,10 @@
 
 #include "include/shaders_factory.h"
 
-PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs)
+PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
+                       const cv::Mat* texture)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
-    camera_(camera_cs) {
+    camera_(camera_cs), texture_(texture) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/test_shader.vertex",
@@ -19,6 +20,7 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs)
   grid_shader_program_ = ShadersFactory::GetProgramFromFile(
                              "../res/shaders/icogrid_shader.vertex",
                              "../res/shaders/icogrid_shader.fragment");
+  SetTexture();
 }
 
 void PlanetView::Display() {
@@ -44,7 +46,9 @@ void PlanetView::Display() {
   loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
   glUniform3f(loc, -100, -100, -100);
 
-  LoadTexture();
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
+               0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
   glUniform1i(3, 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
@@ -94,15 +98,10 @@ void PlanetView::InitGL() {
   glLightfv(GL_LIGHT0, GL_POSITION, position);
 }
 
-void PlanetView::LoadTexture() {
-  texture_ = cv::imread("./texture.png");
-  CHECK(texture_.data) << "Texture not found";
-
+void PlanetView::SetTexture() {
   glGenTextures(1, &texture_id_);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_.cols, texture_.rows,
-               0, GL_RGB, GL_UNSIGNED_BYTE, texture_.data);
 }

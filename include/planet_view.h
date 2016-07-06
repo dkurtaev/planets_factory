@@ -16,19 +16,20 @@
 
 class PlanetView : public GLView {
  public:
-  PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs);
+  PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
+             const cv::Mat* texture);
 
   virtual void Display();
 
  private:
   void InitGL();
 
-  void LoadTexture();
+  void SetTexture();
 
   Camera camera_;
   const Icosphere* icosphere_;
   unsigned texture_id_;
-  cv::Mat texture_;
+  const cv::Mat* texture_;
   unsigned planet_shader_program_;
   unsigned grid_shader_program_;
 };
