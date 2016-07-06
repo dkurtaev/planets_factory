@@ -316,6 +316,11 @@ void Icosphere::GetVertices(std::vector<Point3f*>* vertices) {
   std::copy(vertices_.begin(), vertices_.end(), vertices->begin());
 }
 
+void Icosphere::GetTriangles(std::vector<Triangle*>* triangles) {
+  triangles->resize(triangles_.size());
+  std::copy(triangles_.begin(), triangles_.end(), triangles->begin());
+}
+
 void Icosphere::SetTexCoords() {
 // [01] - triangle idx.
 // 01 - vertex idx.

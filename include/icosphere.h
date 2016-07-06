@@ -23,6 +23,8 @@ class Icosphere {
 
   void GetVertices(std::vector<Point3f*>* vertices);
 
+  void GetTriangles(std::vector<Triangle*>* triangles);
+
  private:
   // Setup texture coordinates for icosahedon.
   void SetTexCoords();

@@ -32,6 +32,8 @@ void VerticesToucher::MouseFunc(int button, int state, int x, int y) {
 
   y = view[3] - y;
   glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+  if (z == 1.0f) return;  // Infinity.
+
   gluUnProject(x, y, z, model, proj, view, world, world + 1, world + 2);
 
   // Find nearest vertex.

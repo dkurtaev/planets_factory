@@ -4,13 +4,15 @@
 
 #include "include/planet_view.h"
 #include "include/actions_view.h"
-#include "include/glview_listener.h"
 #include "include/button.h"
 #include "include/listener_enabler.h"
 #include "include/change_color_button.h"
 #include "include/glview.h"
+#include "include/texture_colorizer.h"
+#include "include/camera_mover.h"
 
 #include <GL/freeglut.h>
+#include <opencv2/opencv.hpp>
 
 int main(int argc, char** argv) {
   GLView::InitGLContext();
@@ -21,16 +23,21 @@ int main(int argc, char** argv) {
   Icosphere icosphere(4);
   ChangeColorButton change_color_button;
 
-  std::vector<Point3f*>* vertices = new std::vector<Point3f*>();
-  icosphere.GetVertices(vertices);
-  VerticesColorizer vertices_colorizer(vertices, &change_color_button);
+  std::vector<Triangle*> triangles;
+  icosphere.GetTriangles(&triangles);
 
-  PlanetView planet_view(&icosphere, &camera_cs, &camera_mover,
-                         &vertices_colorizer);
+  cv::Mat texture = cv::imread("./texture2.png");
+  TextureColorizer texture_colorizer(&texture, &triangles,
+                                     &change_color_button);
+
+  PlanetView planet_view(&icosphere, &camera_cs);
+  planet_view.AddListener(&camera_mover);
+  planet_view.AddListener(&texture_colorizer);
+
 
   std::vector<Button*> buttons;
   buttons.push_back(new ListenerEnabler("Camera", &camera_mover));
-  buttons.push_back(new ListenerEnabler("Color", &vertices_colorizer));
+  buttons.push_back(new ListenerEnabler("Color", &texture_colorizer));
   buttons.push_back(&change_color_button);
   ActionsView actions_view(buttons, &planet_view);
 

@@ -23,6 +23,8 @@ class Point3f {
 
   void GetPosition(float* x, float* y, float* z) const;
 
+  void GetPosition(float* dst) const;
+
   void SetColor(uint8_t r, uint8_t g, uint8_t b);
 
   void SetColor(const uint8_t* src);
@@ -66,8 +68,6 @@ class Edge {
   bool IsInsideEdgeCone(const Point3f& p);
 
  private:
-  float Determinant(float* col_1, float* col_2, float* col_3);
-
   Point3f* p1_;
   Point3f* p2_;
   const Point3f* middle_point_;
@@ -88,10 +88,21 @@ class Triangle {
 
   void GetTexCoords(uint16_t* dst) const;
 
+  // Returns true if point p is inside triangle.
+  // p1______p2
+  //   \ *p /
+  //    \  /
+  //     \/ p3
+  // If true, set barycentric coordinates bary_p* relatively triangle's points.
+  bool IsIncludes(float x, float y, float z, float* bary_p1, float* bary_p2,
+                  float* bary_p3);
+
  private:
   Edge** edges_;
   const Point3f** points_;
   uint16_t* texture_coordinates_;
 };
+
+float Determinant(float* col_1, float* col_2, float* col_3);
 
 #endif  // INCLUDE_STRUCTURES_H_
