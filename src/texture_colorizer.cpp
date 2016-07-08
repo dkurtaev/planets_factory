@@ -26,6 +26,6 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   cirle_center.y = (bary_p1 * tex_coords[1] + bary_p2 * tex_coords[3] +
                    bary_p3 * tex_coords[5]) *
                    static_cast<float>(texture_->rows) / UINT16_MAX;
-
-  cv::circle(*texture_, cirle_center, 5, cv::Scalar(0, 204, 0), CV_FILLED);
+  cv::circle(*texture_, cirle_center, 10,
+             cv::Scalar(color[0], color[1], color[2]), CV_FILLED);
 }

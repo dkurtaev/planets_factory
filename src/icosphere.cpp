@@ -259,16 +259,18 @@ void Icosphere::SplitTriangles() {
     vertices_.push_back(middle_point);
   }
 
-  // Create new triangles.
+  // Collect data of old triangles.
   Triangle* triangle;
-  uint16_t triangle_verts[n_triangles][3];
-  uint16_t middle_points[n_triangles][3];
+  uint16_t vertices_ids[n_triangles][3];
+  uint16_t middle_verts_ids[n_triangles][3];
   uint16_t tex_coords[n_triangles][6];
+  uint16_t middle_verts_tex_coords[n_triangles][6];
   for (unsigned i = 0; i < n_triangles; ++i) {
     triangle = triangles_[i];
-    triangle->GetIndices(triangle_verts[i]);
-    triangle->GetMiddlePointsIndices(middle_points[i]);
+    triangle->GetIndices(vertices_ids[i]);
+    triangle->GetMiddlePointsIndices(middle_verts_ids[i]);
     triangle->GetTexCoords(tex_coords[i]);
+    triangle->GetMiddlePointsTexCoords(middle_verts_tex_coords[i]);
     delete triangle;
   }
   triangles_.clear();
@@ -278,6 +280,7 @@ void Icosphere::SplitTriangles() {
   }
   edges_.clear();
 
+  // Create new triangles.
   // Split each triangle. ti - i-th old triangle's vertex,
   //                      mj - middle point of j-th edge.
   // t0_____m0_____t1
@@ -290,27 +293,27 @@ void Icosphere::SplitTriangles() {
   //       \  /
   //        \/ t2
   static const int orders[][3] = {{0, 3, 5}, {3, 1, 4}, {5, 4, 2}, {3, 4, 5}};
-  uint16_t tex_coords_with_middle_points[12];  // t0, t1, t2, m0, m1, m2.
-  uint16_t ids[6];  // t0, t1, t2, m0, m1, m2.
+  uint16_t ids[6];  // Of t0, t1, t2, m0, m1, m2.
   uint16_t combined_tex_coords[6];
   for (unsigned i = 0; i < n_triangles; ++i) {
-    memcpy(ids, triangle_verts[i], sizeof(uint16_t) * 3);
-    memcpy(ids + 3, middle_points[i], sizeof(uint16_t) * 3);
-    memcpy(tex_coords_with_middle_points, tex_coords[i], sizeof(uint16_t) * 6);
-    for (unsigned j = 0; j < 3; ++j) {
-      for (unsigned k = 0; k < 2; ++k) {
-        tex_coords_with_middle_points[6 + j * 2 + k] =
-             tex_coords[i][j * 2 + k] / 2 +
-             tex_coords[i][((j + 1) % 3) * 2 + k] / 2;
-      }
-    }
-    for (unsigned j = 0; j < 4; ++j) {
+    memcpy(ids, vertices_ids[i], sizeof(uint16_t) * 3);  // t0, t1, t2.
+    memcpy(ids + 3, middle_verts_ids[i], sizeof(uint16_t) * 3);  // m0, m1, m2.
+
+    for (uint8_t j = 0; j < 4; ++j) {
       AddTriangle(ids[orders[j][0]], ids[orders[j][1]], ids[orders[j][2]]);
       triangle = triangles_.back();
-      for (unsigned k = 0; k < 3; ++k) {
-        memcpy(combined_tex_coords + k * 2,
-               tex_coords_with_middle_points + orders[j][k] * 2,
-               sizeof(uint16_t) * 2);
+
+      for (uint8_t k = 0; k < 6; k += 2) {
+        uint8_t idx = orders[j][k / 2];
+        if (idx < 3) {
+          idx *= 2;
+          combined_tex_coords[k] = tex_coords[i][idx];
+          combined_tex_coords[k + 1] = tex_coords[i][idx + 1];
+        } else {
+          idx = (idx - 3) * 2;
+          combined_tex_coords[k] = middle_verts_tex_coords[i][idx];
+          combined_tex_coords[k + 1] = middle_verts_tex_coords[i][idx + 1];
+        }
       }
       triangle->SetTexCoords(combined_tex_coords);
     }
@@ -354,35 +357,30 @@ void Icosphere::SetTexCoords() {
 // 1.00 |***********\/**********\/**********\/**********\/**********\/*****|
 //      +------------------------------------------------------------------+
   CHECK_EQ(triangles_.size(), 20);
-  float normalized_texture_coordinates[][6] = {
-    { 0.09f, 0.00f, 0.00f, 0.33f, 0.18f, 0.33f },  // [00]: {05,09,01}
-    { 0.27f, 0.00f, 0.18f, 0.33f, 0.36f, 0.33f },  // [01]: {05,01,04}
-    { 0.45f, 0.00f, 0.36f, 0.33f, 0.54f, 0.33f },  // [02]: {05,04,02}
-    { 0.63f, 0.00f, 0.54f, 0.33f, 0.72f, 0.33f },  // [03]: {05,02,08}
-    { 0.81f, 0.00f, 0.72f, 0.33f, 0.90f, 0.33f },  // [04]: {05,08,09}
-    { 0.09f, 0.66f, 0.18f, 0.33f, 0.00f, 0.33f },  // [05]: {00,01,09}
-    { 1.00f, 0.66f, 0.90f, 0.33f, 0.81f, 0.66f },  // [06]: {00,09,06}
-    { 1.00f, 0.66f, 0.81f, 0.66f, 0.90f, 1.00f },  // [07]: {00,06,07}
-    { 0.09f, 0.66f, 0.18f, 1.00f, 0.27f, 0.66f },  // [08]: {00,07,10}
-    { 0.09f, 0.66f, 0.27f, 0.66f, 0.18f, 0.33f },  // [09]: {00,10,01}
-    { 0.45f, 0.66f, 0.54f, 0.33f, 0.36f, 0.33f },  // [10]: {11,02,04}
-    { 0.45f, 0.66f, 0.36f, 0.33f, 0.27f, 0.66f },  // [11]: {11,04,10}
-    { 0.45f, 0.66f, 0.27f, 0.66f, 0.36f, 1.00f },  // [12]: {11,10,07}
-    { 0.45f, 0.66f, 0.54f, 1.00f, 0.63f, 0.66f },  // [13]: {11,07,03}
-    { 0.45f, 0.66f, 0.63f, 0.66f, 0.54f, 0.33f },  // [14]: {11,03,02}
-    { 0.36f, 0.33f, 0.18f, 0.33f, 0.27f, 0.66f },  // [15]: {04,01,10}
-    { 0.81f, 0.66f, 0.90f, 0.33f, 0.72f, 0.33f },  // [16]: {06,09,08}
-    { 0.81f, 0.66f, 0.72f, 0.33f, 0.63f, 0.66f },  // [17]: {06,08,03}
-    { 0.63f, 0.66f, 0.72f, 1.00f, 0.81f, 0.66f },  // [18]: {03,07,06}
-    { 0.63f, 0.66f, 0.72f, 0.33f, 0.54f, 0.33f }   // [19]: {03,08,02}
+  uint16_t texture_coordinates[][6] = {
+    {  5898,     0,     0, 21626, 11796, 21626 },  // [00]: {05,09,01}
+    { 17694,     0, 11796, 21626, 23592, 21626 },  // [01]: {05,01,04}
+    { 29490,     0, 23592, 21626, 35388, 21626 },  // [02]: {05,04,02}
+    { 41287,     0, 35388, 21626, 47185, 21626 },  // [03]: {05,02,08}
+    { 53083,     0, 47185, 21626, 58981, 21626 },  // [04]: {05,08,09}
+    {  5898, 43253, 11796, 21626,     0, 21626 },  // [05]: {00,01,09}
+    { 65535, 43253, 58981, 21626, 53083, 43253 },  // [06]: {00,09,06}
+    { 65535, 43253, 53083, 43253, 58981, 65535 },  // [07]: {00,06,07}
+    {  5898, 43253, 11796, 65535, 17694, 43253 },  // [08]: {00,07,10}
+    {  5898, 43253, 17694, 43253, 11796, 21626 },  // [09]: {00,10,01}
+    { 29490, 43253, 35388, 21626, 23592, 21626 },  // [10]: {11,02,04}
+    { 29490, 43253, 23592, 21626, 17694, 43253 },  // [11]: {11,04,10}
+    { 29490, 43253, 17694, 43253, 23592, 65535 },  // [12]: {11,10,07}
+    { 29490, 43253, 35388, 65535, 41287, 43253 },  // [13]: {11,07,03}
+    { 29490, 43253, 41287, 43253, 35388, 21626 },  // [14]: {11,03,02}
+    { 23592, 21626, 11796, 21626, 17694, 43253 },  // [15]: {04,01,10}
+    { 53083, 43253, 58981, 21626, 47185, 21626 },  // [16]: {06,09,08}
+    { 53083, 43253, 47185, 21626, 41287, 43253 },  // [17]: {06,08,03}
+    { 41287, 43253, 47185, 65535, 53083, 43253 },  // [18]: {03,07,06}
+    { 41287, 43253, 47185, 21626, 35388, 21626 }   // [19]: {03,08,02}
   };
-  uint16_t texture_coordinates[6];
   for (uint8_t i = 0; i < 20; ++i) {
-    for (uint8_t j = 0; j < 6; ++j) {
-      texture_coordinates[j] = normalized_texture_coordinates[i][j] *
-                               UINT16_MAX;
-    }
-    triangles_[i]->SetTexCoords(texture_coordinates);
+    triangles_[i]->SetTexCoords(texture_coordinates[i]);
   }
 }
 

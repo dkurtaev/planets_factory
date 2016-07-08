@@ -88,6 +88,8 @@ class Triangle {
 
   void GetTexCoords(uint16_t* dst) const;
 
+  void GetMiddlePointsTexCoords(uint16_t* dst) const;
+
   // Returns true if point p is inside triangle.
   // p1______p2
   //   \ *p /

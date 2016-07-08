@@ -191,6 +191,16 @@ void Triangle::GetTexCoords(uint16_t* dst) const {
   memcpy(dst, texture_coordinates_, sizeof(uint16_t) * 6);
 }
 
+void Triangle::GetMiddlePointsTexCoords(uint16_t* dst) const {
+  // Texture_coordinates_: p1u, p1v, p2u, p2v, p3u, p3v.
+  for (unsigned j = 0; j < 3; ++j) {
+    dst[j * 2] = texture_coordinates_[j * 2] / 2 +
+                 texture_coordinates_[(j + 1) % 3 * 2] / 2;
+    dst[j * 2 + 1] = texture_coordinates_[j * 2 + 1] / 2 +
+                     texture_coordinates_[(j + 1) % 3 * 2 + 1] / 2;
+  }
+}
+
 bool Triangle::IsIncludes(float x, float y, float z, float* bary_p1,
                           float* bary_p2, float* bary_p3) {
   // 1. Check that p is on triangle's plane.
