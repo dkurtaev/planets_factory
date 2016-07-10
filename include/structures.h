@@ -88,6 +88,8 @@ class Triangle {
 
   void GetTexCoords(uint16_t* dst) const;
 
+  void GetTexCoords(float* dst) const;
+
   void GetMiddlePointsTexCoords(uint16_t* dst) const;
 
   // Returns true if point p is inside triangle.
@@ -106,5 +108,7 @@ class Triangle {
 };
 
 float Determinant(float* col_1, float* col_2, float* col_3);
+
+float Determinant(float* col_1, float* col_2);
 
 #endif  // INCLUDE_STRUCTURES_H_

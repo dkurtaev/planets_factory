@@ -151,6 +151,10 @@ float Determinant(float* col_1, float* col_2, float* col_3) {
          col_3[0] * (col_1[1] * col_2[2] - col_2[1] * col_1[2]);
 }
 
+float Determinant(float* col_1, float* col_2) {
+  return col_1[0] * col_2[1] - col_1[1] * col_2[0];
+}
+
 // Triangle --------------------------------------------------------------------
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
@@ -191,13 +195,22 @@ void Triangle::GetTexCoords(uint16_t* dst) const {
   memcpy(dst, texture_coordinates_, sizeof(uint16_t) * 6);
 }
 
+void Triangle::GetTexCoords(float* dst) const {
+  static const float kNormRatio = 1.0f / UINT16_MAX;
+  for (uint8_t i = 0; i < 6; ++i) {
+    dst[i] = texture_coordinates_[i] * kNormRatio;
+  }
+}
+
 void Triangle::GetMiddlePointsTexCoords(uint16_t* dst) const {
   // Texture_coordinates_: p1u, p1v, p2u, p2v, p3u, p3v.
-  for (unsigned j = 0; j < 3; ++j) {
-    dst[j * 2] = texture_coordinates_[j * 2] / 2 +
-                 texture_coordinates_[(j + 1) % 3 * 2] / 2;
-    dst[j * 2 + 1] = texture_coordinates_[j * 2 + 1] / 2 +
-                     texture_coordinates_[(j + 1) % 3 * 2 + 1] / 2;
+  for (uint8_t i = 0; i < 3; ++i) {
+    uint8_t from = i * 2;
+    uint8_t to = ((i + 1) % 3) * 2;
+    dst[from] = texture_coordinates_[from] / 2 +
+                 texture_coordinates_[to] / 2;
+    dst[from + 1] = texture_coordinates_[from + 1] / 2 +
+                     texture_coordinates_[to + 1] / 2;
   }
 }
 
