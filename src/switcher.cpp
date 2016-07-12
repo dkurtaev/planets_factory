@@ -19,8 +19,8 @@ void Switcher::SetFlag(bool* flag) {
   if (flag != 0) {
     flag_ = flag;
     if (*flag_) {
-      memcpy(button_color_, kPressedButtonColor, sizeof(float) * 3);      
-    } 
+      memcpy(button_color_, kPressedButtonColor, sizeof(float) * 3);
+    }
   }
 }
 

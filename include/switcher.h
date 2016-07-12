@@ -10,7 +10,7 @@
 // Button for switching custom boolean flag.
 class Switcher : public Button {
  public:
-  Switcher(const std::string& text, bool* flag = 0);
+  explicit Switcher(const std::string& text, bool* flag = 0);
 
   void SetFlag(bool* flag);
 
