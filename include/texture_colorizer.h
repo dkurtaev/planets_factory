@@ -26,26 +26,24 @@ class TextureColorizer : public TrianglesToucher {
   virtual void DoAction(Triangle* triangle, float bary_p1, float bary_p2,
                         float bary_p3);
 
-  // Returns barycentric coordinates of point inside tringle:
-  // point_uvs = b1*triangle_uvs[0] + b2*triangle_uvs[1] + b3*triangle_uvs[2],
-  // where b3 = 1-b1-b2.
-  void ComputeBarycentric(const float* triangle_uvs, const float* point_uvs,
-                          float* bary_p1, float* bary_p2, float* bary_p3) const;
-
   // Returns true if texture triangle with coordinates [triangle_uvs] includes
   // point on texture with coordinates [point_uvs].
-  bool IsIncludes(const float* triangle_uvs, const float* point_uvs) const;
+  // If true, returns barycentric coordinates of point inside tringle:
+  // point_uvs = b1*triangle_uvs[0] + b2*triangle_uvs[1] + b3*triangle_uvs[2],
+  // where b3 = 1-b1-b2.
+  bool IsIncludes(const float* triangle_uvs, const float* point_uvs,
+                  float* bary_p1, float* bary_p2, float* bary_p3) const;
 
   cv::Mat* texture_;
   const ChangeColorButton* change_color_button_;
-  // Default texture coordinates.
+  // For each triangle neighbor triangles starts from first two points edge.
+  //  ___p1___
+  //  \ 1/\ 3/
+  //   \/__\/
+  // p2 \ 2/ p3
+  //     \/
+  std::vector<uint8_t*> ico_neighbors_;
   std::vector<float*> ico_tex_coords_;
-  std::vector<cv::Point*> ico_tex_points_;
-  // Alternative texture coordinates with different to origin triangles layout.
-  std::vector<float*> alt_tex_coords_;
-  std::vector<cv::Point*> alt_tex_points_;
-  // Affine transform matrices from alternative to origin texture layouts.
-  std::vector<cv::Mat> transf_mats_;
 };
 
 #endif  // INCLUDE_TEXTURE_COLORIZER_H_
