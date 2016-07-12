@@ -5,7 +5,6 @@
 #include "include/planet_view.h"
 #include "include/actions_view.h"
 #include "include/button.h"
-#include "include/listener_enabler.h"
 #include "include/change_color_button.h"
 #include "include/glview.h"
 #include "include/texture_colorizer.h"
@@ -21,7 +20,8 @@ int main(int argc, char** argv) {
 
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
-  CameraMover camera_mover(&camera_cs);
+  Switcher camera_mover_enable_switcher("Camera");
+  CameraMover camera_mover(&camera_cs, &camera_mover_enable_switcher);
   Icosphere icosphere(4);
   ChangeColorButton change_color_button;
 
@@ -30,8 +30,10 @@ int main(int argc, char** argv) {
 
   cv::Mat texture = cv::imread("./texture.png");
   CHECK(texture.data);
+  Switcher texture_colorizer_enable_switcher("Color");
   TextureColorizer texture_colorizer(&texture, &triangles,
-                                     &change_color_button);
+                                     &change_color_button,
+                                     &texture_colorizer_enable_switcher);
 
   bool draw_grid = false;
   bool draw_mesh = true;
@@ -44,8 +46,8 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&texture_colorizer);
 
   std::vector<Button*> buttons;
-  buttons.push_back(new ListenerEnabler("Camera", &camera_mover));
-  buttons.push_back(new ListenerEnabler("Color", &texture_colorizer));
+  buttons.push_back(&camera_mover_enable_switcher);
+  buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);

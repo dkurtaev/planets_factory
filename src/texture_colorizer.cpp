@@ -13,9 +13,12 @@ const float TextureColorizer::kZeroLimit;
 
 TextureColorizer::TextureColorizer(cv::Mat* texture,
                                    std::vector<Triangle*>* triangles,
-                                   const ChangeColorButton* change_color_button)
+                                   const ChangeColorButton* change_color_button,
+                                   Switcher* is_enabled_swither)
   : TrianglesToucher(triangles), change_color_button_(change_color_button),
     texture_(texture) {
+  is_enabled_swither->SetFlag(&is_enabled_);
+  
   static const uint8_t kNumTriangles = 20;
   static const uint8_t kNumTexCoords = 6;
   static const uint8_t kNumTriPoints = 3;

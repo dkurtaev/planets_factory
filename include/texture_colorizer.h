@@ -9,6 +9,7 @@
 #include "include/triangles_toucher.h"
 #include "include/structures.h"
 #include "include/change_color_button.h"
+#include "include/switcher.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -16,7 +17,8 @@ class TextureColorizer : public TrianglesToucher {
  public:
   TextureColorizer(cv::Mat* texture,
                    std::vector<Triangle*>* triangles,
-                   const ChangeColorButton* change_color_button);
+                   const ChangeColorButton* change_color_button,
+                   Switcher* is_enabled_swither);
 
   ~TextureColorizer();
 

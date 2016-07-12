@@ -10,7 +10,9 @@
 // Button for switching custom boolean flag.
 class Switcher : public Button {
  public:
-  Switcher(const std::string& text, bool* flag);
+  Switcher(const std::string& text, bool* flag = 0);
+
+  void SetFlag(bool* flag);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
