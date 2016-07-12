@@ -10,9 +10,9 @@
 #include "include/shaders_factory.h"
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
-                       const cv::Mat* texture)
+                       const cv::Mat* texture, bool* draw_grid)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
-    camera_(camera_cs), texture_(texture) {
+    camera_(camera_cs), texture_(texture), draw_grid_(draw_grid) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/test_shader.vertex",
@@ -56,16 +56,18 @@ void PlanetView::Display() {
   //
   icosphere_->Draw();
 
-  glUseProgram(grid_shader_program_);
-  glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
-  loc = glGetUniformLocation(grid_shader_program_, "u_modelview_matrix");
-  glUniformMatrix4fv(loc, 1, false, modelview_matrix);
+  if (*draw_grid_) {
+    glUseProgram(grid_shader_program_);
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
+    loc = glGetUniformLocation(grid_shader_program_, "u_modelview_matrix");
+    glUniformMatrix4fv(loc, 1, false, modelview_matrix);
 
-  glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
-  loc = glGetUniformLocation(grid_shader_program_, "u_projection_matrix");
-  glUniformMatrix4fv(loc, 1, false, projection_matrix);
+    glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
+    loc = glGetUniformLocation(grid_shader_program_, "u_projection_matrix");
+    glUniformMatrix4fv(loc, 1, false, projection_matrix);
 
-  icosphere_->DrawGrid();
+    icosphere_->DrawGrid();
+  }
 
   glUseProgram(0);  // Disable shader program.
 

@@ -15,8 +15,8 @@ ActionsView::ActionsView(std::vector<Button*> buttons, GLView* parent,
   const unsigned n_buttons = buttons.size();
   const float roi_height = 1.0f / n_buttons;
   for (unsigned i = 0; i < n_buttons; ++i) {
-    Roi roi(kLeftIdent, 1 - kRightIdent, i * roi_height + kTopIdent,
-            (i + 1) * roi_height - kBottomIdent);
+    Roi roi(kLeftIdent, 1 - kRightIdent, (i + kTopIdent) * roi_height,
+            (i + 1 - kBottomIdent) * roi_height);
     layout_.AddListener(buttons[i], roi);
     buttons_rois_.push_back(roi);
   }
@@ -24,7 +24,7 @@ ActionsView::ActionsView(std::vector<Button*> buttons, GLView* parent,
 }
 
 void ActionsView::Display() {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.0f, 0.5f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
