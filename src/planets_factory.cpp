@@ -34,9 +34,12 @@ int main(int argc, char** argv) {
                                      &change_color_button);
 
   bool draw_grid = false;
+  bool draw_mesh = true;
   Switcher draw_grid_switcher("Grid", &draw_grid);
+  Switcher draw_mesh_switcher("Mesh", &draw_mesh);
 
-  PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid);
+  PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
+                         &draw_mesh);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
 
@@ -45,6 +48,7 @@ int main(int argc, char** argv) {
   buttons.push_back(new ListenerEnabler("Color", &texture_colorizer));
   buttons.push_back(&change_color_button);
   buttons.push_back(&draw_grid_switcher);
+  buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);
 
   glutMainLoop();

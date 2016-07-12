@@ -10,9 +10,10 @@
 #include "include/shaders_factory.h"
 
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
-                       const cv::Mat* texture, bool* draw_grid)
+                       const cv::Mat* texture, bool* draw_grid, bool* draw_mesh)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
-    camera_(camera_cs), texture_(texture), draw_grid_(draw_grid) {
+    camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
+    draw_mesh_(draw_mesh) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/test_shader.vertex",
@@ -40,22 +41,23 @@ void PlanetView::Display() {
 
   float projection_matrix[16];
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
-  loc = glGetUniformLocation(planet_shader_program_, "u_projection_matrix");
-  glUniformMatrix4fv(loc, 1, false, projection_matrix);
 
-  loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
-  glUniform3f(loc, -100, -100, -100);
+  if (*draw_mesh_) {
+    loc = glGetUniformLocation(planet_shader_program_, "u_projection_matrix");
+    glUniformMatrix4fv(loc, 1, false, projection_matrix);
 
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
-               0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
-  glUniform1i(3, 0);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
+    loc = glGetUniformLocation(planet_shader_program_, "u_light_vector");
+    glUniform3f(loc, -100, -100, -100);
 
-  //
-  icosphere_->Draw();
+    glBindTexture(GL_TEXTURE_2D, texture_id_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
+                 0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
+    glUniform1i(3, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id_);
 
+    icosphere_->Draw();
+  }
   if (*draw_grid_) {
     glUseProgram(grid_shader_program_);
     glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);

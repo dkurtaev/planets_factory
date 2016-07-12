@@ -17,7 +17,7 @@
 class PlanetView : public GLView {
  public:
   PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
-             const cv::Mat* texture, bool* draw_grid);
+             const cv::Mat* texture, bool* draw_grid, bool* draw_mesh);
 
   virtual void Display();
 
@@ -33,6 +33,7 @@ class PlanetView : public GLView {
   unsigned planet_shader_program_;
   unsigned grid_shader_program_;
   bool* draw_grid_;
+  bool* draw_mesh_;
 };
 
 #endif  // INCLUDE_PLANET_VIEW_H_
