@@ -21,6 +21,18 @@ PaletteView::PaletteView(const PaletteView* palette_view)
   hs_palette_colors_ = new uint8_t[hs_palette_width * hs_palette_height * 3];
   v_palette_colors_ = new uint8_t[v_palette_width * v_palette_height * 3];
 
+  glGenTextures(1, &hs_palette_texture_id_);
+  glBindTexture(GL_TEXTURE_2D, hs_palette_texture_id_);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glGenTextures(1, &v_palette_texture_id_);
+  glBindTexture(GL_TEXTURE_2D, v_palette_texture_id_);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
   if (palette_view) {
     memcpy(hs_palette_colors_, palette_view->hs_palette_colors_,
            sizeof(uint8_t) * hs_palette_width * hs_palette_height * 3);
@@ -43,19 +55,11 @@ PaletteView::PaletteView(const PaletteView* palette_view)
     UpdateVPaletteColors();
   }
 
-  glGenTextures(1, &hs_palette_texture_id_);
   glBindTexture(GL_TEXTURE_2D, hs_palette_texture_id_);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, hs_palette_width, hs_palette_height,
                0, GL_RGB, GL_UNSIGNED_BYTE, hs_palette_colors_);
 
-  glGenTextures(1, &v_palette_texture_id_);
   glBindTexture(GL_TEXTURE_2D, v_palette_texture_id_);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, v_palette_width, v_palette_height,
                0, GL_RGB, GL_UNSIGNED_BYTE, v_palette_colors_);
 
@@ -158,16 +162,22 @@ void PaletteView::HSVtoRGB(float h, float s, float v,
 }
 
 void PaletteView::UpdateVPaletteColors() {
+  uint8_t top_rgb[3];
+  HSVtoRGB(selected_hsv_[0], selected_hsv_[1], 1.0f, top_rgb);
+
   const int v_palette_width = (kVPaletteRight - kVPaletteLeft + 1);
   const int v_palette_height = (kVPaletteTop - kVPaletteBottom + 1);
-  uint8_t rgb[3];
-  uint8_t* colors_array_offset_ = v_palette_colors_;
+
+  uint8_t* colors_array_offset_ = v_palette_colors_ - 3;
   for (int y = kVPaletteBottom; y <= kVPaletteTop; ++y) {
-    HSVtoRGB(selected_hsv_[0], selected_hsv_[1],
-             static_cast<float>(y - kVPaletteBottom) / v_palette_height, rgb);
+    float ratio = static_cast<float>(y - kVPaletteBottom) / v_palette_height;
+    uint8_t rgb[] = {
+      top_rgb[0] * ratio,
+      top_rgb[1] * ratio,
+      top_rgb[2] * ratio
+    };
     for (int x = kVPaletteLeft; x <= kVPaletteRight; ++x) {
-      memcpy(colors_array_offset_, rgb, sizeof(uint8_t) * 3);
-      colors_array_offset_ += 3;
+      memcpy(colors_array_offset_ += 3, rgb, sizeof(uint8_t) * 3);
     }
   }
   glBindTexture(GL_TEXTURE_2D, v_palette_texture_id_);

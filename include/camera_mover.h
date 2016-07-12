@@ -7,10 +7,11 @@
 
 #include "include/glview_listener.h"
 #include "include/spherical_cs.h"
+#include "include/switcher.h"
 
 class CameraMover : public GLViewListener {
  public:
-  explicit CameraMover(SphericalCS* camera_cs);
+  CameraMover(SphericalCS* camera_cs, Switcher* is_enabled_swither);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 

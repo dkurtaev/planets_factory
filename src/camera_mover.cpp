@@ -6,9 +6,11 @@
 
 #include <GL/freeglut.h>
 
-CameraMover::CameraMover(SphericalCS* camera_cs)
+CameraMover::CameraMover(SphericalCS* camera_cs, Switcher* is_enabled_swither)
   : camera_cs_(camera_cs), left_button_pressed_(false),
-    ctrl_key_pressed_(false), is_inertial_moving_(false) {}
+    ctrl_key_pressed_(false), is_inertial_moving_(false) {
+  is_enabled_swither->SetFlag(&is_enabled_);
+}
 
 void CameraMover::MouseFunc(int button, int state, int x, int y) {
   switch (button) {

@@ -5,20 +5,56 @@
 sudo apt-get install freeglut3-dev libxmu-dev libxi-dev
 ```
 
+* OpenCV
+
+```
+sudo apt-get install libopencv-dev
+```
+
+* Cmake >= 3.0 for glog
+
+```
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:george-edison55/cmake-3.x
+sudo apt-get update
+sudo apt-get install cmake
+```
+
 ### How to use it
-Clone and build.
+Clone
 ```
 git clone https://github.com/dkurtaev/planets_factory.git
 cd planets_factory/
-mkdir build && cd build
-cmake .. && make
 ```
+
+Update submodules
+```
+git submodule init
+git submodule update
+```
+
+Build
+```
+mkdir build && cd build/
+cmake .. && make -j4
+```
+
 Run
 ```
-./planets_factory
+./bin/planets_factory
 ```
 
 ### Features
-* Basic icosphere drawing.  
-* Use mouse with pressed left button for moving camera around icosphere.  
-* Press ```Ctrl``` key for rotating around icosphere's normal.
+See wiki page [Features](https://github.com/dkurtaev/planets_factory/wiki/Features)
+
+
+### Testing devices
+```
+Acer Aspire One 725, Ubuntu 14.04 LTS
+CPU: AMD C-60 APU with Radeon(tm) HD Graphics
+GPU: Advanced Micro Devices, Inc. [AMD/ATI] Wrestler [Radeon HD 6290]
+
+HP Pavilion 15-ac001ur, Ubuntu 14.04 LTS
+CPU: Intel(R) Celeron(R) CPU  N3050  @ 1.60GHz
+GPU: Intel Corporation Device 22b1 (rev 21)
+```

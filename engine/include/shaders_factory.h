@@ -7,6 +7,11 @@
 #include <GL/gl.h>
 #include <GL/freeglut.h>
 
+enum Attrib { COORDS_ATTRIB,   // Vertex coordinates attribute (a_position).
+              COLORS_ATTRIB,   // Vertex color attribute (a_color).
+              NORMALS_ATTRIB,  // Vertex normal attibute (a_normal).
+              TEX_ATTRIB };    // Vertex texture coords attribute (a_tex_coord).
+
 class ShadersFactory {
  public:
   static unsigned GetProgramFromFile(const char* vert_shader_path,

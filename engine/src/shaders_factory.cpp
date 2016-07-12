@@ -44,10 +44,10 @@ unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
   glAttachShader(program, vert_shader);
   glAttachShader(program, frag_shader);
 
-  glBindAttribLocation(program, 0, "a_position");
-  glBindAttribLocation(program, 1, "a_color");
-  glBindAttribLocation(program, 2, "a_normal");
-  glBindAttribLocation(program, 3, "a_tex_coord");
+  glBindAttribLocation(program, COORDS_ATTRIB, "a_position");
+  glBindAttribLocation(program, COLORS_ATTRIB, "a_color");
+  glBindAttribLocation(program, NORMALS_ATTRIB, "a_normal");
+  glBindAttribLocation(program, TEX_ATTRIB, "a_tex_coord");
 
   glLinkProgram(program);
   GLint success = GL_FALSE;
