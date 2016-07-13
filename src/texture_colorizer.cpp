@@ -205,45 +205,39 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   cirle_center.y *= mask.rows;
   cv::circle(mask, cirle_center, kCircleRadius, cv::Scalar(1), CV_FILLED);
 
-
-  float origin_tex_coords[5][6];
+  // Warp each triangle from mask to origin.
+  float origin_tex_coords[6];
+  float mask_tex_coords[6];
   for (uint8_t i = 0; i < 5; ++i) {
-    uint8_t vert_idx = fan_centers[i];
-    float* dst = origin_tex_coords[i];
+
+    vert_idx = fan_centers[i];
     float* src = ico_tex_coords_[fan_triangles[i]];
     for (uint8_t j = 0; j < 3; ++j) {
-      dst[j * 2] = src[vert_idx * 2] * texture_->cols;
-      dst[j * 2 + 1] = src[vert_idx * 2 + 1] * texture_->rows;
+      origin_tex_coords[j * 2] = src[vert_idx * 2] * texture_->cols;
+      origin_tex_coords[j * 2 + 1] = src[vert_idx * 2 + 1] * texture_->rows;
       vert_idx = (vert_idx + 1) % 3;
     }
-  }
 
-  float mask_tex_coords[5][6];
-  for (uint8_t i = 0; i < 5; ++i) {
-    float* dst = mask_tex_coords[i];
-    dst[0] = fan_points_tex_coords[0][0] * mask.cols;
-    dst[1] = fan_points_tex_coords[0][1] * mask.rows;
-    dst[2] = fan_points_tex_coords[i + 1][0] * mask.cols;
-    dst[3] = fan_points_tex_coords[i + 1][1] * mask.rows;
-    dst[4] = fan_points_tex_coords[i + 2][0] * mask.cols;
-    dst[5] = fan_points_tex_coords[i + 2][1] * mask.rows;
-  }
+    mask_tex_coords[0] = fan_points_tex_coords[0][0] * mask.cols;
+    mask_tex_coords[1] = fan_points_tex_coords[0][1] * mask.rows;
+    mask_tex_coords[2] = fan_points_tex_coords[i + 1][0] * mask.cols;
+    mask_tex_coords[3] = fan_points_tex_coords[i + 1][1] * mask.rows;
+    mask_tex_coords[4] = fan_points_tex_coords[i + 2][0] * mask.cols;
+    mask_tex_coords[5] = fan_points_tex_coords[i + 2][1] * mask.rows;
 
-  // Warp to origin texture.
-  for (uint8_t i = 0; i < 5; ++i) {
     // Compute transformation matrix.
-    cv::Point2f src[3];
+    cv::Point2f src_point[3];
     cv::Point src_int[3];
-    cv::Point2f dst[3];
+    cv::Point2f dst_point[3];
     for (uint8_t j = 0; j < 3; ++j) {
-      src[j].x = mask_tex_coords[i][j * 2];
-      src[j].y = mask_tex_coords[i][j * 2 + 1];
-      src_int[j].x = src[j].x;
-      src_int[j].y = src[j].y;
-      dst[j].x = origin_tex_coords[i][j * 2];
-      dst[j].y = origin_tex_coords[i][j * 2 + 1];
+      src_point[j].x = mask_tex_coords[j * 2];
+      src_point[j].y = mask_tex_coords[j * 2 + 1];
+      src_int[j].x = src_point[j].x;
+      src_int[j].y = src_point[j].y;
+      dst_point[j].x = origin_tex_coords[j * 2];
+      dst_point[j].y = origin_tex_coords[j * 2 + 1];
     }
-    cv::Mat transf_mat = cv::getAffineTransform(src, dst);
+    cv::Mat transf_mat = cv::getAffineTransform(src_point, dst_point);
 
     // Mask of triangle of interest.
     cv::Mat submask = cv::Mat::zeros(mask.size(), CV_8UC1);
