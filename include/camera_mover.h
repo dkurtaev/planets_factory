@@ -11,7 +11,7 @@
 
 class CameraMover : public GLViewListener {
  public:
-  CameraMover(SphericalCS* camera_cs, Switcher* is_enabled_swither);
+  CameraMover(SphericalCS* camera_cs);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
