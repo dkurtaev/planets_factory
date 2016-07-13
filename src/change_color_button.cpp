@@ -2,8 +2,6 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/change_color_button.h"
 
-#include <iostream>
-
 ChangeColorButton::ChangeColorButton()
   : Button("Change color") {
   palette_view_ = new PaletteView();

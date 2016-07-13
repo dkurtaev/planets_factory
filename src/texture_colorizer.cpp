@@ -14,9 +14,10 @@ const float TextureColorizer::kZeroLimit;
 TextureColorizer::TextureColorizer(cv::Mat* texture,
                                    std::vector<Triangle*>* triangles,
                                    const ChangeColorButton* change_color_button,
+                                   const BrushSizeButton* brush_size_button,
                                    Switcher* is_enabled_swither)
   : TrianglesToucher(triangles), change_color_button_(change_color_button),
-    texture_(texture) {
+    texture_(texture), brush_size_button_(brush_size_button) {
   is_enabled_swither->SetFlag(&is_enabled_);
 
   static const uint8_t kNumTriangles = 20;
@@ -62,7 +63,10 @@ TextureColorizer::~TextureColorizer() {
 
 void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
                                 float bary_p2, float bary_p3) {
-  static const unsigned kCircleRadius = 10;
+  // Maximal brush size is half of triangles height. Texture has height
+  // of 3 triangles heights and width of 5.5 triangles widths.
+  const unsigned kMaxBrushSize = texture_->rows * (0.5f / 3.0f);
+  const unsigned kBrushSize = brush_size_button_->GetBrushSize(kMaxBrushSize);
   static const uint8_t kNumTriangles = 20;
   static const uint8_t kNumTexCoords = 6;
 
@@ -205,13 +209,12 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   }
   cirle_center.x *= mask.cols;
   cirle_center.y *= mask.rows;
-  cv::circle(mask, cirle_center, kCircleRadius, cv::Scalar(1), CV_FILLED);
+  cv::circle(mask, cirle_center, kBrushSize, cv::Scalar(1), CV_FILLED);
 
   // Warp each triangle from mask to origin.
   std::vector<cv::Point2f> origin_tex_coords(3);
   std::vector<cv::Point2f> mask_tex_coords(3);
   for (uint8_t i = 0; i < 5; ++i) {
-
     vert_idx = fan_centers[i];
     float* src = ico_tex_coords_[fan_triangles[i]];
     for (uint8_t j = 0; j < 3; ++j) {

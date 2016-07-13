@@ -10,6 +10,7 @@
 #include "include/structures.h"
 #include "include/change_color_button.h"
 #include "include/switcher.h"
+#include "include/brush_size_button.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -18,6 +19,7 @@ class TextureColorizer : public TrianglesToucher {
   TextureColorizer(cv::Mat* texture,
                    std::vector<Triangle*>* triangles,
                    const ChangeColorButton* change_color_button,
+                   const BrushSizeButton* brush_size_button,
                    Switcher* is_enabled_swither);
 
   ~TextureColorizer();
@@ -38,6 +40,7 @@ class TextureColorizer : public TrianglesToucher {
 
   cv::Mat* texture_;
   const ChangeColorButton* change_color_button_;
+  const BrushSizeButton* brush_size_button_;
   // For each triangle neighbor triangles starts from first two points edge.
   //  ___p1___
   //  \ 1/\ 3/
