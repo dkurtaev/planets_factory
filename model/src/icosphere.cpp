@@ -26,7 +26,7 @@ Icosphere::Icosphere(float radius)
   static const unsigned kInitNumVertices = 12;
   static const unsigned kInitNumEdges = 30;
   // Number of triangles splitting procedure calls.
-  static const unsigned kNumSplits = 3;
+  static const unsigned kNumSplits = 4;
   // Characteristics of final icosphere.
   // After each split:
   // new_n_trianlges = 4 * prev_n_triangles

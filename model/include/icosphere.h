@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_ICOSPHERE_H_
-#define INCLUDE_ICOSPHERE_H_
+#ifndef MODEL_INCLUDE_ICOSPHERE_H_
+#define MODEL_INCLUDE_ICOSPHERE_H_
 
 #include <stdint.h>
 
@@ -50,4 +50,4 @@ class Icosphere {
   float radius_;
 };
 
-#endif  // INCLUDE_ICOSPHERE_H_
+#endif  // MODEL_INCLUDE_ICOSPHERE_H_

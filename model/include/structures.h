@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_STRUCTURES_H_
-#define INCLUDE_STRUCTURES_H_
+#ifndef MODEL_INCLUDE_STRUCTURES_H_
+#define MODEL_INCLUDE_STRUCTURES_H_
 
 #include <stdint.h>
 
@@ -111,4 +111,4 @@ float Determinant(float* col_1, float* col_2, float* col_3);
 
 float Determinant(float* col_1, float* col_2);
 
-#endif  // INCLUDE_STRUCTURES_H_
+#endif  // MODEL_INCLUDE_STRUCTURES_H_

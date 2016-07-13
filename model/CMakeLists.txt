@@ -1,19 +1,22 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(engine)
+project(model)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(sources
-  src/button.cpp
-  src/glview.cpp
-  src/layout.cpp
+  src/camera.cpp
+  src/icosphere.cpp
+  src/shaders_factory.cpp
+  src/spherical_cs.cpp
+  src/structures.cpp
 )
 
-set(headers	
-  include/button.h
-  include/glview.h
-  include/glview_listener.h
-  include/layout.h
+set(headers
+  include/camera.h
+  include/icosphere.h
+  include/shaders_factory.h
+  include/spherical_cs.h
+  include/structures.h
 )
 
 find_package(OpenGL REQUIRED)

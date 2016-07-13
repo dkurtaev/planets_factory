@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_CAMERA_H_
-#define INCLUDE_CAMERA_H_
+#ifndef MODEL_INCLUDE_CAMERA_H_
+#define MODEL_INCLUDE_CAMERA_H_
 
 #include "include/spherical_cs.h"
 
@@ -18,4 +18,4 @@ class Camera {
   SphericalCS* camera_cs_;
 };
 
-#endif  // INCLUDE_CAMERA_H_
+#endif  // MODEL_INCLUDE_CAMERA_H_
