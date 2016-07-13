@@ -181,6 +181,31 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
     }
   }
 
+  // Drawing circle on mask.
+  float fan_points_tex_coords[][2] = {
+    {0.50f, 0.50f}, {0.25f, 0.00f}, {0.00f, 0.50f}, {0.25f, 1.00f},
+    {0.75f, 1.00f}, {1.00f, 0.50f}, {0.75f, 0.00f}};
+
+  cv::Point2f cirle_center(0, 0);
+  float barycentric_coords[] = {bary_p1, bary_p2, bary_p3};
+  uint8_t vert_idx = fan_centers[2];
+
+  cirle_center.x = fan_points_tex_coords[0][0] * barycentric_coords[vert_idx];
+  cirle_center.y = fan_points_tex_coords[0][1] * barycentric_coords[vert_idx];
+  vert_idx = (vert_idx + 1) % 3;
+
+  for (uint8_t i = 1; i < 3; ++i) {
+    cirle_center.x += fan_points_tex_coords[2 + i][0] *
+                      barycentric_coords[vert_idx];
+    cirle_center.y += fan_points_tex_coords[2 + i][1] *
+                      barycentric_coords[vert_idx];
+    vert_idx = (vert_idx + 1) % 3;
+  }
+  cirle_center.x *= mask.cols;
+  cirle_center.y *= mask.rows;
+  cv::circle(mask, cirle_center, kCircleRadius, cv::Scalar(1), CV_FILLED);
+
+
   float origin_tex_coords[5][6];
   for (uint8_t i = 0; i < 5; ++i) {
     uint8_t vert_idx = fan_centers[i];
@@ -193,9 +218,6 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
     }
   }
 
-  float fan_points_tex_coords[][2] = {
-    {0.50f, 0.50f}, {0.25f, 0.00f}, {0.00f, 0.50f}, {0.25f, 1.00f},
-    {0.75f, 1.00f}, {1.00f, 0.50f}, {0.75f, 0.00f}};
   float mask_tex_coords[5][6];
   for (uint8_t i = 0; i < 5; ++i) {
     float* dst = mask_tex_coords[i];
@@ -206,19 +228,6 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
     dst[4] = fan_points_tex_coords[i + 2][0] * mask.cols;
     dst[5] = fan_points_tex_coords[i + 2][1] * mask.rows;
   }
-
-  // Drawing circle on mask.
-  cv::Point2f cirle_center(0, 0);
-  float barycentric_coords[] = {bary_p1, bary_p2, bary_p3};
-  uint8_t vert_idx = fan_centers[2];
-  for (uint8_t i = 0; i < 3; ++i) {
-    cirle_center.x += mask_tex_coords[2][i * 2] *
-                      barycentric_coords[vert_idx];
-    cirle_center.y += mask_tex_coords[2][i * 2 + 1] *
-                      barycentric_coords[vert_idx];
-    vert_idx = (vert_idx + 1) % 3;
-  }
-  cv::circle(mask, cirle_center, kCircleRadius, cv::Scalar(1), CV_FILLED);
 
   // Warp to origin texture.
   for (uint8_t i = 0; i < 5; ++i) {
