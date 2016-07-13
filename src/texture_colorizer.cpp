@@ -215,7 +215,6 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   std::vector<cv::Point2f> origin_tex_coords(3);
   std::vector<cv::Point2f> mask_tex_coords(3);
   for (uint8_t i = 0; i < 5; ++i) {
-
     vert_idx = fan_centers[i];
     float* src = ico_tex_coords_[fan_triangles[i]];
     for (uint8_t j = 0; j < 3; ++j) {

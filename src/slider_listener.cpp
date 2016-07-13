@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/slider_listener.h"
 
+#include <algorithm>
+
 #include "include/slider_view.h"
 
 SliderListener::SliderListener(SliderView* slider_view)

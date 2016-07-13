@@ -8,7 +8,7 @@
 class SliderView;
 class SliderListener : public GLViewListener {
  public:
-  SliderListener(SliderView* slider_view);
+  explicit SliderListener(SliderView* slider_view);
 
   virtual void MouseMove(int x, int y);
 

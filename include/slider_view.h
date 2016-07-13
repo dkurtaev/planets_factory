@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_SLIDER_H_
-#define INCLUDE_SLIDER_H_
+#ifndef INCLUDE_SLIDER_VIEW_H_
+#define INCLUDE_SLIDER_VIEW_H_
 
 #include <stdint.h>
 
@@ -30,4 +30,4 @@ class SliderView : public GLView {
   SliderListener listener_;
 };
 
-#endif  // INCLUDE_CHANGE_COLOR_BUTTON_H_
+#endif  // INCLUDE_SLIDER_VIEW_H_

@@ -4,6 +4,8 @@
 
 #include <math.h>
 
+#include <algorithm>
+
 BrushSizeButton::BrushSizeButton()
   : Button("Brush size") {
   slider_view_ = new SliderView();
