@@ -10,6 +10,7 @@
 #include "include/texture_colorizer.h"
 #include "include/camera_mover.h"
 #include "include/switcher.h"
+#include "include/brush_size_button.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -23,6 +24,7 @@ int main(int argc, char** argv) {
   CameraMover camera_mover(&camera_cs);
   Icosphere icosphere(4);
   ChangeColorButton change_color_button;
+  BrushSizeButton brush_size_button;
 
   std::vector<Triangle*> triangles;
   icosphere.GetTriangles(&triangles);
@@ -32,6 +34,7 @@ int main(int argc, char** argv) {
   Switcher texture_colorizer_enable_switcher("Color");
   TextureColorizer texture_colorizer(&texture, &triangles,
                                      &change_color_button,
+                                     &brush_size_button,
                                      &texture_colorizer_enable_switcher);
 
   bool draw_grid = false;
@@ -47,6 +50,7 @@ int main(int argc, char** argv) {
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
+  buttons.push_back(&brush_size_button);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);
