@@ -15,12 +15,17 @@ class TrianglesToucher : public GLViewListener {
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
+  virtual void MouseMove(int x, int y);
+
  protected:
   virtual void DoAction(Triangle* triangle, float bary_p1, float bary_p2,
                         float bary_p3) = 0;
 
  private:
+  void ProcessTouch(int x, int y);
+
   std::vector<Triangle*>* triangles_;
+  bool left_button_pressed_;
 };
 
 #endif  // INCLUDE_TRIANGLES_TOUCHER_H_

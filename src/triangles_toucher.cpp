@@ -4,7 +4,6 @@
 
 #include <math.h>
 
-#include <set>
 #include <utility>
 #include <algorithm>
 #include <vector>
@@ -12,13 +11,24 @@
 #include <GL/freeglut.h>
 
 TrianglesToucher::TrianglesToucher(std::vector<Triangle*>* triangles)
-  : triangles_(triangles) {}
+  : triangles_(triangles), left_button_pressed_(false) {}
 
 void TrianglesToucher::MouseFunc(int button, int state, int x, int y) {
-  if (button != GLUT_LEFT_BUTTON || state != 0) {
-    return;
+  if (button == GLUT_LEFT_BUTTON) {
+    left_button_pressed_ = !static_cast<bool>(state);
+    if (left_button_pressed_) {
+      ProcessTouch(x, y);
+    }
   }
+}
 
+void TrianglesToucher::MouseMove(int x, int y) {
+  if (left_button_pressed_) {
+    ProcessTouch(x, y);
+  }
+}
+
+void TrianglesToucher::ProcessTouch(int x, int y) {
   int view[4];
   double model[16];
   double proj[16];
