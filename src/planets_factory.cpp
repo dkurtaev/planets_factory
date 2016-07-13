@@ -20,8 +20,7 @@ int main(int argc, char** argv) {
 
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
-  Switcher camera_mover_enable_switcher("Camera");
-  CameraMover camera_mover(&camera_cs, &camera_mover_enable_switcher);
+  CameraMover camera_mover(&camera_cs);
   Icosphere icosphere(4);
   ChangeColorButton change_color_button;
 
@@ -46,7 +45,6 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&texture_colorizer);
 
   std::vector<Button*> buttons;
-  buttons.push_back(&camera_mover_enable_switcher);
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
   buttons.push_back(&draw_grid_switcher);
