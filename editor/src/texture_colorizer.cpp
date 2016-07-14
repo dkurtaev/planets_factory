@@ -267,6 +267,7 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
         origin_tex_coords_int[j].y = mask_tex_coords[j].y;
       }
       cv::fillConvexPoly(submask, origin_tex_coords_int, 3, cv::Scalar(1));
+      cv::dilate(submask, submask, cv::Mat());
       submask &= mask_roi;
       // Apply transformation matrix.
       cv::warpAffine(submask, submask, transf_mat, origin_roi.size());
