@@ -30,7 +30,10 @@ int main(int argc, char** argv) {
   icosphere.GetTriangles(&triangles);
 
   cv::Mat texture = cv::imread("./texture.png");
-  CHECK(texture.data);
+  if (!texture.data) {
+    texture = cv::Mat(512, 1024, CV_8UC3);
+    texture.setTo(255);
+  }
   Switcher texture_colorizer_enable_switcher("Color");
   TextureColorizer texture_colorizer(&texture, &triangles,
                                      &change_color_button,

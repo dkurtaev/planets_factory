@@ -215,14 +215,6 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   std::vector<cv::Point2f> origin_tex_coords(3);
   std::vector<cv::Point2f> mask_tex_coords(3);
   for (uint8_t i = 0; i < 5; ++i) {
-    vert_idx = fan_centers[i];
-    float* src = ico_tex_coords_[fan_triangles[i]];
-    for (uint8_t j = 0; j < 3; ++j) {
-      origin_tex_coords[j].x = src[vert_idx * 2] * (texture_->cols - 1);
-      origin_tex_coords[j].y = src[vert_idx * 2 + 1] * (texture_->rows - 1);
-      vert_idx = (vert_idx + 1) % 3;
-    }
-
     mask_tex_coords[0].x = fan_points_tex_coords[0][0] * (mask.cols - 1);
     mask_tex_coords[0].y = fan_points_tex_coords[0][1] * (mask.rows - 1);
     mask_tex_coords[1].x = fan_points_tex_coords[i + 1][0] * (mask.cols - 1);
@@ -230,35 +222,100 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
     mask_tex_coords[2].x = fan_points_tex_coords[i + 2][0] * (mask.cols - 1);
     mask_tex_coords[2].y = fan_points_tex_coords[i + 2][1] * (mask.rows - 1);
 
-    cv::Rect origin_rect = cv::boundingRect(origin_tex_coords);
-    cv::Rect mask_rect = cv::boundingRect(mask_tex_coords);
-
-    cv::Mat origin_roi = (*texture_)(origin_rect);
-    cv::Mat mask_roi = mask(mask_rect);
-
+    // For checking that triangle has masked points, check that circle center
+    // is inside radius-area of target triangle.
+    //  __________________   Where r - brush size (radius).
+    //  \   ____|r____   /   0--------> x  Let p1, p2 - points of edge in
+    //   \  \        /  /    |    * p2     corresponding order. We need to move
+    //    \  \      /  /     |   /         this edge by r in right direction
+    //     \r/\    /\r/      |  * p1       (forward direction is p1->p2).
+    //      \  \  /  /     y v  --> move   0 -1 - rotation matrix
+    //       \  \/  /                      1  0
+    //        \    /
+    //         \  /                       /|\       => x = 2*r
+    //          \/                       / | \
+    // \                                / x|  \
+    //   \                         90gr/\  |  /\90gr
+    //     \         ^                 \/  |  \/
+    //       \ 90gr /                    \_|_/  r
+    //         \  /                    60gr 60gr
+    // ______60gr\
+    //       90gr| - - - >
+    //           |
+    //           v
+    cv::Point2f edges_directions[3];
     for (uint8_t j = 0; j < 3; ++j) {
-      origin_tex_coords[j].x -= origin_rect.tl().x;
-      origin_tex_coords[j].y -= origin_rect.tl().y;
-      mask_tex_coords[j].x -= mask_rect.tl().x;
-      mask_tex_coords[j].y -= mask_rect.tl().y;
+      uint8_t to = (j + 1) % 3;
+      edges_directions[j].x = mask_tex_coords[j].y - mask_tex_coords[to].y;
+      edges_directions[j].y = mask_tex_coords[to].x - mask_tex_coords[j].x;
+      float norm = sqrt(edges_directions[j].x * edges_directions[j].x +
+                        edges_directions[j].y * edges_directions[j].y);
+      edges_directions[j] *= static_cast<float>(kBrushSize) / norm;
+    }
+    cv::Point2f augm_mask_tex_coords[3];
+    for (uint8_t j = 0; j < 3; ++j) {
+      cv::Point2f direction = (edges_directions[j] +
+                               edges_directions[(j + 2) % 3]);
+      float norm = sqrt(direction.x * direction.x + direction.y * direction.y);
+      direction *= static_cast<float>(2 * kBrushSize) / norm;
+      augm_mask_tex_coords[j] = mask_tex_coords[j] + direction;
+    }
+    // Check that circle point at left side of each edge.
+    //   0-------> x       a, b - edge points
+    //   |   * c           c = circle point
+    //   |  /              c at left side of edge (a, b) if determinant
+    //   | *----* b        | (b-a).x (b-a).y | < 0.
+    // y v  a              | (c-a).x (c-a).y |
+    bool has_masked_points = true;
+    if (i != 2) {
+      for (uint8_t j = 0; j < 3; ++j) {
+        uint8_t to = (j + 1) % 3;
+        cv::Point2f edge = augm_mask_tex_coords[to] - augm_mask_tex_coords[j];
+        cv::Point2f point = cirle_center - augm_mask_tex_coords[j];
+        if (edge.x * point.y - edge.y * point.x > kZeroLimit) {
+          has_masked_points = false;
+          break;
+        }
+      }
     }
 
-    // Compute transformation matrix.
-    cv::Mat transf_mat = cv::getAffineTransform(mask_tex_coords,
-                                                origin_tex_coords);
+    if (has_masked_points) {
+      vert_idx = fan_centers[i];
+      float* src = ico_tex_coords_[fan_triangles[i]];
+      for (uint8_t j = 0; j < 3; ++j) {
+        origin_tex_coords[j].x = src[vert_idx * 2] * (texture_->cols - 1);
+        origin_tex_coords[j].y = src[vert_idx * 2 + 1] * (texture_->rows - 1);
+        vert_idx = (vert_idx + 1) % 3;
+      }
+      cv::Rect origin_rect = cv::boundingRect(origin_tex_coords);
+      cv::Rect mask_rect = cv::boundingRect(mask_tex_coords);
 
-    // Mask of triangle of interest.
-    cv::Mat submask = cv::Mat::zeros(mask_roi.size(), CV_8UC1);
-    cv::Point origin_tex_coords_int[3];
-    for (uint8_t j = 0; j < 3; ++j) {
-      origin_tex_coords_int[j].x = mask_tex_coords[j].x;
-      origin_tex_coords_int[j].y = mask_tex_coords[j].y;
+      cv::Mat origin_roi = (*texture_)(origin_rect);
+      cv::Mat mask_roi = mask(mask_rect);
+
+      for (uint8_t j = 0; j < 3; ++j) {
+        origin_tex_coords[j].x -= origin_rect.tl().x;
+        origin_tex_coords[j].y -= origin_rect.tl().y;
+        mask_tex_coords[j].x -= mask_rect.tl().x;
+        mask_tex_coords[j].y -= mask_rect.tl().y;
+      }
+
+      // Mask of triangle of interest.
+      cv::Mat submask = cv::Mat::zeros(mask_roi.size(), CV_8UC1);
+      cv::Point mask_tex_coords_int[3];
+      for (uint8_t j = 0; j < 3; ++j) {
+        mask_tex_coords_int[j] = mask_tex_coords[j];
+      }
+      cv::fillConvexPoly(submask, mask_tex_coords_int, 3, cv::Scalar(1));
+      cv::dilate(submask, submask, cv::Mat());
+      submask &= mask_roi;
+      // Compute transformation matrix.
+      cv::Mat transf_mat = cv::getAffineTransform(mask_tex_coords,
+                                                  origin_tex_coords);
+      // Apply transformation matrix.
+      cv::warpAffine(submask, submask, transf_mat, origin_roi.size());
+      origin_roi.setTo(cv_color, submask);
     }
-    cv::fillConvexPoly(submask, origin_tex_coords_int, 3, cv::Scalar(1));
-    submask &= mask_roi;
-    // Apply transformation matrix.
-    cv::warpAffine(submask, submask, transf_mat, origin_roi.size());
-    origin_roi.setTo(cv_color, submask);
   }
 }
 
