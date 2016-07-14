@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef ENGINE_INCLUDE_SHADERS_FACTORY_H_
-#define ENGINE_INCLUDE_SHADERS_FACTORY_H_
+#ifndef MODEL_INCLUDE_SHADERS_FACTORY_H_
+#define MODEL_INCLUDE_SHADERS_FACTORY_H_
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -24,4 +24,4 @@ class ShadersFactory {
   static unsigned CreateShader(GLenum type, const char* src);
 };
 
-#endif  // ENGINE_INCLUDE_SHADERS_FACTORY_H_
+#endif  // MODEL_INCLUDE_SHADERS_FACTORY_H_

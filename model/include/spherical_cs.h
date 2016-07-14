@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_SPHERICAL_CS_H_
-#define INCLUDE_SPHERICAL_CS_H_
+#ifndef MODEL_INCLUDE_SPHERICAL_CS_H_
+#define MODEL_INCLUDE_SPHERICAL_CS_H_
 
 class SphericalCS {
  public:
@@ -47,4 +47,4 @@ class SphericalCS {
   bool update_global_matrix_;
 };
 
-#endif  // INCLUDE_SPHERICAL_CS_H_
+#endif  // MODEL_INCLUDE_SPHERICAL_CS_H_
