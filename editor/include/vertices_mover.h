@@ -16,7 +16,9 @@ class VerticesMover : public VerticesToucher {
                          Switcher* is_enabled_swither);
 
  private:
-  virtual void DoAction(std::vector<std::pair<int, Point3f*> >* area);
+  static const unsigned kAreaRadius = 4;
+
+  virtual void DoAction(Point3f* vertex);
 };
 
 #endif  // EDITOR_INCLUDE_VERTICES_MOVER_H_

@@ -14,11 +14,9 @@ class VerticesToucher : public Toucher {
   explicit VerticesToucher(std::vector<Point3f*>* vertices);
 
  protected:
-  virtual void DoAction(std::vector<std::pair<int, Point3f*> >* area) = 0;
+  virtual void DoAction(Point3f* vertex) = 0;
 
  private:
-  static const unsigned kAreaRadius = 4;
-
   void ProcessTouch(float x, float y, float z);
 
   std::vector<Point3f*>* vertices_;

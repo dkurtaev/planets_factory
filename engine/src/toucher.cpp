@@ -34,8 +34,9 @@ void Toucher::ProcessTouch(int x, int y) {
 
   y = view[3] - y;
   glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
-  if (z == 1.0f) return;  // Infinity.
-
-  gluUnProject(x, y, z, model, proj, view, &world_x, &world_y, &world_z);
-  ProcessTouch(world_x, world_y, world_z);
+  // If not infinity.
+  if (z != 1.0f) {
+    gluUnProject(x, y, z, model, proj, view, &world_x, &world_y, &world_z);
+    ProcessTouch(world_x, world_y, world_z);
+  }
 }
