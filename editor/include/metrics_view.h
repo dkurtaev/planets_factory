@@ -38,8 +38,6 @@ class MetricsView : public GLView {
 
  private:
   static const uint8_t kFontColor[];
-  static const unsigned kViewHeight = 100;
-  static const unsigned kViewWidth = 300;
 
   void TimeCheck();
 
@@ -52,6 +50,8 @@ class MetricsView : public GLView {
   unsigned n_triangles_;
   unsigned n_vertices_;
   cv::Point texture_size_;
+  int parent_width_;
+  int parent_height_;
 };
 
 #endif  // EDITOR_INCLUDE_METRICS_VIEW_H_

@@ -9,8 +9,7 @@ const uint8_t MetricsView::kFontColor[] = {0, 204, 0};
 MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
                          const std::vector<Triangle*>& triangles,
                          const cv::Mat& texture)
-  : GLView(kViewWidth, kViewHeight, "", parent,
-           parent->GetWidth() - kViewWidth, 0),
+  : GLView(1, 1, "", parent),
     parent_shape_listener_(this), n_triangles_(triangles.size()),
     n_vertices_(vertices.size()), texture_size_(texture.size()) {
   if (parent) {
@@ -75,6 +74,7 @@ void MetricsView::DrawTable(std::stringstream* ss) {
   // Draw it.
   const uint8_t n_lines = lines.size();
   int bmp_height = 0;
+  int bmp_length;
   for (uint8_t i = 0; i < n_lines; ++i) {
     std::stringstream dst_ss;
     std::stringstream src_ss(lines[i]);
@@ -87,11 +87,14 @@ void MetricsView::DrawTable(std::stringstream* ss) {
     }
     str = dst_ss.str();
     const uint8_t* text = reinterpret_cast<const uint8_t*>(str.c_str());
+    bmp_length = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
     bmp_height += glutBitmapHeight(GLUT_BITMAP_9_BY_15);
     glColor3ubv(kFontColor);
     glRasterPos2i(0, bmp_height);
     glutBitmapString(GLUT_BITMAP_9_BY_15, text);
   }
+  glutReshapeWindow(bmp_length, bmp_height);
+  glutPositionWindow(parent_width_ - display_width_, 0);
 }
 
 void MetricsView::TimeCheck() {
@@ -114,10 +117,8 @@ void MetricsView::TimeCheck() {
 }
 
 void MetricsView::ParentIsReshaped(int parent_width, int parent_height) {
-  const int parent_window = glutGetWindow();
-  glutSetWindow(window_handle_);
-  glutPositionWindow(parent_width - display_width_, 0);
-  glutSetWindow(parent_window);
+  parent_width_ = parent_width;
+  parent_height_ = parent_height;
 }
 
 ParentShapeListener::ParentShapeListener(MetricsView* child_view)
