@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_SWITCHER_H_
-#define INCLUDE_SWITCHER_H_
+#ifndef EDITOR_INCLUDE_SWITCHER_H_
+#define EDITOR_INCLUDE_SWITCHER_H_
 
 #include <string>
 
@@ -21,4 +21,4 @@ class Switcher : public Button {
   float default_button_color_[3];
 };
 
-#endif  // INCLUDE_SWITCHER_H_
+#endif  // EDITOR_INCLUDE_SWITCHER_H_

@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_PALETTE_VIEW_H_
-#define INCLUDE_PALETTE_VIEW_H_
+#ifndef EDITOR_INCLUDE_PALETTE_VIEW_H_
+#define EDITOR_INCLUDE_PALETTE_VIEW_H_
 
 #include <stdint.h>
 
@@ -72,4 +72,4 @@ class PaletteView : public GLView {
   float selected_hsv_[3];
 };
 
-#endif  // INCLUDE_PALETTE_VIEW_H_
+#endif  // EDITOR_INCLUDE_PALETTE_VIEW_H_

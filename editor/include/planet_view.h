@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_PLANET_VIEW_H_
-#define INCLUDE_PLANET_VIEW_H_
+#ifndef EDITOR_INCLUDE_PLANET_VIEW_H_
+#define EDITOR_INCLUDE_PLANET_VIEW_H_
 
 #include <opencv2/opencv.hpp>
 
@@ -36,4 +36,4 @@ class PlanetView : public GLView {
   bool* draw_mesh_;
 };
 
-#endif  // INCLUDE_PLANET_VIEW_H_
+#endif  // EDITOR_INCLUDE_PLANET_VIEW_H_

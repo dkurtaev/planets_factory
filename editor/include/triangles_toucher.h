@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_TRIANGLES_TOUCHER_H_
-#define INCLUDE_TRIANGLES_TOUCHER_H_
+#ifndef EDITOR_INCLUDE_TRIANGLES_TOUCHER_H_
+#define EDITOR_INCLUDE_TRIANGLES_TOUCHER_H_
 
 #include <vector>
 #include <utility>
@@ -28,4 +28,4 @@ class TrianglesToucher : public GLViewListener {
   bool left_button_pressed_;
 };
 
-#endif  // INCLUDE_TRIANGLES_TOUCHER_H_
+#endif  // EDITOR_INCLUDE_TRIANGLES_TOUCHER_H_

@@ -139,3 +139,11 @@ void GLView::InitGLContext() {
   glutInitWindowPosition(0, 0);
   glutDestroyWindow(glutCreateWindow(""));
 }
+
+int GLView::GetHeight() const {
+  return display_height_;
+}
+
+int GLView::GetWidth() const {
+  return display_width_;
+}

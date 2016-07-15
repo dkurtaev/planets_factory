@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_ACTIONS_VIEW_H_
-#define INCLUDE_ACTIONS_VIEW_H_
+#ifndef EDITOR_INCLUDE_ACTIONS_VIEW_H_
+#define EDITOR_INCLUDE_ACTIONS_VIEW_H_
 
 #include <vector>
 
@@ -30,4 +30,4 @@ class ActionsView : public GLView {
   std::vector<Roi> buttons_rois_;
 };
 
-#endif  // INCLUDE_ACTIONS_VIEW_H_
+#endif  // EDITOR_INCLUDE_ACTIONS_VIEW_H_
