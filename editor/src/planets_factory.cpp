@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
                          &draw_mesh);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
+  planet_view.AsRootView();
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);

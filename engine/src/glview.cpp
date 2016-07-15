@@ -18,7 +18,8 @@ std::vector<GLView*> GLView::inherited_views_;
 
 GLView::GLView(int display_width, int display_height, std::string window_header,
                GLView* parent, int sub_x, int sub_y)
-  : display_width_(display_width), display_height_(display_height) {
+  : display_width_(display_width), display_height_(display_height),
+    root_(false) {
   InitWindow(window_header, parent, sub_x, sub_y);
   inherited_views_.push_back(this);
 }
@@ -117,12 +118,20 @@ GLView* GLView::GetActiveGLView() {
 
 void GLView::CloseFunc() {
   const int handle = glutGetWindow();
-  std::vector<GLView*>::iterator it = inherited_views_.begin();
-  for (it; it != inherited_views_.end(); ++it) {
-    if ((*it)->window_handle_ == handle) {
+  GLView* view;
+  std::vector<GLView*>::iterator it;
+  for (it = inherited_views_.begin(); it != inherited_views_.end(); ++it) {
+    view = *it;
+    if (view->window_handle_ == handle) {
       inherited_views_.erase(it);
       break;
     }
+  }
+  if (view->root_) {
+    for (it = inherited_views_.begin(); it != inherited_views_.end(); ++it) {
+      glutDestroyWindow((*it)->window_handle_);
+    }
+    inherited_views_.clear();
   }
 }
 
@@ -146,4 +155,13 @@ int GLView::GetHeight() const {
 
 int GLView::GetWidth() const {
   return display_width_;
+}
+
+void GLView::Hide() {
+  glutSetWindow(window_handle_);
+  glutHideWindow();
+}
+
+void GLView::AsRootView() {
+  root_ = true;
 }
