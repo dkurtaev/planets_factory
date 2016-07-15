@@ -13,6 +13,8 @@ class Toucher : public GLViewListener {
 
   virtual void MouseMove(int x, int y);
 
+  virtual void DoEvents();
+
  protected:
   virtual void ProcessTouch(float x, float y, float z) = 0;
 
@@ -20,6 +22,9 @@ class Toucher : public GLViewListener {
   void ProcessTouch(int x, int y);
 
   bool left_button_pressed_;
+  double world_x_;
+  double world_y_;
+  double world_z_;
 };
 
 #endif  // ENGINE_INCLUDE_TOUCHER_H_

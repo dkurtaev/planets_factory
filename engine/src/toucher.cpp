@@ -22,12 +22,17 @@ void Toucher::MouseMove(int x, int y) {
   }
 }
 
+void Toucher::DoEvents() {
+  if (left_button_pressed_) {
+    ProcessTouch(world_x_, world_y_, world_z_);
+  }
+}
+
 void Toucher::ProcessTouch(int x, int y) {
   int view[4];
   double model[16];
   double proj[16];
   float z;
-  double world_x, world_y, world_z;
   glGetIntegerv(GL_VIEWPORT, view);
   glGetDoublev(GL_MODELVIEW_MATRIX, model);
   glGetDoublev(GL_PROJECTION_MATRIX, proj);
@@ -36,7 +41,7 @@ void Toucher::ProcessTouch(int x, int y) {
   glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
   // If not infinity.
   if (z != 1.0f) {
-    gluUnProject(x, y, z, model, proj, view, &world_x, &world_y, &world_z);
-    ProcessTouch(world_x, world_y, world_z);
+    gluUnProject(x, y, z, model, proj, view, &world_x_, &world_y_, &world_z_);
+    ProcessTouch(world_x_, world_y_, world_z_);
   }
 }
