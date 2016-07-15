@@ -1,15 +1,18 @@
 #include "include/metrics_view.h"
 
-#include <sstream>
+#include <iomanip>
 
 #include <GL/freeglut.h>
 
 const uint8_t MetricsView::kFontColor[] = {0, 204, 0};
 
-MetricsView::MetricsView(GLView* parent)
+MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
+                         const std::vector<Triangle*>& triangles,
+                         const cv::Mat& texture)
   : GLView(kViewWidth, kViewHeight, "", parent,
-           parent->GetWidth() - kViewWidth, kViewHeight),
-    parent_shape_listener_(this) {
+           parent->GetWidth() - kViewWidth, 0),
+    parent_shape_listener_(this), n_triangles_(triangles.size()),
+    n_vertices_(vertices.size()), texture_size_(texture.size()) {
   if (parent) {
     parent->AddListener(&parent_shape_listener_);    
   }
@@ -19,10 +22,7 @@ void MetricsView::Display() {
   TimeCheck();
 
   // Draw info.
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
@@ -33,23 +33,65 @@ void MetricsView::Display() {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
     glLoadIdentity();
-
     std::stringstream ss;
     unsigned fps = static_cast<int>(frames_times_.size() * (1000.0f / kPeriod));
-    ss << "fps: " << fps;
-
-    const uint8_t* text = reinterpret_cast<const uint8_t*>(ss.str().c_str());
-    const int bmp_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
-    glColor3ubv(kFontColor);
-    glRasterPos2i(0, bmp_height);
-    glutBitmapString(GLUT_BITMAP_9_BY_15, text);
+    ss << "fps|" << fps << '\n'
+       << "number of triangles|" << n_triangles_ << '\n'
+       << "number of vertices|" << n_vertices_ << '\n'
+       << "texture size|" << texture_size_.x << 'x' << texture_size_.y << '\n';
+    DrawTable(&ss);
   glPopMatrix();
 
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
 
-  // glDisable(GL_BLEND);
   glutSwapBuffers();
+}
+
+void MetricsView::DrawTable(std::stringstream* ss) {
+  // Raw data looks like:
+  // first_row_1th_col|1st_row_2nd_col\n2nd_row_1st_col|last_cell
+  // Expected:
+  // first_row_1th_col | 1st_row_2nd_col
+  // 2nd_row_1st_col   | last_cell
+  // We need to split data by rows and align columns by biggest cell in
+  // each column.
+  std::vector<std::string> lines;
+  std::vector<uint8_t> cols_lengths;
+  std::string str;
+  while (std::getline(*ss, str, '\n')) {
+    lines.push_back(str);
+    std::stringstream line_ss(str);
+    for (uint8_t col = 0; std::getline(line_ss, str, '|'); ++col) {
+      if (col < cols_lengths.size()) {
+        if (cols_lengths[col] < str.length()) {
+          cols_lengths[col] = str.length();
+        }
+      } else {
+        cols_lengths.push_back(str.length());
+      }
+    }
+  }
+  // Draw it.
+  const uint8_t n_lines = lines.size();
+  int bmp_height = 0;
+  for (uint8_t i = 0; i < n_lines; ++i) {
+    std::stringstream dst_ss;
+    std::stringstream src_ss(lines[i]);
+    for (uint8_t col = 0; std::getline(src_ss, str, '|'); ++col) {
+      if (col != 0) {
+        dst_ss << " | ";
+      }
+      dst_ss << std::left << std::setfill(' ')
+             << std::setw(cols_lengths[col]) << str;
+    }
+    str = dst_ss.str();
+    const uint8_t* text = reinterpret_cast<const uint8_t*>(str.c_str());
+    bmp_height += glutBitmapHeight(GLUT_BITMAP_9_BY_15);
+    glColor3ubv(kFontColor);
+    glRasterPos2i(0, bmp_height);
+    glutBitmapString(GLUT_BITMAP_9_BY_15, text);
+  }
 }
 
 void MetricsView::TimeCheck() {
@@ -74,7 +116,7 @@ void MetricsView::TimeCheck() {
 void MetricsView::ParentIsReshaped(int parent_width, int parent_height) {
   const int parent_window = glutGetWindow();
   glutSetWindow(window_handle_);
-  glutPositionWindow(parent_width - display_width_, display_height_);
+  glutPositionWindow(parent_width - display_width_, 0);
   glutSetWindow(parent_window);
 }
 

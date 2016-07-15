@@ -28,7 +28,9 @@ int main(int argc, char** argv) {
   BrushSizeButton brush_size_button;
 
   std::vector<Triangle*> triangles;
+  std::vector<Point3f*> vertices;
   icosphere.GetTriangles(&triangles);
+  icosphere.GetVertices(&vertices);
 
   cv::Mat texture = cv::imread("./texture.png");
   if (!texture.data) {
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);
 
-  MetricsView metrics_view(&planet_view);
+  MetricsView metrics_view(&planet_view, vertices, triangles, texture);
 
   glutMainLoop();
   return 0;
