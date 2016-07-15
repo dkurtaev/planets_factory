@@ -7,14 +7,20 @@
 #include <utility>
 #include <algorithm>
 
+#include <glog/logging.h>
+
 VerticesMover::VerticesMover(std::vector<Point3f*>* vertices,
-                             Switcher* is_enabled_swither)
-  : VerticesToucher(vertices) {
-  is_enabled_swither->SetFlag(&is_enabled_);
+                             Switcher* is_move_up_swither,
+                             Switcher* is_move_down_swither)
+  : VerticesToucher(vertices), is_move_up_(false), is_move_down_(false) {
+  is_move_up_swither->SetFlag(&is_move_up_);
+  is_move_down_swither->SetFlag(&is_move_down_);
 }
 
 void VerticesMover::DoAction(Point3f* vertex) {
   static const float kIncrement = 1e-3f;
+
+  CHECK(!is_move_up_ || !is_move_down_);
 
   std::vector<std::pair<int, Point3f*> > area;
   area.push_back(std::pair<int, Point3f*>(0, vertex));
@@ -41,8 +47,14 @@ void VerticesMover::DoAction(Point3f* vertex) {
   }
 
   const unsigned n_vertices = area.size();
+  float norm;
   for (unsigned i = 0; i < n_vertices; ++i) {
     vertex = area[i].second;
-    vertex->Normalize(vertex->GetNorm() + kIncrement);
+    norm = vertex->GetNorm();
+    vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
   }
+}
+
+bool VerticesMover::IsEnabled() {
+  return is_move_up_ || is_move_down_;
 }

@@ -43,8 +43,15 @@ int main(int argc, char** argv) {
                                      &change_color_button,
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher);
-  Switcher vertices_mover_enable_switcher("Terrain");
-  VerticesMover vertices_mover(&vertices, &vertices_mover_enable_switcher);
+
+  Switcher move_up_mover_switcher("Terrain up");
+  Switcher move_down_mover_switcher("Terrain down");
+  VerticesMover vertices_mover(&vertices, &move_up_mover_switcher,
+                               &move_down_mover_switcher);
+  std::vector<Switcher*> radio_group;
+  move_up_mover_switcher.AddToRadioGroup(&radio_group);
+  move_down_mover_switcher.AddToRadioGroup(&radio_group);
+  texture_colorizer_enable_switcher.AddToRadioGroup(&radio_group);
 
   bool draw_grid = false;
   bool draw_mesh = true;
@@ -62,7 +69,8 @@ int main(int argc, char** argv) {
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
   buttons.push_back(&brush_size_button);
-  buttons.push_back(&vertices_mover_enable_switcher);
+  buttons.push_back(&move_up_mover_switcher);
+  buttons.push_back(&move_down_mover_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);

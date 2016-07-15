@@ -38,7 +38,7 @@ class GLViewListener {
 
   void Disable() { is_enabled_ = false; }
 
-  bool IsEnabled() { return is_enabled_; }
+  virtual bool IsEnabled() { return is_enabled_; }
 
  protected:
   float display_width_;
