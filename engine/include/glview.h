@@ -26,6 +26,11 @@ class GLView {
 
   int GetWidth() const;
 
+  void Hide();
+
+  // After closing root window terminates all inherited views.
+  void AsRootView();
+
  protected:
   virtual void Display() = 0;
 
@@ -59,6 +64,7 @@ class GLView {
 
   static std::vector<GLView*> inherited_views_;
   std::vector<GLViewListener*> listeners_;
+  bool root_;
 };
 
 #endif  // ENGINE_INCLUDE_GLVIEW_H_

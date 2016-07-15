@@ -5,6 +5,7 @@
 ChangeColorButton::ChangeColorButton()
   : Button("Change color") {
   palette_view_ = new PaletteView();
+  palette_view_->Hide();
 }
 
 ChangeColorButton::~ChangeColorButton() {
@@ -20,7 +21,5 @@ void ChangeColorButton::MouseFunc(int button, int state, int x, int y) {
 }
 
 void ChangeColorButton::GetSelectedColor(uint8_t* rgb) const {
-  if (palette_view_) {
-    palette_view_->GetSelectedColor(rgb);
-  }
+  palette_view_->GetSelectedColor(rgb);
 }

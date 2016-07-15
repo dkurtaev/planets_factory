@@ -9,6 +9,7 @@
 BrushSizeButton::BrushSizeButton()
   : Button("Brush size") {
   slider_view_ = new SliderView();
+  slider_view_->Hide();
 }
 
 BrushSizeButton::~BrushSizeButton() {
@@ -25,12 +26,8 @@ void BrushSizeButton::MouseFunc(int button, int state, int x, int y) {
 
 unsigned BrushSizeButton::GetBrushSize(unsigned max_brush_size) const {
   static unsigned kMinBrushSize = 1;
-  if (slider_view_) {
-    float power = slider_view_->GetPower();
-    unsigned brush_size = pow(power, 2) * max_brush_size;
-    brush_size = std::max(kMinBrushSize, brush_size);
-    return brush_size;
-  } else {
-    return 0;
-  }
+  float power = slider_view_->GetPower();
+  unsigned brush_size = pow(power, 2) * max_brush_size;
+  brush_size = std::max(kMinBrushSize, brush_size);
+  return brush_size;
 }
