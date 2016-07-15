@@ -1,6 +1,10 @@
+// Copyright © 2016 Dmitry Kurtaev. All rights reserved.
+// e-mail: dmitry.kurtaev@gmail.com
 #include "include/metrics_view.h"
 
 #include <iomanip>
+#include <string>
+#include <vector>
 
 #include <GL/freeglut.h>
 
@@ -13,7 +17,7 @@ MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
     parent_shape_listener_(this), n_triangles_(triangles.size()),
     n_vertices_(vertices.size()), texture_size_(texture.size()) {
   if (parent) {
-    parent->AddListener(&parent_shape_listener_);    
+    parent->AddListener(&parent_shape_listener_);
   }
 }
 

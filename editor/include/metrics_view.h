@@ -19,7 +19,7 @@
 class MetricsView;
 class ParentShapeListener : public GLViewListener {
  public:
-  ParentShapeListener(MetricsView* child_);
+  explicit ParentShapeListener(MetricsView* child_);
 
   virtual void Reshape(int parent_width, int parent_height);
 
