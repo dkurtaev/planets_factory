@@ -6,20 +6,20 @@
 #include <vector>
 #include <utility>
 
-#include "include/glview_listener.h"
+#include "include/toucher.h"
 #include "include/structures.h"
 
-class VerticesToucher : public GLViewListener {
+class VerticesToucher : public Toucher {
  public:
   explicit VerticesToucher(std::vector<Point3f*>* vertices);
-
-  virtual void MouseFunc(int button, int state, int x, int y);
 
  protected:
   virtual void DoAction(std::vector<std::pair<int, Point3f*> >* area) = 0;
 
  private:
   static const unsigned kAreaRadius = 4;
+
+  void ProcessTouch(float x, float y, float z);
 
   std::vector<Point3f*>* vertices_;
 };

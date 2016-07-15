@@ -12,6 +12,7 @@
 #include "include/switcher.h"
 #include "include/brush_size_button.h"
 #include "include/metrics_view.h"
+#include "include/vertices_mover.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -42,6 +43,8 @@ int main(int argc, char** argv) {
                                      &change_color_button,
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher);
+  Switcher vertices_mover_enable_switcher("Terrain");
+  VerticesMover vertices_mover(&vertices, &vertices_mover_enable_switcher);
 
   bool draw_grid = false;
   bool draw_mesh = true;
@@ -52,12 +55,14 @@ int main(int argc, char** argv) {
                          &draw_mesh);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
+  planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
   buttons.push_back(&brush_size_button);
+  buttons.push_back(&vertices_mover_enable_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);

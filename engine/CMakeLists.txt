@@ -7,6 +7,7 @@ set(sources
   src/button.cpp
   src/glview.cpp
   src/layout.cpp
+  src/toucher.cpp
 )
 
 set(headers	
@@ -14,6 +15,7 @@ set(headers
   include/glview.h
   include/glview_listener.h
   include/layout.h
+  include/toucher.h
 )
 
 find_package(OpenGL REQUIRED)
