@@ -22,11 +22,16 @@ class GLView {
   // fictive window that initializing OpenGL's context.
   static void InitGLContext();
 
+  int GetHeight() const;
+
+  int GetWidth() const;
+
  protected:
   virtual void Display() = 0;
 
   int display_width_;
   int display_height_;
+  int window_handle_;
 
  private:
   void InitWindow(std::string window_header, GLView* parent, int sub_x,
@@ -53,7 +58,6 @@ class GLView {
   static GLView* GetActiveGLView();
 
   static std::vector<GLView*> inherited_views_;
-  int window_handle_;
   std::vector<GLViewListener*> listeners_;
 };
 

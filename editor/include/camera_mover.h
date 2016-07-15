@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_CAMERA_MOVER_H_
-#define INCLUDE_CAMERA_MOVER_H_
+#ifndef EDITOR_INCLUDE_CAMERA_MOVER_H_
+#define EDITOR_INCLUDE_CAMERA_MOVER_H_
 
 #include <sys/time.h>
 
@@ -53,4 +53,4 @@ class CameraMover : public GLViewListener {
   timeval last_mouse_move_;
 };
 
-#endif  // INCLUDE_CAMERA_MOVER_H_
+#endif  // EDITOR_INCLUDE_CAMERA_MOVER_H_

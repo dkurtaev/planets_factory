@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_SLIDER_LISTENER_H_
-#define INCLUDE_SLIDER_LISTENER_H_
+#ifndef EDITOR_INCLUDE_SLIDER_LISTENER_H_
+#define EDITOR_INCLUDE_SLIDER_LISTENER_H_
 
 #include "include/glview_listener.h"
 
@@ -18,4 +18,4 @@ class SliderListener : public GLViewListener {
   SliderView* slider_view_;
 };
 
-#endif  // INCLUDE_SLIDER_LISTENER_H_
+#endif  // EDITOR_INCLUDE_SLIDER_LISTENER_H_

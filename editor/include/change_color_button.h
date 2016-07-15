@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_CHANGE_COLOR_BUTTON_H_
-#define INCLUDE_CHANGE_COLOR_BUTTON_H_
+#ifndef EDITOR_INCLUDE_CHANGE_COLOR_BUTTON_H_
+#define EDITOR_INCLUDE_CHANGE_COLOR_BUTTON_H_
 
 #include "include/button.h"
 #include "include/palette_view.h"
@@ -20,4 +20,4 @@ class ChangeColorButton : public Button {
   PaletteView* palette_view_;
 };
 
-#endif  // INCLUDE_CHANGE_COLOR_BUTTON_H_
+#endif  // EDITOR_INCLUDE_CHANGE_COLOR_BUTTON_H_

@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_TEXTURE_COLORIZER_H_
-#define INCLUDE_TEXTURE_COLORIZER_H_
+#ifndef EDITOR_INCLUDE_TEXTURE_COLORIZER_H_
+#define EDITOR_INCLUDE_TEXTURE_COLORIZER_H_
 
 #include <vector>
 #include <utility>
@@ -51,4 +51,4 @@ class TextureColorizer : public TrianglesToucher {
   std::vector<float*> ico_tex_coords_;
 };
 
-#endif  // INCLUDE_TEXTURE_COLORIZER_H_
+#endif  // EDITOR_INCLUDE_TEXTURE_COLORIZER_H_

@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef INCLUDE_VERTICES_TOUCHER_H_
-#define INCLUDE_VERTICES_TOUCHER_H_
+#ifndef EDITOR_INCLUDE_VERTICES_TOUCHER_H_
+#define EDITOR_INCLUDE_VERTICES_TOUCHER_H_
 
 #include <vector>
 #include <utility>
@@ -24,4 +24,4 @@ class VerticesToucher : public GLViewListener {
   std::vector<Point3f*>* vertices_;
 };
 
-#endif  // INCLUDE_VERTICES_TOUCHER_H_
+#endif  // EDITOR_INCLUDE_VERTICES_TOUCHER_H_

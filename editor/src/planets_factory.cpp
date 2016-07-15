@@ -11,6 +11,7 @@
 #include "include/camera_mover.h"
 #include "include/switcher.h"
 #include "include/brush_size_button.h"
+#include "include/metrics_view.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -27,7 +28,9 @@ int main(int argc, char** argv) {
   BrushSizeButton brush_size_button;
 
   std::vector<Triangle*> triangles;
+  std::vector<Point3f*> vertices;
   icosphere.GetTriangles(&triangles);
+  icosphere.GetVertices(&vertices);
 
   cv::Mat texture = cv::imread("./texture.png");
   if (!texture.data) {
@@ -57,6 +60,8 @@ int main(int argc, char** argv) {
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);
+
+  MetricsView metrics_view(&planet_view, vertices, triangles, texture);
 
   glutMainLoop();
   return 0;
