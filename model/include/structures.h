@@ -101,6 +101,9 @@ class Triangle {
   bool IsIncludes(float x, float y, float z, float* bary_p1, float* bary_p2,
                   float* bary_p3);
 
+  // Triangle's normal. Not normalized.
+  void GetNormal(int8_t* dst);
+
  private:
   Edge** edges_;
   const Point3f** points_;
