@@ -255,3 +255,30 @@ bool Triangle::IsIncludes(float x, float y, float z, float* bary_p1,
     return false;
   }
 }
+
+void Triangle::GetNormal(int8_t* dst) {
+  float points[3][3];
+  float normal[3];
+  for (uint8_t i = 0; i < 3; ++i) {
+    points_[i]->GetPosition(points[i]);
+    normal[i] = 0.0f;
+  }
+
+  uint8_t idx_1, idx_2;
+  for (uint8_t i = 0; i < 3; ++i) {
+    idx_1 = (1 + i) % 3;
+    idx_2 = (2 + i) % 3;
+    normal[0] += points[i][1] * (points[idx_1][2] - points[idx_2][2]);
+    normal[1] += points[i][0] * (points[idx_2][2] - points[idx_1][2]);
+    normal[2] += points[i][0] * (points[idx_1][1] - points[idx_2][1]);
+  }
+
+  float norm = 0;
+  for (uint8_t i = 0; i < 3; ++i) {
+    norm += normal[i] * normal[i];
+  }
+  norm = sqrt(norm);
+  for (uint8_t i = 0; i < 3; ++i) {
+    dst[i] = INT8_MAX * (normal[i] / norm);
+  }
+}

@@ -40,7 +40,6 @@ Icosphere::Icosphere(float radius)
   static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
 
   vertices_array_ = new float[3 * kNumVertices];
-  normals_array_ = new int8_t[3 * kNumVertices];
   colors_array_ = new uint8_t[3 * kNumVertices];
   indices_array_ = new uint16_t[3 * kNumTriangles];
   tex_coord_array_ = new uint16_t[6 * kNumTriangles];
@@ -100,10 +99,6 @@ Icosphere::Icosphere(float radius)
   CHECK(edges_.size() == kNumEdges);
   CHECK(vertices_.size() == kNumVertices);
 
-  const unsigned dim = 3 * kNumVertices;
-  for (unsigned i = 0; i < dim; ++i) {
-    normals_array_[i] = (vertices_array_[i] / radius) * INT8_MAX;
-  }
   for (unsigned i = 0; i < kNumTriangles; ++i) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
     triangles_[i]->GetTexCoords(tex_coord_array_ + i * 6);
@@ -151,7 +146,6 @@ Icosphere::~Icosphere() {
   }
 
   delete[] vertices_array_;
-  delete[] normals_array_;
   delete[] indices_array_;
   delete[] colors_array_;
   delete[] tex_coord_array_;
@@ -193,17 +187,22 @@ void Icosphere::Draw() const {
   float* vertices = new float[9 * n_tris];
   int8_t* normals = new int8_t[9 * n_tris];
 
-  const unsigned n_indices = 3 * n_tris;
   unsigned offset;
-  float* vertices_indent = vertices - 3;
-  int8_t* normals_indent = normals - 3;
+  float* vertices_indent = vertices;
+  int8_t* normals_indent = normals;
 
   const uint8_t sizeof_float_x3 = sizeof(float) * 3;
   const uint8_t sizeof_uint8_t_x3 = sizeof(uint8_t) * 3;
-  for (unsigned i = 0; i < n_indices; ++i) {
-    offset = indices_array_[i] * 3;
-    memcpy(vertices_indent += 3, vertices_array_ + offset, sizeof_float_x3);
-    memcpy(normals_indent += 3, normals_array_ + offset, sizeof_uint8_t_x3);
+  for (unsigned i = 0; i < n_tris; ++i) {
+    triangles_[i]->GetNormal(normals_indent);
+    memcpy(normals_indent + 3, normals_indent, sizeof_uint8_t_x3);
+    memcpy(normals_indent + 6, normals_indent, sizeof_uint8_t_x3);
+    normals_indent += 9;
+    for (uint8_t j = 0; j < 3; ++j) {
+      offset = indices_array_[i * 3 + j] * 3;
+      memcpy(vertices_indent, vertices_array_ + offset, sizeof_float_x3);
+      vertices_indent += 3;
+    }
   }
 
   unsigned vbo[4];
