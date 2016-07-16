@@ -22,8 +22,8 @@ void VerticesMover::DoAction(Point3f* vertex) {
 
   CHECK(!is_move_up_ || !is_move_down_);
 
-  std::vector<std::pair<int, Point3f*> > area;
-  area.push_back(std::pair<int, Point3f*>(0, vertex));
+  float norm = vertex->GetNorm();
+  vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
 
   std::vector<Point3f*> area_level(1, vertex);
   std::vector<Point3f*> neighborhood;
@@ -42,16 +42,10 @@ void VerticesMover::DoAction(Point3f* vertex) {
     unique_neighbors.clear();
 
     for (it = area_level.begin(); it != area_level.end(); ++it) {
-      area.push_back(std::pair<int, Point3f*>(i, *it));
+      vertex = *it;
+      norm = vertex->GetNorm();
+      vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
     }
-  }
-
-  const unsigned n_vertices = area.size();
-  float norm;
-  for (unsigned i = 0; i < n_vertices; ++i) {
-    vertex = area[i].second;
-    norm = vertex->GetNorm();
-    vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
   }
 }
 
