@@ -13,13 +13,8 @@ const uint8_t MetricsView::kFontColor[] = {0, 204, 0};
 MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
                          const std::vector<Triangle*>& triangles,
                          const cv::Mat& texture)
-  : GLView(1, 1, "", parent),
-    parent_shape_listener_(this), n_triangles_(triangles.size()),
-    n_vertices_(vertices.size()), texture_size_(texture.size()) {
-  if (parent) {
-    parent->AddListener(&parent_shape_listener_);
-  }
-}
+  : GLView(1, 1, "", parent), parent_(parent), n_triangles_(triangles.size()),
+    n_vertices_(vertices.size()), texture_size_(texture.size()) {}
 
 void MetricsView::Display() {
   TimeCheck();
@@ -98,7 +93,9 @@ void MetricsView::DrawTable(std::stringstream* ss) {
     glutBitmapString(GLUT_BITMAP_9_BY_15, text);
   }
   glutReshapeWindow(bmp_length, bmp_height);
-  glutPositionWindow(parent_width_ - display_width_, 0);
+  if (parent_ != 0) {
+    glutPositionWindow(parent_->GetWidth() - display_width_, 0);
+  }
 }
 
 void MetricsView::TimeCheck() {
@@ -118,16 +115,4 @@ void MetricsView::TimeCheck() {
       break;
     }
   } while (!frames_times_.empty());
-}
-
-void MetricsView::ParentIsReshaped(int parent_width, int parent_height) {
-  parent_width_ = parent_width;
-  parent_height_ = parent_height;
-}
-
-ParentShapeListener::ParentShapeListener(MetricsView* child_view)
-  : child_view_(child_view) {}
-
-void ParentShapeListener::Reshape(int parent_width, int parent_height) {
-  child_view_->ParentIsReshaped(parent_width, parent_height);
 }

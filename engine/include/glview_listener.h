@@ -11,6 +11,8 @@
   #define GLUT_WHEEL_DOWN 4
 #endif
 
+#include <stdint.h>
+
 class GLViewListener {
  public:
   GLViewListener() { is_enabled_ = true; }
@@ -24,6 +26,8 @@ class GLViewListener {
   virtual void SpecialKeyPressed(int key, int x, int y) {}
 
   virtual void SpecialKeyReleased(int key, int x, int y) {}
+
+  virtual void KeyPressed(uint8_t key, int x, int y) {}
 
   virtual void DoEvents() {}
 
