@@ -60,6 +60,8 @@ class GLView {
 
   static void EntryFunc(int state);
 
+  static void KeyPressed(uint8_t key, int x, int y);
+
   static GLView* GetActiveGLView();
 
   static std::vector<GLView*> inherited_views_;

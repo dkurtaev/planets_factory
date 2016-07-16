@@ -55,6 +55,7 @@ void GLView::InitWindow(std::string window_header, GLView* parent, int sub_x,
   glutPassiveMotionFunc(PassiveMouseMove);
   glutMouseFunc(MouseFunc);
   glutSpecialUpFunc(SpecialKeyReleased);
+  glutKeyboardFunc(KeyPressed);
   glutCloseFunc(CloseFunc);
   glutEntryFunc(EntryFunc);
 }
@@ -76,6 +77,10 @@ void GLView::SpecialKeyPressed(int key, int x, int y) {
 
 void GLView::SpecialKeyReleased(int key, int x, int y) {
   FOREACH_LISTENER SpecialKeyReleased(key, x, y);
+}
+
+void GLView::KeyPressed(uint8_t key, int x, int y) {
+  FOREACH_LISTENER KeyPressed(key, x, y);
 }
 
 void GLView::MouseFunc(int button, int state, int x, int y) {
