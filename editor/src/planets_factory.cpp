@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   ConsoleViewListener console_view_listener(&console_view);
   planet_view.AddListener(&console_view_listener);
 
-  SaveButton save_buton(&icosphere, &console_view_listener);
+  SaveButton save_buton(&icosphere, &console_view);
   LoadButton load_buton(&icosphere);
 
   std::vector<Button*> buttons;

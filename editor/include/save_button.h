@@ -5,12 +5,11 @@
 
 #include "include/button.h"
 #include "include/icosphere.h"
-#include "include/console_view_listener.h"
+#include "include/console_view.h"
 
 class SaveButton : public Button {
  public:
-  explicit SaveButton(const Icosphere* icosphere,
-                      ConsoleViewListener* console_view_listener);
+  explicit SaveButton(const Icosphere* icosphere, ConsoleView* console_view);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
@@ -18,7 +17,7 @@ class SaveButton : public Button {
 
  private:
   const Icosphere* icosphere_;
-  ConsoleViewListener* console_view_listener_;
+  ConsoleView* console_view_;
   // If true, check console listener for new command (saving path expected).
   bool waiting_path_;
 };
