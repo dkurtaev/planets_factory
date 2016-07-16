@@ -20,7 +20,35 @@
 #include "include/shaders_factory.h"
 
 Icosphere::Icosphere(float radius, const std::string& src_file)
-  : radius_(radius) {
+  : radius_(radius), vertices_array_(0), indices_array_(0), tex_coord_array_(0),
+    colors_array_(0) {
+  Build(src_file);
+}
+
+Icosphere::~Icosphere() {
+  Clear();
+}
+
+void Icosphere::Clear() {
+  unsigned size = vertices_.size();
+  for (unsigned i = 0; i < size; ++i) {
+    delete vertices_[i];
+  }
+  vertices_.clear();
+
+  size = triangles_.size();
+  for (unsigned i = 0; i < size; ++i) {
+    delete triangles_[i];
+  }
+  triangles_.clear();
+
+  delete[] vertices_array_;
+  delete[] indices_array_;
+  delete[] colors_array_;
+  delete[] tex_coord_array_;
+}
+
+void Icosphere::Build(const std::string& src_file) {
   // Characteristics of icosahedron.
   static const unsigned kInitNumTriangles = 20;
   static const unsigned kInitNumVertices = 12;
@@ -30,17 +58,20 @@ Icosphere::Icosphere(float radius, const std::string& src_file)
   // Colors of grid nodes.
   static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
   static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
-  // Characteristics of final icosphere.
-  // After each split:
-  // new_n_trianlges = 4 * prev_n_triangles
-  // new_n_vertices = prev_n_vertices + 1.5 * (prev_n_triangles)
+
+  Clear();
   if (src_file != "") {
     std::ifstream file(src_file.c_str(), std::ifstream::binary);
+    CHECK(file.is_open());
     file.read(reinterpret_cast<char*>(&n_splits_), sizeof(n_splits_));
     file.close();
   } else {
     n_splits_ = kNumSplits;
   }
+  // Characteristics of final icosphere.
+  // After each split:
+  // new_n_trianlges = 4 * prev_n_triangles
+  // new_n_vertices = prev_n_vertices + 1.5 * (prev_n_triangles)
   const unsigned kNumTriangles = kInitNumTriangles * pow(4, n_splits_);
   const unsigned kNumVertices =
       kInitNumVertices + 0.5f * (kNumTriangles - kInitNumTriangles);
@@ -63,7 +94,7 @@ Icosphere::Icosphere(float radius, const std::string& src_file)
   // h = sqrt(rr / (1 + (1+sqrt(5))^2 / 4))
   // h = sqrt(rr / (1 + (1+5+2sqrt(5)) / 4))
   // h = sqrt(rr / (1 + 1.5 + sqrt(5) / 2))
-  const float h = sqrt(radius * radius / (2.5 + 0.5 * sqrt(5)));
+  const float h = sqrt(radius_ * radius_ / (2.5 + 0.5 * sqrt(5)));
   const float w = 0.5 * (1 + sqrt(5)) * h;
 
   // Vertices.
@@ -142,6 +173,7 @@ Icosphere::Icosphere(float radius, const std::string& src_file)
   if (src_file != "") {
     float* norms = new float[kNumVertices];
     std::ifstream file(src_file.c_str(), std::ifstream::binary);
+    CHECK(file.is_open());
     file.seekg(sizeof(n_splits_));  // Skip.
     file.read(reinterpret_cast<char*>(norms), sizeof(float) * kNumVertices);
     file.close();
@@ -150,23 +182,6 @@ Icosphere::Icosphere(float radius, const std::string& src_file)
     }
     delete[] norms;
   }
-}
-
-Icosphere::~Icosphere() {
-  unsigned size = vertices_.size();
-  for (unsigned i = 0; i < size; ++i) {
-    delete vertices_[i];
-  }
-
-  size = triangles_.size();
-  for (unsigned i = 0; i < size; ++i) {
-    delete triangles_[i];
-  }
-
-  delete[] vertices_array_;
-  delete[] indices_array_;
-  delete[] colors_array_;
-  delete[] tex_coord_array_;
 }
 
 void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
@@ -342,14 +357,12 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
   }
 }
 
-void Icosphere::GetVertices(std::vector<Point3f*>* vertices) {
-  vertices->resize(vertices_.size());
-  std::copy(vertices_.begin(), vertices_.end(), vertices->begin());
+std::vector<Point3f*>* Icosphere::GetVertices() {
+  return &vertices_;
 }
 
-void Icosphere::GetTriangles(std::vector<Triangle*>* triangles) {
-  triangles->resize(triangles_.size());
-  std::copy(triangles_.begin(), triangles_.end(), triangles->begin());
+std::vector<Triangle*>* Icosphere::GetTriangles() {
+  return &triangles_;
 }
 
 void Icosphere::SetTexCoords() {
@@ -403,11 +416,12 @@ void Icosphere::DrawGrid() const {
   glDeleteBuffers(3, vbo);
 }
 
-void Icosphere::Save(const std::string& file_path) {
+void Icosphere::Save(const std::string& file_path) const {
   // Store number of splits and norms of vertices
   // (distances to icosphere center).
   std::ofstream file(file_path.c_str(), std::ofstream::binary);
-  file.write(reinterpret_cast<char*>(&n_splits_), sizeof(n_splits_));
+  CHECK(file.is_open());
+  file.write(reinterpret_cast<const char*>(&n_splits_), sizeof(n_splits_));
 
   const unsigned n_vertices = vertices_.size();
   float* norms = new float[n_vertices];
