@@ -8,8 +8,8 @@
 
 #include <algorithm>
 #include <vector>
-#include <iostream>
 #include <fstream>
+#include <string>
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -19,7 +19,7 @@
 
 #include "include/shaders_factory.h"
 
-Icosphere::Icosphere(float radius)
+Icosphere::Icosphere(float radius, const std::string& src_file)
   : radius_(radius) {
   // Characteristics of icosahedron.
   static const unsigned kInitNumTriangles = 20;
@@ -27,17 +27,24 @@ Icosphere::Icosphere(float radius)
   static const unsigned kInitNumEdges = 30;
   // Number of triangles splitting procedure calls.
   static const unsigned kNumSplits = 3;
+  // Colors of grid nodes.
+  static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
+  static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
   // Characteristics of final icosphere.
   // After each split:
   // new_n_trianlges = 4 * prev_n_triangles
   // new_n_vertices = prev_n_vertices + 1.5 * (prev_n_triangles)
-  static const unsigned kNumTriangles = kInitNumTriangles * pow(4, kNumSplits);
-  static const unsigned kNumVertices =
+  if (src_file != "") {
+    std::ifstream file(src_file.c_str(), std::ifstream::binary);
+    file.read(reinterpret_cast<char*>(&n_splits_), sizeof(n_splits_));
+    file.close();
+  } else {
+    n_splits_ = kNumSplits;
+  }
+  const unsigned kNumTriangles = kInitNumTriangles * pow(4, n_splits_);
+  const unsigned kNumVertices =
       kInitNumVertices + 0.5f * (kNumTriangles - kInitNumTriangles);
-  static const unsigned kNumEdges = (3 * kNumTriangles) / 2;
-  // Colors of grid nodes.
-  static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
-  static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
+  const unsigned kNumEdges = (3 * kNumTriangles) / 2;
 
   vertices_array_ = new float[3 * kNumVertices];
   colors_array_ = new uint8_t[3 * kNumVertices];
@@ -93,7 +100,7 @@ Icosphere::Icosphere(float radius)
 
   SetTexCoords();
 
-  for (unsigned i = 0; i < kNumSplits; ++i) {
+  for (unsigned i = 0; i < n_splits_; ++i) {
     SplitTriangles(&edges);
   }
 
@@ -131,6 +138,17 @@ Icosphere::Icosphere(float radius)
   }
   for (unsigned i = 0; i < kNumEdges; ++i) {
     delete edges[i];
+  }
+  if (src_file != "") {
+    float* norms = new float[kNumVertices];
+    std::ifstream file(src_file.c_str(), std::ifstream::binary);
+    file.seekg(sizeof(n_splits_));  // Skip.
+    file.read(reinterpret_cast<char*>(norms), sizeof(float) * kNumVertices);
+    file.close();
+    for (unsigned i = 0; i < kNumVertices; ++i) {
+      vertices_[i]->Normalize(norms[i]);
+    }
+    delete[] norms;
   }
 }
 
@@ -385,6 +403,18 @@ void Icosphere::DrawGrid() const {
   glDeleteBuffers(3, vbo);
 }
 
-void Icosphere::Save(std::string file_path) {
+void Icosphere::Save(const std::string& file_path) {
+  // Store number of splits and norms of vertices
+  // (distances to icosphere center).
+  std::ofstream file(file_path.c_str(), std::ofstream::binary);
+  file.write(reinterpret_cast<char*>(&n_splits_), sizeof(n_splits_));
 
+  const unsigned n_vertices = vertices_.size();
+  float* norms = new float[n_vertices];
+  for (unsigned i = 0; i < n_vertices; ++i) {
+    norms[i] = vertices_[i]->GetNorm();
+  }
+  file.write(reinterpret_cast<char*>(norms), sizeof(float) * n_vertices);
+  delete[] norms;
+  file.close();
 }
