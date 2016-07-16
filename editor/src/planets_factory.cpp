@@ -15,6 +15,8 @@
 #include "include/vertices_mover.h"
 #include "include/save_button.h"
 #include "include/load_button.h"
+#include "include/console_view.h"
+#include "include/console_view_listener.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -81,6 +83,12 @@ int main(int argc, char** argv) {
   ActionsView actions_view(buttons, &planet_view);
 
   MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
+
+  ConsoleView console_view(&planet_view);
+  ConsoleViewListener console_view_listener(&console_view);
+  planet_view.AddListener(&console_view_listener);
+  actions_view.AddListener(&console_view_listener);
+  metrics_view.AddListener(&console_view_listener);
 
   glutMainLoop();
   return 0;
