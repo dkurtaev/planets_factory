@@ -3,6 +3,8 @@
 #ifndef ENGINE_INCLUDE_BUTTON_H_
 #define ENGINE_INCLUDE_BUTTON_H_
 
+#include <stdint.h>
+
 #include <string>
 
 #include "include/glview_listener.h"
@@ -28,8 +30,8 @@ class Button : public GLViewListener {
 
  protected:
   std::string text_;
-  float font_color_[3];
-  float button_color_[3];
+  uint8_t font_color_[3];
+  uint8_t button_color_[3];
 };
 
 #endif  // ENGINE_INCLUDE_BUTTON_H_

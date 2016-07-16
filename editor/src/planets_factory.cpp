@@ -12,6 +12,7 @@
 #include "include/switcher.h"
 #include "include/brush_size_button.h"
 #include "include/metrics_view.h"
+#include "include/vertices_mover.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -43,6 +44,15 @@ int main(int argc, char** argv) {
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher);
 
+  Switcher move_up_mover_switcher("Terrain up");
+  Switcher move_down_mover_switcher("Terrain down");
+  VerticesMover vertices_mover(&vertices, &move_up_mover_switcher,
+                               &move_down_mover_switcher);
+  std::vector<Switcher*> radio_group;
+  move_up_mover_switcher.AddToRadioGroup(&radio_group);
+  move_down_mover_switcher.AddToRadioGroup(&radio_group);
+  texture_colorizer_enable_switcher.AddToRadioGroup(&radio_group);
+
   bool draw_grid = false;
   bool draw_mesh = true;
   Switcher draw_grid_switcher("Grid", &draw_grid);
@@ -52,12 +62,15 @@ int main(int argc, char** argv) {
                          &draw_mesh);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
+  planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
   buttons.push_back(&brush_size_button);
+  buttons.push_back(&move_up_mover_switcher);
+  buttons.push_back(&move_down_mover_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
   ActionsView actions_view(buttons, &planet_view);

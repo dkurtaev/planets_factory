@@ -3,7 +3,10 @@
 #ifndef EDITOR_INCLUDE_SWITCHER_H_
 #define EDITOR_INCLUDE_SWITCHER_H_
 
+#include <stdint.h>
+
 #include <string>
+#include <vector>
 
 #include "include/button.h"
 
@@ -16,9 +19,13 @@ class Switcher : public Button {
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
+  // If enabled current button disable others.
+  void AddToRadioGroup(std::vector<Switcher*>* group);
+
  private:
   bool* flag_;
-  float default_button_color_[3];
+  uint8_t default_button_color_[3];
+  std::vector<Switcher*>* radio_group_;
 };
 
 #endif  // EDITOR_INCLUDE_SWITCHER_H_
