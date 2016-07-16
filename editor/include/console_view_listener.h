@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include <string>
+
 #include "include/glview_listener.h"
 #include "include/console_view.h"
 

@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/console_view_listener.h"
 
+#include <string>
+
 #define GLUT_KEY_BACKSPACE 8
 #define GLUT_KEY_ENTER 13
 
@@ -36,6 +38,6 @@ std::string ConsoleViewListener::ProcessCommand() {
   } else {
     std::string command_cpy = command_;
     command_ = "";
-    return command_cpy;    
+    return command_cpy;
   }
 }

@@ -11,7 +11,7 @@
 
 class ConsoleView : public GLView {
  public:
-  ConsoleView(GLView* parent);
+  explicit ConsoleView(GLView* parent);
 
   virtual void Display();
 

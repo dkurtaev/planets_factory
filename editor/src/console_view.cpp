@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/console_view.h"
 
+#include <string>
+
 #include <GL/freeglut.h>
 
 const uint8_t ConsoleView::kFontColor[] = {0, 204, 0};
@@ -38,7 +40,7 @@ void ConsoleView::Display() {
 
   if (parent_ != 0) {
     glutReshapeWindow(parent_->GetWidth(), bmp_height);
-    glutPositionWindow(0, parent_->GetHeight() - bmp_height);    
+    glutPositionWindow(0, parent_->GetHeight() - bmp_height);
   } else {
     glutReshapeWindow(bmp_length, bmp_height);
   }
