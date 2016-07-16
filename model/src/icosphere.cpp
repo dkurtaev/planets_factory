@@ -71,7 +71,8 @@ Icosphere::Icosphere(float radius)
                                colors_array_ + i * 3);   // shared memory.
   }
 
-  edges_.reserve(kNumEdges);
+  std::vector<Edge*> edges;
+  edges.reserve(kNumEdges);
   triangles_.reserve(kNumTriangles);
 
   uint8_t triangles_ids[][3] = {
@@ -81,22 +82,23 @@ Icosphere::Icosphere(float radius)
       {3, 7, 6}, {3, 8, 2}};
 
   for (unsigned i = 0; i < kInitNumTriangles; ++i) {
-    AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2]);
+    AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2],
+                &edges);
   }
 
-  std::vector<Edge*> init_edges_(kInitNumEdges);
+  std::vector<Edge*> init_edges(kInitNumEdges);
   for (unsigned i = 0; i < kInitNumEdges; ++i) {
-    init_edges_[i] = new Edge(*edges_[i]);
+    init_edges[i] = new Edge(*edges[i]);
   }
 
   SetTexCoords();
 
   for (unsigned i = 0; i < kNumSplits; ++i) {
-    SplitTriangles();
+    SplitTriangles(&edges);
   }
 
   CHECK(triangles_.size() == kNumTriangles);
-  CHECK(edges_.size() == kNumEdges);
+  CHECK(edges.size() == kNumEdges);
   CHECK(vertices_.size() == kNumVertices);
 
   for (unsigned i = 0; i < kNumTriangles; ++i) {
@@ -106,7 +108,7 @@ Icosphere::Icosphere(float radius)
   Point3f* p1;
   Point3f* p2;
   for (unsigned i = 0; i < kNumEdges; ++i) {
-    edges_[i]->GetPoints(&p1, &p2);
+    edges[i]->GetPoints(&p1, &p2);
     p1->AddNeighbor(p2);
     p2->AddNeighbor(p1);
   }
@@ -117,7 +119,7 @@ Icosphere::Icosphere(float radius)
     vertex = vertices_[i];
     vertex_on_init_edge = false;
     for (unsigned j = 0; j < kInitNumEdges; ++j) {
-      if (init_edges_[j]->IsInsideEdgeCone(*vertex)) {
+      if (init_edges[j]->IsInsideEdgeCone(*vertex)) {
         vertex_on_init_edge = true;
         break;
       }
@@ -125,7 +127,10 @@ Icosphere::Icosphere(float radius)
     vertex->SetColor(vertex_on_init_edge ? kInitEdgesColor : kSubEdgesColor);
   }
   for (unsigned i = 0; i < kInitNumEdges; ++i) {
-    delete init_edges_[i];
+    delete init_edges[i];
+  }
+  for (unsigned i = 0; i < kNumEdges; ++i) {
+    delete edges[i];
   }
 }
 
@@ -133,11 +138,6 @@ Icosphere::~Icosphere() {
   unsigned size = vertices_.size();
   for (unsigned i = 0; i < size; ++i) {
     delete vertices_[i];
-  }
-
-  size = edges_.size();
-  for (unsigned i = 0; i < size; ++i) {
-    delete edges_[i];
   }
 
   size = triangles_.size();
@@ -151,27 +151,30 @@ Icosphere::~Icosphere() {
   delete[] tex_coord_array_;
 }
 
-void Icosphere::AddTriangle(unsigned v1, unsigned v2, unsigned v3) {
-  unsigned pairs[3][2];
+void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
+                            std::vector<Edge*>* edges) {
+  uint16_t pairs[3][2];
   pairs[0][0] = v1; pairs[0][1] = v2;
   pairs[1][0] = v2; pairs[1][1] = v3;
   pairs[2][0] = v3; pairs[2][1] = v1;
 
   Edge* traingle_edges[3];
-  int n_edges = edges_.size();
+  Edge* edge = 0;
+  int n_edges = edges->size();
   for (int i = 0; i < 3; ++i) {
     // Check if edge exists.
     traingle_edges[i] = 0;
     for (int j = 0; j < n_edges; ++j) {
-      if (edges_[j]->CompareTo(pairs[i][0], pairs[i][1])) {
-        traingle_edges[i] = edges_[j];
+      edge = edges->operator[](j);
+      if (edge->CompareTo(pairs[i][0], pairs[i][1])) {
+        traingle_edges[i] = edge;
         break;
       }
     }
     if (!traingle_edges[i]) {
       traingle_edges[i] = new Edge(vertices_[pairs[i][0]],
                                    vertices_[pairs[i][1]]);
-      edges_.push_back(traingle_edges[i]);
+      edges->push_back(traingle_edges[i]);
       ++n_edges;
     }
   }
@@ -242,10 +245,10 @@ void Icosphere::Draw() const {
   delete[] normals;
 }
 
-void Icosphere::SplitTriangles() {
+void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
   const unsigned n_triangles = triangles_.size();
   const unsigned n_vertices = vertices_.size();
-  const unsigned n_edges = edges_.size();
+  const unsigned n_edges = edges->size();
 
   // Split each edge in halfs.
   Point3f* middle_point;
@@ -254,7 +257,7 @@ void Icosphere::SplitTriangles() {
     middle_point = new Point3f(id, 0, 0, 0,
                                vertices_array_ + id * 3,  // Offsets to
                                colors_array_ + id * 3);   // shared data.
-    edges_[i]->MiddlePoint(middle_point);
+    edges->operator[](i)->MiddlePoint(middle_point);
     middle_point->Normalize(radius_);
     vertices_.push_back(middle_point);
   }
@@ -276,9 +279,9 @@ void Icosphere::SplitTriangles() {
   triangles_.clear();
 
   for (unsigned i = 0; i < n_edges; ++i) {
-    delete edges_[i];
+    delete edges->operator[](i);
   }
-  edges_.clear();
+  edges->clear();
 
   // Create new triangles.
   // Split each triangle. ti - i-th old triangle's vertex,
@@ -300,7 +303,8 @@ void Icosphere::SplitTriangles() {
     memcpy(ids + 3, middle_verts_ids[i], sizeof(uint16_t) * 3);  // m0, m1, m2.
 
     for (uint8_t j = 0; j < 4; ++j) {
-      AddTriangle(ids[orders[j][0]], ids[orders[j][1]], ids[orders[j][2]]);
+      AddTriangle(ids[orders[j][0]], ids[orders[j][1]], ids[orders[j][2]],
+                  edges);
       triangle = triangles_.back();
 
       for (uint8_t k = 0; k < 6; k += 2) {
@@ -379,4 +383,8 @@ void Icosphere::DrawGrid() const {
   glDisableVertexAttribArray(COLORS_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);
   glDeleteBuffers(3, vbo);
+}
+
+void Icosphere::Save(std::string file_path) {
+
 }

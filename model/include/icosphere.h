@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <vector>
+#include <string>
 
 #include "include/structures.h"
 
@@ -25,18 +26,21 @@ class Icosphere {
 
   void GetTriangles(std::vector<Triangle*>* triangles);
 
+  // Writing binary file with data of mesh.
+  void Save(std::string file_path);
+
  private:
   // Setup texture coordinates for icosahedon.
   void SetTexCoords();
 
   // Used for building icosphere from icosahedron.
-  void AddTriangle(unsigned v1, unsigned v2, unsigned v3);
+  void AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
+                   std::vector<Edge*>* edges);
 
   // Used for building icosphere from icosahedron.
-  void SplitTriangles();
+  void SplitTriangles(std::vector<Edge*>* edges);
 
   std::vector<Point3f*> vertices_;
-  std::vector<Edge*> edges_;
   std::vector<Triangle*> triangles_;
 
   float* vertices_array_;
