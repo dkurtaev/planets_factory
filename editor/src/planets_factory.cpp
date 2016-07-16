@@ -67,7 +67,11 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
-  SaveButton save_buton(&icosphere);
+  ConsoleView console_view(&planet_view);
+  ConsoleViewListener console_view_listener(&console_view);
+  planet_view.AddListener(&console_view_listener);
+
+  SaveButton save_buton(&icosphere, &console_view_listener);
   LoadButton load_buton(&icosphere);
 
   std::vector<Button*> buttons;
@@ -81,13 +85,9 @@ int main(int argc, char** argv) {
   buttons.push_back(&save_buton);
   buttons.push_back(&load_buton);
   ActionsView actions_view(buttons, &planet_view);
+  actions_view.AddListener(&console_view_listener);
 
   MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
-
-  ConsoleView console_view(&planet_view);
-  ConsoleViewListener console_view_listener(&console_view);
-  planet_view.AddListener(&console_view_listener);
-  actions_view.AddListener(&console_view_listener);
   metrics_view.AddListener(&console_view_listener);
 
   glutMainLoop();
