@@ -13,6 +13,8 @@
 #include "include/brush_size_button.h"
 #include "include/metrics_view.h"
 #include "include/vertices_mover.h"
+#include "include/save_button.h"
+#include "include/load_button.h"
 #include "include/console_view.h"
 #include "include/console_view_listener.h"
 
@@ -30,10 +32,8 @@ int main(int argc, char** argv) {
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
 
-  std::vector<Triangle*> triangles;
-  std::vector<Point3f*> vertices;
-  icosphere.GetTriangles(&triangles);
-  icosphere.GetVertices(&vertices);
+  std::vector<Triangle*>* triangles = icosphere.GetTriangles();
+  std::vector<Point3f*>* vertices = icosphere.GetVertices();
 
   cv::Mat texture = cv::imread("./texture.png");
   if (!texture.data) {
@@ -41,14 +41,14 @@ int main(int argc, char** argv) {
     texture.setTo(255);
   }
   Switcher texture_colorizer_enable_switcher("Color");
-  TextureColorizer texture_colorizer(&texture, &triangles,
+  TextureColorizer texture_colorizer(&texture, triangles,
                                      &change_color_button,
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher);
 
   Switcher move_up_mover_switcher("Terrain up");
   Switcher move_down_mover_switcher("Terrain down");
-  VerticesMover vertices_mover(&vertices, &move_up_mover_switcher,
+  VerticesMover vertices_mover(vertices, &move_up_mover_switcher,
                                &move_down_mover_switcher);
   std::vector<Switcher*> radio_group;
   move_up_mover_switcher.AddToRadioGroup(&radio_group);
@@ -67,6 +67,13 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
+  ConsoleView console_view(&planet_view);
+  ConsoleViewListener console_view_listener(&console_view);
+  planet_view.AddListener(&console_view_listener);
+
+  SaveButton save_buton(&icosphere, &console_view);
+  LoadButton load_buton(&icosphere, &console_view);
+
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
   buttons.push_back(&change_color_button);
@@ -75,13 +82,12 @@ int main(int argc, char** argv) {
   buttons.push_back(&move_down_mover_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
+  buttons.push_back(&save_buton);
+  buttons.push_back(&load_buton);
   ActionsView actions_view(buttons, &planet_view);
-
-  MetricsView metrics_view(&planet_view, vertices, triangles, texture);
-  ConsoleView console_view(&planet_view);
-  ConsoleViewListener console_view_listener(&console_view);
-  planet_view.AddListener(&console_view_listener);
   actions_view.AddListener(&console_view_listener);
+
+  MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
   metrics_view.AddListener(&console_view_listener);
 
   glutMainLoop();
