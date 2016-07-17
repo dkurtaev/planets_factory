@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&console_view_listener);
 
   SaveButton save_buton(&icosphere, &console_view);
-  LoadButton load_buton(&icosphere);
+  LoadButton load_buton(&icosphere, &console_view);
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);

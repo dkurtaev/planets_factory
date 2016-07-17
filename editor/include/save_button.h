@@ -9,7 +9,7 @@
 
 class SaveButton : public Button {
  public:
-  explicit SaveButton(const Icosphere* icosphere, ConsoleView* console_view);
+  SaveButton(const Icosphere* icosphere, ConsoleView* console_view);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
