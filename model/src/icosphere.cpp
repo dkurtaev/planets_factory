@@ -36,11 +36,13 @@ void Icosphere::Clear() {
   }
   vertices_.clear();
 
-  size = triangles_.size();
+  size = all_triangles_.size();
   for (unsigned i = 0; i < size; ++i) {
-    delete triangles_[i];
+    delete all_triangles_[i];
   }
   triangles_.clear();
+  all_triangles_.clear();
+  init_triangles_.clear();
 
   delete[] vertices_array_;
   delete[] indices_array_;
@@ -113,6 +115,8 @@ void Icosphere::Build(const std::string& src_file, float radius) {
   std::vector<Edge*> edges;
   edges.reserve(kNumEdges);
   triangles_.reserve(kNumTriangles);
+  init_triangles_.resize(kInitNumTriangles);
+  all_triangles_.resize(kInitNumTriangles);
 
   uint8_t triangles_ids[][3] = {
       {5, 9, 1}, {5, 1, 4}, {5, 4, 2}, {5, 2, 8}, {5, 8, 9}, {0, 1, 9},
@@ -124,6 +128,8 @@ void Icosphere::Build(const std::string& src_file, float radius) {
     AddTriangle(triangles_ids[i][0], triangles_ids[i][1], triangles_ids[i][2],
                 &edges);
   }
+  std::copy(triangles_.begin(), triangles_.end(), init_triangles_.begin());
+  std::copy(triangles_.begin(), triangles_.end(), all_triangles_.begin());
 
   std::vector<Edge*> init_edges(kInitNumEdges);
   for (unsigned i = 0; i < kInitNumEdges; ++i) {
@@ -301,8 +307,9 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
     triangle->GetMiddlePointsIndices(middle_verts_ids[i]);
     triangle->GetTexCoords(tex_coords[i]);
     triangle->GetMiddlePointsTexCoords(middle_verts_tex_coords[i]);
-    delete triangle;
   }
+  std::vector<Triangle*> processed_triangles_(n_triangles);
+  std::copy(triangles_.begin(), triangles_.end(), processed_triangles_.begin());
   triangles_.clear();
 
   for (unsigned i = 0; i < n_edges; ++i) {
@@ -333,6 +340,7 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
       AddTriangle(ids[orders[j][0]], ids[orders[j][1]], ids[orders[j][2]],
                   edges);
       triangle = triangles_.back();
+      processed_triangles_[i]->AddSubtriangle(triangle);
 
       for (uint8_t k = 0; k < 6; k += 2) {
         uint8_t idx = orders[j][k / 2];
@@ -349,6 +357,10 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
       triangle->SetTexCoords(combined_tex_coords);
     }
   }
+
+  all_triangles_.reserve(all_triangles_.size() + triangles_.size());
+  all_triangles_.insert(all_triangles_.begin(), triangles_.begin(),
+                        triangles_.end());
 }
 
 std::vector<Point3f*>* Icosphere::GetVertices() {
@@ -357,6 +369,10 @@ std::vector<Point3f*>* Icosphere::GetVertices() {
 
 std::vector<Triangle*>* Icosphere::GetTriangles() {
   return &triangles_;
+}
+
+std::vector<Triangle*>* Icosphere::GetInitTriangles() {
+  return &init_triangles_;
 }
 
 void Icosphere::SetTexCoords() {
