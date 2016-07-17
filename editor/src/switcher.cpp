@@ -28,27 +28,8 @@ void Switcher::SetFlag(bool* flag) {
 }
 
 void Switcher::MouseFunc(int button, int state, int x, int y) {
-  if (!state && flag_ != 0) {
-    if (*flag_) {
-      *flag_ = false;
-      memcpy(button_color_, default_button_color_, sizeof(uint8_t) * 3);
-    } else {
-      *flag_ = true;
-      memcpy(button_color_, kPressedButtonColor, sizeof(uint8_t) * 3);
-
-      if (radio_group_ != 0) {
-        const unsigned n_radio_buttons = radio_group_->size();
-        Switcher* switcher;
-        for (unsigned i = 0; i < n_radio_buttons; ++i) {
-          switcher = radio_group_->operator[](i);
-          if (switcher != this && *switcher->flag_ != 0 && *switcher->flag_) {
-            *switcher->flag_ = false;
-            memcpy(switcher->button_color_, switcher->default_button_color_,
-                   sizeof(uint8_t) * 3);
-          }
-        }
-      }
-    }
+  if (!state) {
+    Switch();
   }
 }
 
@@ -58,5 +39,29 @@ void Switcher::AddToRadioGroup(std::vector<Switcher*>* group) {
   if (flag_ != 0 && *flag_) {
     *flag_ = false;
     memcpy(button_color_, default_button_color_, sizeof(uint8_t) * 3);
+  }
+}
+
+void Switcher::Switch() {
+  if (flag_ == 0) return;
+  if (*flag_) {
+    *flag_ = false;
+    memcpy(button_color_, default_button_color_, sizeof(uint8_t) * 3);
+  } else {
+    *flag_ = true;
+    memcpy(button_color_, kPressedButtonColor, sizeof(uint8_t) * 3);
+
+    if (radio_group_ != 0) {
+      const unsigned n_radio_buttons = radio_group_->size();
+      Switcher* switcher;
+      for (unsigned i = 0; i < n_radio_buttons; ++i) {
+        switcher = radio_group_->operator[](i);
+        if (switcher != this && *switcher->flag_ != 0 && *switcher->flag_) {
+          *switcher->flag_ = false;
+          memcpy(switcher->button_color_, switcher->default_button_color_,
+                 sizeof(uint8_t) * 3);
+        }
+      }
+    }
   }
 }

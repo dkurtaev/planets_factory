@@ -19,6 +19,8 @@ class Switcher : public Button {
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
+  void Switch();
+
   // If enabled current button disable others.
   void AddToRadioGroup(std::vector<Switcher*>* group);
 

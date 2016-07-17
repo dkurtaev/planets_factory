@@ -6,9 +6,16 @@
 
 #define GLUT_KEY_BACKSPACE 8
 #define GLUT_KEY_ENTER 13
+#define GLUT_CTRL_S 19  // Save button click.
+#define GLUT_CTRL_G 7  // Switch grid visualization.
+#define GLUT_CTRL_C 3  // Switch colorizer.
 
-ConsoleViewListener::ConsoleViewListener(ConsoleView* console_view)
-  : console_view_(console_view) {
+ConsoleViewListener::ConsoleViewListener(ConsoleView* console_view,
+                                         SaveButton* save_button,
+                                         Switcher* draw_grid_switcher,
+                                         Switcher* colorizer_switcher)
+  : console_view_(console_view), draw_grid_switcher_(draw_grid_switcher),
+    save_button_(save_button), colorizer_switcher_(colorizer_switcher) {
   console_view_->AddListener(this);
 }
 
@@ -23,6 +30,18 @@ void ConsoleViewListener::KeyPressed(uint8_t key, int x, int y) {
     case GLUT_KEY_ENTER: {
       console_view_->SetCommand(str);
       str = "";
+      break;
+    }
+    case GLUT_CTRL_S: {
+      save_button_->Save();
+      break;
+    }
+    case GLUT_CTRL_G: {
+      draw_grid_switcher_->Switch();
+      break;
+    }
+    case GLUT_CTRL_C: {
+      colorizer_switcher_->Switch();
       break;
     }
     default: {
