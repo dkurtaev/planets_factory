@@ -7,6 +7,7 @@
 
 #include <vector>
 
+class Edge;
 class Point3f {
  public:
   Point3f(uint16_t id, float x, float y, float z, float* vertices_array_offset,
@@ -33,7 +34,13 @@ class Point3f {
 
   uint16_t GetId() const { return id_; }
 
-  void AddNeighbor(Point3f* point);
+  // Neighborhood methods.
+  void AddNeighbor(Point3f* point, Edge* edge);
+
+  void ResetNeighborhood();
+
+  // Returns 0 if not neighbor.
+  Edge* GetEdgeTo(const Point3f* point) const;
 
   void GetNeighborhood(std::vector<Point3f*>* neighborhood);
 
@@ -43,6 +50,7 @@ class Point3f {
   uint8_t* colors_array_offset_;
   float norm_;
   std::vector<Point3f*> neighborhood_;
+  std::vector<Edge*> edges_;
 };
 
 class Edge {

@@ -16,6 +16,7 @@ Point3f::Point3f(uint16_t id, float x, float y, float z,
     colors_array_offset_(colors_array_offset) {
   SetPosition(x, y, z);
   neighborhood_.reserve(6);  // Maximal numer of neighbors.
+  edges_.reserve(6);
 }
 
 void Point3f::Normalize(float target_norm) {
@@ -57,8 +58,9 @@ float Point3f::SquaredDistanceTo(float x, float y, float z) {
          pow(vertices_array_offset_[2] - z, 2);
 }
 
-void Point3f::AddNeighbor(Point3f* point) {
+void Point3f::AddNeighbor(Point3f* point, Edge* edge) {
   neighborhood_.push_back(point);
+  edges_.push_back(edge);
 }
 
 void Point3f::GetNeighborhood(std::vector<Point3f*>* neighborhood) {
@@ -76,9 +78,27 @@ void Point3f::GetPosition(float* dst) const {
   memcpy(dst, vertices_array_offset_, sizeof(float) * 3);
 }
 
+void Point3f::ResetNeighborhood() {
+  neighborhood_.clear();
+  edges_.clear();
+}
+
+Edge* Point3f::GetEdgeTo(const Point3f* point) const {
+  const uint8_t n_neighbors = neighborhood_.size();
+  for (uint8_t i = 0; i < n_neighbors; ++i) {
+    if (neighborhood_[i] == point) {
+      return edges_[i];
+    }
+  }
+  return 0;
+}
+
 // Edge ---------------------------------------------------------------------
 Edge::Edge(Point3f* p1, Point3f* p2)
-  : p1_(p1), p2_(p2), middle_point_(0) {}
+  : p1_(p1), p2_(p2), middle_point_(0) {
+  p1->AddNeighbor(p2, this);
+  p2->AddNeighbor(p1, this);
+}
 
 const Point3f* Edge::MiddlePoint(Point3f* middle_point) {
   if (middle_point) {
