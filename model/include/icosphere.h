@@ -16,7 +16,7 @@ class Icosphere {
 
   ~Icosphere();
 
-  void Build(const std::string& src_file);
+  void Build(const std::string& src_file, float radius = 1.0f);
 
   // Drawing textured mesh.
   void Draw() const;
@@ -53,7 +53,6 @@ class Icosphere {
   // Using for drawing icosphere grid. One color for internal vertices, other
   // color for vertices on initial edges.
   uint8_t* colors_array_;
-  float radius_;
   uint8_t n_splits_;
 };
 

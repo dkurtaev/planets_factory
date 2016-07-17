@@ -20,9 +20,9 @@
 #include "include/shaders_factory.h"
 
 Icosphere::Icosphere(float radius, const std::string& src_file)
-  : radius_(radius), vertices_array_(0), indices_array_(0), tex_coord_array_(0),
+  : vertices_array_(0), indices_array_(0), tex_coord_array_(0),
     colors_array_(0) {
-  Build(src_file);
+  Build(src_file, radius);
 }
 
 Icosphere::~Icosphere() {
@@ -48,7 +48,7 @@ void Icosphere::Clear() {
   delete[] tex_coord_array_;
 }
 
-void Icosphere::Build(const std::string& src_file) {
+void Icosphere::Build(const std::string& src_file, float radius) {
   // Characteristics of icosahedron.
   static const unsigned kInitNumTriangles = 20;
   static const unsigned kInitNumVertices = 12;
@@ -94,7 +94,8 @@ void Icosphere::Build(const std::string& src_file) {
   // h = sqrt(rr / (1 + (1+sqrt(5))^2 / 4))
   // h = sqrt(rr / (1 + (1+5+2sqrt(5)) / 4))
   // h = sqrt(rr / (1 + 1.5 + sqrt(5) / 2))
-  const float h = sqrt(radius_ * radius_ / (2.5 + 0.5 * sqrt(5)));
+  // Initial radius is 1. After renormalization.
+  const float h = sqrt(1.0f / (2.5 + 0.5 * sqrt(5)));
   const float w = 0.5 * (1 + sqrt(5)) * h;
 
   // Vertices.
@@ -181,6 +182,12 @@ void Icosphere::Build(const std::string& src_file) {
       vertices_[i]->Normalize(norms[i]);
     }
     delete[] norms;
+  } else {
+    if (radius != 1.0f) {
+      for (unsigned i = 0; i < kNumVertices; ++i) {
+        vertices_[i]->Normalize(radius);
+      }
+    }
   }
 }
 
@@ -291,7 +298,7 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
                                vertices_array_ + id * 3,  // Offsets to
                                colors_array_ + id * 3);   // shared data.
     edges->operator[](i)->MiddlePoint(middle_point);
-    middle_point->Normalize(radius_);
+    middle_point->Normalize(1.0f);
     vertices_.push_back(middle_point);
   }
 
