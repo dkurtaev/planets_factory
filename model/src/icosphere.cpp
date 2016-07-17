@@ -136,6 +136,25 @@ void Icosphere::Build(const std::string& src_file, float radius) {
     SplitTriangles(&edges);
   }
 
+  if (src_file != "") {
+    float* norms = new float[kNumVertices];
+    std::ifstream file(src_file.c_str(), std::ifstream::binary);
+    CHECK(file.is_open());
+    file.seekg(sizeof(n_splits_));  // Skip.
+    file.read(reinterpret_cast<char*>(norms), sizeof(float) * kNumVertices);
+    file.close();
+    for (unsigned i = 0; i < kNumVertices; ++i) {
+      vertices_[i]->Normalize(norms[i]);
+    }
+    delete[] norms;
+  } else {
+    if (radius != 1.0f) {
+      for (unsigned i = 0; i < kNumVertices; ++i) {
+        vertices_[i]->Normalize(radius);
+      }
+    }
+  }
+
   CHECK(triangles_.size() == kNumTriangles);
   CHECK(edges.size() == kNumEdges);
   CHECK(vertices_.size() == kNumVertices);
@@ -170,24 +189,6 @@ void Icosphere::Build(const std::string& src_file, float radius) {
   }
   for (unsigned i = 0; i < kNumEdges; ++i) {
     delete edges[i];
-  }
-  if (src_file != "") {
-    float* norms = new float[kNumVertices];
-    std::ifstream file(src_file.c_str(), std::ifstream::binary);
-    CHECK(file.is_open());
-    file.seekg(sizeof(n_splits_));  // Skip.
-    file.read(reinterpret_cast<char*>(norms), sizeof(float) * kNumVertices);
-    file.close();
-    for (unsigned i = 0; i < kNumVertices; ++i) {
-      vertices_[i]->Normalize(norms[i]);
-    }
-    delete[] norms;
-  } else {
-    if (radius != 1.0f) {
-      for (unsigned i = 0; i < kNumVertices; ++i) {
-        vertices_[i]->Normalize(radius);
-      }
-    }
   }
 }
 
