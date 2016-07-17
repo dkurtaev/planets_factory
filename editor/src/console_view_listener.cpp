@@ -3,7 +3,6 @@
 #include "include/console_view_listener.h"
 
 #include <string>
-#include <iostream>
 
 #define GLUT_KEY_BACKSPACE 8
 #define GLUT_KEY_ENTER 13
@@ -21,7 +20,6 @@ ConsoleViewListener::ConsoleViewListener(ConsoleView* console_view,
 }
 
 void ConsoleViewListener::KeyPressed(uint8_t key, int x, int y) {
-  std::cout << (int)key << std::endl;
   std::string str;
   console_view_->GetText(&str);
   switch (key) {
