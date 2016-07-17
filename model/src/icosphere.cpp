@@ -54,7 +54,7 @@ void Icosphere::Build(const std::string& src_file, float radius) {
   static const unsigned kInitNumVertices = 12;
   static const unsigned kInitNumEdges = 30;
   // Number of triangles splitting procedure calls.
-  static const unsigned kNumSplits = 3;
+  static const unsigned kNumSplits = 4;
   // Colors of grid nodes.
   static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
   static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
@@ -163,13 +163,6 @@ void Icosphere::Build(const std::string& src_file, float radius) {
     triangles_[i]->GetIndices(indices_array_ + i * 3);
     triangles_[i]->GetTexCoords(tex_coord_array_ + i * 6);
   }
-  Point3f* p1;
-  Point3f* p2;
-  for (unsigned i = 0; i < kNumEdges; ++i) {
-    edges[i]->GetPoints(&p1, &p2);
-    p1->AddNeighbor(p2);
-    p2->AddNeighbor(p1);
-  }
 
   Point3f* vertex;
   bool vertex_on_init_edge;
@@ -194,29 +187,18 @@ void Icosphere::Build(const std::string& src_file, float radius) {
 
 void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
                             std::vector<Edge*>* edges) {
-  uint16_t pairs[3][2];
-  pairs[0][0] = v1; pairs[0][1] = v2;
-  pairs[1][0] = v2; pairs[1][1] = v3;
-  pairs[2][0] = v3; pairs[2][1] = v1;
+  Point3f* pairs[3][2];
+  pairs[0][0] = vertices_[v1]; pairs[0][1] = vertices_[v2];
+  pairs[1][0] = vertices_[v2]; pairs[1][1] = vertices_[v3];
+  pairs[2][0] = vertices_[v3]; pairs[2][1] = vertices_[v1];
 
   Edge* traingle_edges[3];
   Edge* edge = 0;
-  int n_edges = edges->size();
-  for (int i = 0; i < 3; ++i) {
-    // Check if edge exists.
-    traingle_edges[i] = 0;
-    for (int j = 0; j < n_edges; ++j) {
-      edge = edges->operator[](j);
-      if (edge->CompareTo(pairs[i][0], pairs[i][1])) {
-        traingle_edges[i] = edge;
-        break;
-      }
-    }
+  for (uint8_t i = 0; i < 3; ++i) {
+    traingle_edges[i] = pairs[i][0]->GetEdgeTo(pairs[i][1]);
     if (!traingle_edges[i]) {
-      traingle_edges[i] = new Edge(vertices_[pairs[i][0]],
-                                   vertices_[pairs[i][1]]);
+      traingle_edges[i] = new Edge(pairs[i][0], pairs[i][1]);
       edges->push_back(traingle_edges[i]);
-      ++n_edges;
     }
   }
   Triangle* new_triangle = new Triangle(vertices_[v1], vertices_[v2],
@@ -290,6 +272,10 @@ void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
   const unsigned n_triangles = triangles_.size();
   const unsigned n_vertices = vertices_.size();
   const unsigned n_edges = edges->size();
+
+  for (unsigned i = 0; i < n_vertices; ++i) {
+    vertices_[i]->ResetNeighborhood();
+  }
 
   // Split each edge in halfs.
   Point3f* middle_point;
