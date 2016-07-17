@@ -3,7 +3,7 @@
 #include "include/change_color_button.h"
 
 ChangeColorButton::ChangeColorButton()
-  : Button("Change color") {
+  : Button("Palette") {
   palette_view_ = new PaletteView();
   palette_view_->Hide();
 }

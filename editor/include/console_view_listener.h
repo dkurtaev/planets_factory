@@ -9,15 +9,22 @@
 
 #include "include/glview_listener.h"
 #include "include/console_view.h"
+#include "include/save_button.h"
+#include "include/switcher.h"
 
 class ConsoleViewListener : public GLViewListener {
  public:
-  explicit ConsoleViewListener(ConsoleView* console_view);
+  ConsoleViewListener(ConsoleView* console_view, SaveButton* save_button,
+                      Switcher* draw_grid_switcher,
+                      Switcher* colorizer_switcher);
 
   virtual void KeyPressed(uint8_t key, int x, int y);
 
  private:
   ConsoleView* console_view_;
+  SaveButton* save_button_;
+  Switcher* draw_grid_switcher_;
+  Switcher* colorizer_switcher_;
 };
 
 #endif  // EDITOR_INCLUDE_CONSOLE_VIEW_LISTENER_H_

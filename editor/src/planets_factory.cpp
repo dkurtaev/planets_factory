@@ -68,11 +68,14 @@ int main(int argc, char** argv) {
   planet_view.AsRootView();
 
   ConsoleView console_view(&planet_view);
-  ConsoleViewListener console_view_listener(&console_view);
-  planet_view.AddListener(&console_view_listener);
 
-  SaveButton save_buton(&icosphere, &console_view);
-  LoadButton load_buton(&icosphere, &console_view);
+  SaveButton save_button(&icosphere, &console_view);
+  LoadButton load_button(&icosphere, &console_view);
+
+  ConsoleViewListener console_view_listener(&console_view, &save_button,
+                                            &draw_grid_switcher,
+                                            &texture_colorizer_enable_switcher);
+  planet_view.AddListener(&console_view_listener);
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
@@ -82,8 +85,8 @@ int main(int argc, char** argv) {
   buttons.push_back(&move_down_mover_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
-  buttons.push_back(&save_buton);
-  buttons.push_back(&load_buton);
+  buttons.push_back(&save_button);
+  buttons.push_back(&load_button);
   ActionsView actions_view(buttons, &planet_view);
   actions_view.AddListener(&console_view_listener);
 
