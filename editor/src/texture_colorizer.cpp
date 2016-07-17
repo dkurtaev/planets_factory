@@ -63,8 +63,8 @@ TextureColorizer::~TextureColorizer() {
 
 void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
                                 float bary_p2, float bary_p3) {
-  // Maximal brush size is half of triangles height. Texture has height
-  // of 3 triangles heights and width of 5.5 triangles widths.
+  // Maximal brush size is a half of triangles height.
+  // Texture has height of 3 triangles heights.
   const unsigned kMaxBrushSize = texture_->rows * (0.5f / 3.0f);
   const unsigned kBrushSize = brush_size_button_->GetBrushSize(kMaxBrushSize);
   static const uint8_t kNumTriangles = 20;
@@ -117,12 +117,12 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   // (00, 03, 04) - found triangle under touch.
   const float rows_ratio = 2.0f / 3.0f;
   const float cols_ratio = 2.0f / 5.5f;
-  cv::Mat mask = cv::Mat::zeros(texture_->rows * rows_ratio,
-                                texture_->cols * cols_ratio, CV_8UC1);
+  const unsigned mask_height = texture_->rows * rows_ratio;
+  const unsigned mask_width = texture_->cols * cols_ratio;
 
   // Indices of fan center respectively triangles points.
   uint8_t fan_centers[5];
-  // Indices of triangles of fan.
+  // Indices of triangles in fan.
   uint8_t fan_triangles[5];
   fan_centers[2] = (bary_p2 > bary_p1 ? (bary_p3 > bary_p2 ? 2 : 1) :
                                         (bary_p3 > bary_p1 ? 2 : 0));
@@ -187,7 +187,8 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
     }
   }
 
-  // Drawing circle on mask.
+  // Drawing circle on each texture triangles. For it warp circle center from
+  // support mask coordinates to origin texture coordinates.
   float fan_points_tex_coords[][2] = {
     {0.50f, 0.50f}, {0.25f, 0.00f}, {0.00f, 0.50f}, {0.25f, 1.00f},
     {0.75f, 1.00f}, {1.00f, 0.50f}, {0.75f, 0.00f}};
@@ -207,20 +208,19 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
                       barycentric_coords[vert_idx];
     vert_idx = (vert_idx + 1) % 3;
   }
-  cirle_center.x *= mask.cols;
-  cirle_center.y *= mask.rows;
-  cv::circle(mask, cirle_center, kBrushSize, cv::Scalar(1), CV_FILLED);
+  cirle_center.x *= mask_width;
+  cirle_center.y *= mask_height;
 
   // Warp each triangle from mask to origin.
   std::vector<cv::Point2f> origin_tex_coords(3);
   std::vector<cv::Point2f> mask_tex_coords(3);
   for (uint8_t i = 0; i < 5; ++i) {
-    mask_tex_coords[0].x = fan_points_tex_coords[0][0] * (mask.cols - 1);
-    mask_tex_coords[0].y = fan_points_tex_coords[0][1] * (mask.rows - 1);
-    mask_tex_coords[1].x = fan_points_tex_coords[i + 1][0] * (mask.cols - 1);
-    mask_tex_coords[1].y = fan_points_tex_coords[i + 1][1] * (mask.rows - 1);
-    mask_tex_coords[2].x = fan_points_tex_coords[i + 2][0] * (mask.cols - 1);
-    mask_tex_coords[2].y = fan_points_tex_coords[i + 2][1] * (mask.rows - 1);
+    mask_tex_coords[0].x = fan_points_tex_coords[0][0] * (mask_width - 1);
+    mask_tex_coords[0].y = fan_points_tex_coords[0][1] * (mask_height - 1);
+    mask_tex_coords[1].x = fan_points_tex_coords[i + 1][0] * (mask_width - 1);
+    mask_tex_coords[1].y = fan_points_tex_coords[i + 1][1] * (mask_height - 1);
+    mask_tex_coords[2].x = fan_points_tex_coords[i + 2][0] * (mask_width - 1);
+    mask_tex_coords[2].y = fan_points_tex_coords[i + 2][1] * (mask_height - 1);
 
     // For checking that triangle has masked points, check that circle center
     // is inside radius-area of target triangle.
@@ -287,34 +287,21 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
         origin_tex_coords[j].y = src[vert_idx * 2 + 1] * (texture_->rows - 1);
         vert_idx = (vert_idx + 1) % 3;
       }
+
       cv::Rect origin_rect = cv::boundingRect(origin_tex_coords);
-      cv::Rect mask_rect = cv::boundingRect(mask_tex_coords);
-
       cv::Mat origin_roi = (*texture_)(origin_rect);
-      cv::Mat mask_roi = mask(mask_rect);
-
       for (uint8_t j = 0; j < 3; ++j) {
         origin_tex_coords[j].x -= origin_rect.tl().x;
         origin_tex_coords[j].y -= origin_rect.tl().y;
-        mask_tex_coords[j].x -= mask_rect.tl().x;
-        mask_tex_coords[j].y -= mask_rect.tl().y;
       }
 
-      // Mask of triangle of interest.
-      cv::Mat submask = cv::Mat::zeros(mask_roi.size(), CV_8UC1);
-      cv::Point mask_tex_coords_int[3];
-      for (uint8_t j = 0; j < 3; ++j) {
-        mask_tex_coords_int[j] = mask_tex_coords[j];
-      }
-      cv::fillConvexPoly(submask, mask_tex_coords_int, 3, cv::Scalar(1));
-      cv::dilate(submask, submask, cv::Mat());
-      submask &= mask_roi;
-      // Compute transformation matrix.
+      // Compute transformation matrix and warp circle center.
       cv::Mat transf_mat = cv::getAffineTransform(mask_tex_coords,
                                                   origin_tex_coords);
-      // Apply transformation matrix.
-      cv::warpAffine(submask, submask, transf_mat, origin_roi.size());
-      origin_roi.setTo(cv_color, submask);
+      std::vector<cv::Point2f> warped_points(1, cirle_center);
+      cv::transform(warped_points, warped_points, transf_mat);
+
+      cv::circle(origin_roi, warped_points[0], kBrushSize, cv_color, CV_FILLED);
     }
   }
 }
