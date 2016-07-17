@@ -3,6 +3,8 @@
 #ifndef EDITOR_INCLUDE_SAVE_BUTTON_H_
 #define EDITOR_INCLUDE_SAVE_BUTTON_H_
 
+#include <string>
+
 #include "include/button.h"
 #include "include/icosphere.h"
 #include "include/console_view.h"
