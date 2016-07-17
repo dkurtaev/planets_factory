@@ -27,13 +27,21 @@ void VerticesMover::DoAction(Point3f* vertex) {
 
   std::vector<Point3f*> area_level(1, vertex);
   std::vector<Point3f*> neighborhood;
-  std::set<Point3f*> unique_neighbors;
+  std::vector<Point3f*> unique_neighbors;
+  std::set<Point3f*> unique_vertices;
   std::vector<Point3f*>::iterator it;
 
+  unique_vertices.insert(vertex);
   for (unsigned i = 1; i <= kAreaRadius; ++i) {
     for (it = area_level.begin(); it != area_level.end(); ++it) {
       (*it)->GetNeighborhood(&neighborhood);
-      unique_neighbors.insert(neighborhood.begin(), neighborhood.end());
+      const unsigned n_neighbors = neighborhood.size();
+      for (unsigned j = 0; j < n_neighbors; ++j) {
+        vertex = neighborhood[j];
+        if (unique_vertices.insert(vertex).second) {  // If new vertex.
+          unique_neighbors.push_back(vertex);
+        }
+      }
     }
 
     area_level.resize(unique_neighbors.size());
@@ -44,7 +52,9 @@ void VerticesMover::DoAction(Point3f* vertex) {
     for (it = area_level.begin(); it != area_level.end(); ++it) {
       vertex = *it;
       norm = vertex->GetNorm();
-      vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
+      float ratio = 1.0f - static_cast<float>(i) / (1.0f + kAreaRadius);
+      float power = kIncrement * ratio;
+      vertex->Normalize(norm + (is_move_up_ ? power : -power));
     }
   }
 }
