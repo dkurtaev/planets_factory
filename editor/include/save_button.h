@@ -18,8 +18,6 @@ class SaveButton : public Button {
  private:
   const Icosphere* icosphere_;
   ConsoleView* console_view_;
-  // If true, check console listener for new command (saving path expected).
-  bool waiting_path_;
 };
 
 #endif  // EDITOR_INCLUDE_SAVE_BUTTON_H_
