@@ -7,10 +7,11 @@
 
 #include "include/toucher.h"
 #include "include/structures.h"
+#include "include/backtrace.h"
 
 class TrianglesToucher : public Toucher {
  public:
-  explicit TrianglesToucher(std::vector<Triangle*>* triangles);
+  TrianglesToucher(std::vector<Triangle*>* triangles, Backtrace* backtrace);
 
  protected:
   virtual void DoAction(Triangle* triangle, float bary_p1, float bary_p2,

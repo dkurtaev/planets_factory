@@ -11,8 +11,20 @@
 #include "include/change_color_button.h"
 #include "include/switcher.h"
 #include "include/brush_size_button.h"
+#include "include/backtrace.h"
 
 #include <opencv2/opencv.hpp>
+
+class TextureColorizerAction : public Action {
+ public:
+  TextureColorizerAction(cv::Mat* texture);
+
+  virtual void Undo();
+
+ private:
+  cv::Mat* texture_;
+  cv::Mat texture_copy_;
+};
 
 class TextureColorizer : public TrianglesToucher {
  public:
@@ -20,7 +32,8 @@ class TextureColorizer : public TrianglesToucher {
                    std::vector<Triangle*>* triangles,
                    const ChangeColorButton* change_color_button,
                    const BrushSizeButton* brush_size_button,
-                   Switcher* is_enabled_swither);
+                   Switcher* is_enabled_swither,
+                   Backtrace* backtrace);
 
   ~TextureColorizer();
 
@@ -38,6 +51,10 @@ class TextureColorizer : public TrianglesToucher {
   bool IsIncludes(const float* triangle_uvs, const float* point_uvs,
                   float* bary_p1, float* bary_p2, float* bary_p3) const;
 
+  virtual void InitAction();
+
+  virtual void FlushAction(Backtrace* backtrace);
+
   cv::Mat* texture_;
   const ChangeColorButton* change_color_button_;
   const BrushSizeButton* brush_size_button_;
@@ -49,6 +66,7 @@ class TextureColorizer : public TrianglesToucher {
   //     \/
   std::vector<uint8_t*> ico_neighbors_;
   std::vector<float*> ico_tex_coords_;
+  TextureColorizerAction* action_;
 };
 
 #endif  // EDITOR_INCLUDE_TEXTURE_COLORIZER_H_

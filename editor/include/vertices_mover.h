@@ -26,12 +26,11 @@ class VerticesMover : public VerticesToucher {
 
   virtual void InitAction();
 
-  virtual void FlushAction();
+  virtual void FlushAction(Backtrace* backtrace);
 
   // Flags for moving vertices up / down by normal.
   bool is_move_up_;
   bool is_move_down_;
-  Backtrace* backtrace_;
   std::map<Point3f*, float> action_data_;
 };
 

@@ -47,7 +47,8 @@ int main(int argc, char** argv) {
   TextureColorizer texture_colorizer(&texture, init_triangles,
                                      &change_color_button,
                                      &brush_size_button,
-                                     &texture_colorizer_enable_switcher);
+                                     &texture_colorizer_enable_switcher,
+                                     &backtrace);
 
   Switcher move_up_mover_switcher("Terrain up");
   Switcher move_down_mover_switcher("Terrain down");

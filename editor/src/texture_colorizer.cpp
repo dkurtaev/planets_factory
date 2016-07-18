@@ -15,15 +15,17 @@ TextureColorizer::TextureColorizer(cv::Mat* texture,
                                    std::vector<Triangle*>* triangles,
                                    const ChangeColorButton* change_color_button,
                                    const BrushSizeButton* brush_size_button,
-                                   Switcher* is_enabled_swither)
-  : TrianglesToucher(triangles), change_color_button_(change_color_button),
-    texture_(texture), brush_size_button_(brush_size_button) {
-  is_enabled_swither->SetFlag(&is_enabled_);
-
+                                   Switcher* is_enabled_swither,
+                                   Backtrace* backtrace)
+  : TrianglesToucher(triangles, backtrace), texture_(texture),
+    change_color_button_(change_color_button), action_(0),
+    brush_size_button_(brush_size_button) {
   static const uint8_t kNumTriangles = 20;
   static const uint8_t kNumTexCoords = 6;
   static const uint8_t kNumTriPoints = 3;
   static const float kNormRatio = 1.0f / UINT16_MAX;
+
+  is_enabled_swither->SetFlag(&is_enabled_);
 
   // Read texture data from resource files.
   std::ifstream tex_coords_file("../res/tex_coords/coords_1.txt");
@@ -337,4 +339,22 @@ bool TextureColorizer::IsIncludes(const float* triangle_uvs,
   }
   *bary_p3 = 1.0f - *bary_p1 - *bary_p2;
   return (-kZeroLimit <= *bary_p3 && *bary_p3 <= 1.0f + kZeroLimit);
+}
+
+void TextureColorizer::InitAction() {
+  action_ = new TextureColorizerAction(texture_);
+}
+
+void TextureColorizer::FlushAction(Backtrace* backtrace) {
+  backtrace->AddAction(action_);
+  action_ = 0;
+}
+
+TextureColorizerAction::TextureColorizerAction(cv::Mat* texture)
+  : texture_(texture) {
+  texture_copy_ = texture->clone();
+}
+
+void TextureColorizerAction::Undo() {
+  texture_copy_.copyTo(*texture_);
 }

@@ -4,8 +4,8 @@
 
 #include <GL/freeglut.h>
 
-Toucher::Toucher()
-  : left_button_pressed_(false) {}
+Toucher::Toucher(Backtrace* backtrace)
+  : left_button_pressed_(false), backtrace_(backtrace) {}
 
 void Toucher::MouseFunc(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
@@ -14,7 +14,7 @@ void Toucher::MouseFunc(int button, int state, int x, int y) {
       InitAction();
       ProcessTouch(x, y);
     } else {
-      FlushAction();
+      FlushAction(backtrace_);
     }
   }
 }

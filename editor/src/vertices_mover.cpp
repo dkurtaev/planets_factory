@@ -13,8 +13,8 @@ VerticesMover::VerticesMover(std::vector<Point3f*>* vertices,
                              Switcher* is_move_up_swither,
                              Switcher* is_move_down_swither,
                              Backtrace* backtrace)
-  : VerticesToucher(vertices), is_move_up_(false), is_move_down_(false),
-    backtrace_(backtrace) {
+  : VerticesToucher(vertices, backtrace), is_move_up_(false),
+    is_move_down_(false) {
   is_move_up_swither->SetFlag(&is_move_up_);
   is_move_down_swither->SetFlag(&is_move_down_);
 }
@@ -75,8 +75,8 @@ void VerticesMover::InitAction() {
   action_data_.clear();
 }
 
-void VerticesMover::FlushAction() {
-  backtrace_->AddAction(new VerticesMoverAction(action_data_));
+void VerticesMover::FlushAction(Backtrace* backtrace) {
+  backtrace->AddAction(new VerticesMoverAction(action_data_));
 }
 
 VerticesMoverAction::VerticesMoverAction(const std::map<Point3f*, float>& data)

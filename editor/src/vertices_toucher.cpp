@@ -5,8 +5,9 @@
 #include <vector>
 #include <cfloat>
 
-VerticesToucher::VerticesToucher(std::vector<Point3f*>* vertices)
-  : vertices_(vertices) {}
+VerticesToucher::VerticesToucher(std::vector<Point3f*>* vertices,
+                                 Backtrace* backtrace)
+  : Toucher(backtrace), vertices_(vertices) {}
 
 void VerticesToucher::ProcessTouch(float x, float y, float z) {
   // Find nearest vertex.
