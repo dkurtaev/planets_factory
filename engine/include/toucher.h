@@ -18,6 +18,12 @@ class Toucher : public GLViewListener {
  protected:
   virtual void ProcessTouch(float x, float y, float z) = 0;
 
+  // Initialize new action for writing.
+  virtual void InitAction() {};
+
+  // When mouse button released, write action to backtrace.
+  virtual void FlushAction() {};
+
  private:
   void ProcessTouch(int x, int y);
 

@@ -17,6 +17,7 @@
 #include "include/load_button.h"
 #include "include/console_view.h"
 #include "include/console_view_listener.h"
+#include "include/backtrace.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -31,6 +32,7 @@ int main(int argc, char** argv) {
   Icosphere icosphere(4);
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
+  Backtrace backtrace;
 
   std::vector<Triangle*>* init_triangles = icosphere.GetInitTriangles();
   std::vector<Triangle*>* triangles = icosphere.GetTriangles();
@@ -50,7 +52,8 @@ int main(int argc, char** argv) {
   Switcher move_up_mover_switcher("Terrain up");
   Switcher move_down_mover_switcher("Terrain down");
   VerticesMover vertices_mover(vertices, &move_up_mover_switcher,
-                               &move_down_mover_switcher);
+                               &move_down_mover_switcher,
+                               &backtrace);
   std::vector<Switcher*> radio_group;
   move_up_mover_switcher.AddToRadioGroup(&radio_group);
   move_down_mover_switcher.AddToRadioGroup(&radio_group);
@@ -71,11 +74,12 @@ int main(int argc, char** argv) {
   ConsoleView console_view(&planet_view);
 
   SaveButton save_button(&icosphere, &console_view);
-  LoadButton load_button(&icosphere, &console_view);
+  LoadButton load_button(&icosphere, &console_view, &backtrace);
 
   ConsoleViewListener console_view_listener(&console_view, &save_button,
                                             &draw_grid_switcher,
-                                            &texture_colorizer_enable_switcher);
+                                            &texture_colorizer_enable_switcher,
+                                            &backtrace);
   planet_view.AddListener(&console_view_listener);
 
   std::vector<Button*> buttons;

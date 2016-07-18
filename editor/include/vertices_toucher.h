@@ -17,7 +17,7 @@ class VerticesToucher : public Toucher {
   virtual void DoAction(Point3f* vertex) = 0;
 
  private:
-  void ProcessTouch(float x, float y, float z);
+  virtual void ProcessTouch(float x, float y, float z);
 
   std::vector<Point3f*>* vertices_;
 };
