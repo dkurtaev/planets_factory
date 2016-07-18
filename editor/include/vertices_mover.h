@@ -36,7 +36,7 @@ class VerticesMover : public VerticesToucher {
 
 class VerticesMoverAction : public Action {
  public:
-  VerticesMoverAction(const std::map<Point3f*, float>& data);
+  explicit VerticesMoverAction(const std::map<Point3f*, float>& data);
 
   virtual void Undo();
 

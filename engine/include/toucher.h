@@ -8,7 +8,7 @@
 
 class Toucher : public GLViewListener {
  public:
-  Toucher(Backtrace* backtrace);
+  explicit Toucher(Backtrace* backtrace);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 

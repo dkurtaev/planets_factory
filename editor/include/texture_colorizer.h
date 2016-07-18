@@ -17,7 +17,7 @@
 
 class TextureColorizerAction : public Action {
  public:
-  TextureColorizerAction(cv::Mat* texture);
+  explicit TextureColorizerAction(cv::Mat* texture);
 
   virtual void Undo();
 

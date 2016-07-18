@@ -1,7 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef EDITOR_INCLUDE_BACKTRACE_H_
-#define EDITOR_INCLUDE_BACKTRACE_H_
+#ifndef ENGINE_INCLUDE_BACKTRACE_H_
+#define ENGINE_INCLUDE_BACKTRACE_H_
 
 #include <vector>
 
@@ -28,4 +28,4 @@ class Backtrace {
   std::vector<Action*> actions_;
 };
 
-#endif  // EDITOR_INCLUDE_BACKTRACE_H_
+#endif  // ENGINE_INCLUDE_BACKTRACE_H_

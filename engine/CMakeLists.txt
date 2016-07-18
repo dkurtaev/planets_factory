@@ -4,13 +4,15 @@ project(engine)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(sources
+  src/backtrace.cpp
   src/button.cpp
   src/glview.cpp
   src/layout.cpp
   src/toucher.cpp
 )
 
-set(headers	
+set(headers
+  include/backtrace.h
   include/button.h
   include/glview.h
   include/glview_listener.h

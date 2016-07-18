@@ -2,6 +2,7 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/vertices_mover.h"
 
+#include <map>
 #include <set>
 #include <vector>
 #include <utility>
