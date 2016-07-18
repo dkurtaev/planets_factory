@@ -19,6 +19,14 @@ MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
 void MetricsView::Display() {
   TimeCheck();
 
+  timeval now;
+  gettimeofday(&now, 0);
+  if ((now.tv_sec - last_display_.tv_sec) * 1e+3 +
+      (now.tv_usec - last_display_.tv_usec) * 1e-3 < kDisplayDelay) {
+    return;
+  }
+  last_display_ = now;
+
   // Draw info.
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -72,8 +80,9 @@ void MetricsView::DrawTable(std::stringstream* ss) {
   }
   // Draw it.
   const uint8_t n_lines = lines.size();
-  int bmp_height = 0;
+  int font_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
   int bmp_length;
+  glColor3ubv(kFontColor);
   for (uint8_t i = 0; i < n_lines; ++i) {
     std::stringstream dst_ss;
     std::stringstream src_ss(lines[i]);
@@ -87,12 +96,10 @@ void MetricsView::DrawTable(std::stringstream* ss) {
     str = dst_ss.str();
     const uint8_t* text = reinterpret_cast<const uint8_t*>(str.c_str());
     bmp_length = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
-    bmp_height += glutBitmapHeight(GLUT_BITMAP_9_BY_15);
-    glColor3ubv(kFontColor);
-    glRasterPos2i(0, bmp_height);
+    glRasterPos2i(0, font_height * (i + 1));
     glutBitmapString(GLUT_BITMAP_9_BY_15, text);
   }
-  glutReshapeWindow(bmp_length, bmp_height);
+  glutReshapeWindow(bmp_length, font_height * n_lines);
   if (parent_ != 0) {
     glutPositionWindow(parent_->GetWidth() - display_width_, 0);
   }
