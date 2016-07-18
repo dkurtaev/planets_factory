@@ -15,15 +15,15 @@ ConsoleView::ConsoleView(GLView* parent)
 }
 
 void ConsoleView::Display() {
+  timeval now;
+  gettimeofday(&now, 0);
   if (!content_changed_) {
-    timeval now;
-    gettimeofday(&now, 0);
     if ((now.tv_sec - last_display_.tv_sec) * 1e+3 +
         (now.tv_usec - last_display_.tv_usec) * 1e-3 < kDisplayDelay) {
       return;
     }
-    last_display_ = now;
   }
+  last_display_ = now;
 
   glClearColor(0.19f, 0.04f, 0.34f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -66,11 +66,12 @@ void ConsoleView::Display() {
 
   if (parent_ != 0) {
     glutReshapeWindow(parent_->GetWidth(), bmp_height);
+    glutPostRedisplay();
     glutPositionWindow(0, parent_->GetHeight() - bmp_height);
   } else {
     glutReshapeWindow(bmp_width, bmp_height);
+    glutPostRedisplay();
   }
-  glutPostRedisplay();
   glutSwapBuffers();
 
   content_changed_= display_height_ != bmp_height;  // For dynamically growing.
