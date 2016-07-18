@@ -8,16 +8,17 @@
 
 #include "include/toucher.h"
 #include "include/structures.h"
+#include "include/backtrace.h"
 
 class VerticesToucher : public Toucher {
  public:
-  explicit VerticesToucher(std::vector<Point3f*>* vertices);
+  VerticesToucher(std::vector<Point3f*>* vertices, Backtrace* backtrace);
 
  protected:
   virtual void DoAction(Point3f* vertex) = 0;
 
  private:
-  void ProcessTouch(float x, float y, float z);
+  virtual void ProcessTouch(float x, float y, float z);
 
   std::vector<Point3f*>* vertices_;
 };

@@ -4,10 +4,11 @@
 #define ENGINE_INCLUDE_TOUCHER_H_
 
 #include "include/glview_listener.h"
+#include "include/backtrace.h"
 
 class Toucher : public GLViewListener {
  public:
-  Toucher();
+  explicit Toucher(Backtrace* backtrace);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
@@ -18,6 +19,12 @@ class Toucher : public GLViewListener {
  protected:
   virtual void ProcessTouch(float x, float y, float z) = 0;
 
+  // Initialize new action for writing.
+  virtual void InitAction() = 0;
+
+  // When mouse button released, write action to backtrace.
+  virtual void FlushAction(Backtrace* backtrace) = 0;
+
  private:
   void ProcessTouch(int x, int y);
 
@@ -25,6 +32,7 @@ class Toucher : public GLViewListener {
   double world_x_;
   double world_y_;
   double world_z_;
+  Backtrace* backtrace_;
 };
 
 #endif  // ENGINE_INCLUDE_TOUCHER_H_

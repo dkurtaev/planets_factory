@@ -4,8 +4,9 @@
 
 #include <vector>
 
-TrianglesToucher::TrianglesToucher(std::vector<Triangle*>* triangles)
-  : triangles_(triangles) {}
+TrianglesToucher::TrianglesToucher(std::vector<Triangle*>* triangles,
+                                   Backtrace* backtrace)
+  : Toucher(backtrace), triangles_(triangles) {}
 
 void TrianglesToucher::ProcessTouch(float x, float y, float z) {
   // Find triangle.

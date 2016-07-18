@@ -2,6 +2,7 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/vertices_mover.h"
 
+#include <map>
 #include <set>
 #include <vector>
 #include <utility>
@@ -11,8 +12,10 @@
 
 VerticesMover::VerticesMover(std::vector<Point3f*>* vertices,
                              Switcher* is_move_up_swither,
-                             Switcher* is_move_down_swither)
-  : VerticesToucher(vertices), is_move_up_(false), is_move_down_(false) {
+                             Switcher* is_move_down_swither,
+                             Backtrace* backtrace)
+  : VerticesToucher(vertices, backtrace), is_move_up_(false),
+    is_move_down_(false) {
   is_move_up_swither->SetFlag(&is_move_up_);
   is_move_down_swither->SetFlag(&is_move_down_);
 }
@@ -24,6 +27,9 @@ void VerticesMover::DoAction(Point3f* vertex) {
 
   float norm = vertex->GetNorm();
   vertex->Normalize(norm + (is_move_up_ ? kIncrement : -kIncrement));
+  if (action_data_.find(vertex) == action_data_.end()) {
+    action_data_[vertex] = norm;
+  }
 
   std::vector<Point3f*> area_level(1, vertex);
   std::vector<Point3f*> neighborhood;
@@ -55,10 +61,31 @@ void VerticesMover::DoAction(Point3f* vertex) {
       float ratio = 1.0f - static_cast<float>(i) / (1.0f + kAreaRadius);
       float power = kIncrement * ratio;
       vertex->Normalize(norm + (is_move_up_ ? power : -power));
+      if (action_data_.find(vertex) == action_data_.end()) {
+        action_data_[vertex] = norm;
+      }
     }
   }
 }
 
 bool VerticesMover::IsEnabled() {
   return is_move_up_ || is_move_down_;
+}
+
+void VerticesMover::InitAction() {
+  action_data_.clear();
+}
+
+void VerticesMover::FlushAction(Backtrace* backtrace) {
+  backtrace->AddAction(new VerticesMoverAction(action_data_));
+}
+
+VerticesMoverAction::VerticesMoverAction(const std::map<Point3f*, float>& data)
+  : data_(data) {}
+
+void VerticesMoverAction::Undo() {
+  std::map<Point3f*, float>::iterator it;
+  for (it = data_.begin(); it != data_.end(); ++it) {
+    (*it).first->Normalize((*it).second);
+  }
 }

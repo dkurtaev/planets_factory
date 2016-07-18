@@ -5,8 +5,10 @@
 #include <iostream>
 #include <string>
 
-LoadButton::LoadButton(Icosphere* icosphere, ConsoleView* console_view)
-  : Button("Load"), icosphere_(icosphere), console_view_(console_view) {}
+LoadButton::LoadButton(Icosphere* icosphere, ConsoleView* console_view,
+                       Backtrace* backtrace)
+  : Button("Load"), icosphere_(icosphere), console_view_(console_view),
+    backtrace_(backtrace) {}
 
 void LoadButton::MouseFunc(int button, int state, int x, int y) {
   if (!state) {
@@ -27,6 +29,7 @@ void LoadButton::DoEvents() {
     if (idx != -1) {
       command = command.substr(idx + kCommandPrefix.size());
       icosphere_->Build(command);
+      backtrace_->Clear();
       console_view_->Write("Model loaded from " + command);
     } else {
       console_view_->ReturnCommand(command);

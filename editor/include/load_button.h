@@ -6,10 +6,12 @@
 #include "include/button.h"
 #include "include/icosphere.h"
 #include "include/console_view.h"
+#include "include/backtrace.h"
 
 class LoadButton : public Button {
  public:
-  LoadButton(Icosphere* icosphere, ConsoleView* console_view);
+  LoadButton(Icosphere* icosphere, ConsoleView* console_view,
+             Backtrace* backtrace);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
@@ -18,6 +20,7 @@ class LoadButton : public Button {
  private:
   Icosphere* icosphere_;
   ConsoleView* console_view_;
+  Backtrace* backtrace_;
 };
 
 #endif  // EDITOR_INCLUDE_LOAD_BUTTON_H_
