@@ -5,7 +5,7 @@
 #include <GL/freeglut.h>
 
 Toucher::Toucher(Backtrace* backtrace)
-  : left_button_pressed_(false), backtrace_(backtrace) {}
+  : left_button_pressed_(false), backtrace_(backtrace), infinity_touch_(true) {}
 
 void Toucher::MouseFunc(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
@@ -26,7 +26,7 @@ void Toucher::MouseMove(int x, int y) {
 }
 
 void Toucher::DoEvents() {
-  if (left_button_pressed_) {
+  if (left_button_pressed_ && !infinity_touch_) {
     ProcessTouch(world_x_, world_y_, world_z_);
   }
 }
@@ -44,7 +44,10 @@ void Toucher::ProcessTouch(int x, int y) {
   glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
   // If not infinity.
   if (z != 1.0f) {
+    infinity_touch_ = false;
     gluUnProject(x, y, z, model, proj, view, &world_x_, &world_y_, &world_z_);
     ProcessTouch(world_x_, world_y_, world_z_);
+  } else {
+    infinity_touch_ = true;
   }
 }
