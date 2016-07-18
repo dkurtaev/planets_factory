@@ -123,7 +123,7 @@ GLView* GLView::GetActiveGLView() {
 
 void GLView::CloseFunc() {
   const int handle = glutGetWindow();
-  GLView* view;
+  GLView* view = 0;
   std::vector<GLView*>::iterator it;
   for (it = inherited_views_.begin(); it != inherited_views_.end(); ++it) {
     view = *it;
@@ -132,7 +132,7 @@ void GLView::CloseFunc() {
       break;
     }
   }
-  if (view->root_) {
+  if (view && view->root_) {
     for (it = inherited_views_.begin(); it != inherited_views_.end(); ++it) {
       glutDestroyWindow((*it)->window_handle_);
     }

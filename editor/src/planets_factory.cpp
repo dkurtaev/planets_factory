@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
 
+  std::vector<Triangle*>* init_triangles = icosphere.GetInitTriangles();
   std::vector<Triangle*>* triangles = icosphere.GetTriangles();
   std::vector<Point3f*>* vertices = icosphere.GetVertices();
 
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
     texture.setTo(255);
   }
   Switcher texture_colorizer_enable_switcher("Color");
-  TextureColorizer texture_colorizer(&texture, triangles,
+  TextureColorizer texture_colorizer(&texture, init_triangles,
                                      &change_color_button,
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher);

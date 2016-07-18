@@ -4,6 +4,7 @@
 #define EDITOR_INCLUDE_CONSOLE_VIEW_H_
 
 #include <stdint.h>
+#include <sys/time.h>
 
 #include <string>
 #include <vector>
@@ -40,12 +41,18 @@ class ConsoleView : public GLView {
   static const uint8_t kFontColor[];
   // Number of commands for displaying.
   static const uint8_t kDisplayLogDepth = 3;
+  // Number of milliseconds between redisplaying view.
+  static const unsigned kDisplayDelay = 1000;
 
   std::string text_line_;
   // Last command is empty if processed and not empty if not processed.
   std::string last_command_;
   std::vector<std::string> commands_log_;
   GLView* parent_;
+  // If true, need to redisplay.
+  bool content_changed_;
+  // If content not changes, display by timer.
+  timeval last_display_;
 };
 
 #endif  // EDITOR_INCLUDE_CONSOLE_VIEW_H_

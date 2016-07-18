@@ -100,22 +100,28 @@ class Triangle {
 
   void GetMiddlePointsTexCoords(uint16_t* dst) const;
 
-  // Returns true if point p is inside triangle.
+  // Returns true if point p is inside triangle's cone.
+  // Cone vertex at (0, 0, 0).
   // p1______p2
   //   \ *p /
   //    \  /
   //     \/ p3
   // If true, set barycentric coordinates bary_p* relatively triangle's points.
-  bool IsIncludes(float x, float y, float z, float* bary_p1, float* bary_p2,
-                  float* bary_p3);
+  bool IsInsideCone(float x, float y, float z, float* bary_p1, float* bary_p2,
+                    float* bary_p3);
 
   // Triangle's normal. Not normalized.
   void GetNormal(int8_t* dst);
 
+  void AddSubtriangle(Triangle* subtriangle);
+
+  void GetSubtriangles(std::vector<Triangle*>* subtriangles);
+
  private:
-  Edge** edges_;
-  const Point3f** points_;
+  std::vector<Edge*> edges_;
+  std::vector<const Point3f*> points_;
   uint16_t* texture_coordinates_;
+  std::vector<Triangle*> subtriangles_;
 };
 
 float Determinant(float* col_1, float* col_2, float* col_3);

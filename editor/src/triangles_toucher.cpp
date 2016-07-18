@@ -9,14 +9,24 @@ TrianglesToucher::TrianglesToucher(std::vector<Triangle*>* triangles)
 
 void TrianglesToucher::ProcessTouch(float x, float y, float z) {
   // Find triangle.
-  const unsigned n_tris = triangles_->size();
+  std::vector<Triangle*> subtriangles(*triangles_);
   Triangle* triangle;
   float bary_p1, bary_p2, bary_p3;
-  for (unsigned i = 0; i < n_tris; ++i) {
-    triangle = triangles_->operator[](i);
-    if (triangle->IsIncludes(x, y, z, &bary_p1, &bary_p2, &bary_p3)) {
-      DoAction(triangle, bary_p1, bary_p2, bary_p3);
-      break;
+  unsigned n_tris;
+  bool found;
+  do {
+    found = false;
+    n_tris = subtriangles.size();
+    for (unsigned i = 0; i < n_tris; ++i) {
+      triangle = subtriangles[i];
+      if (triangle->IsInsideCone(x, y, z, &bary_p1, &bary_p2, &bary_p3)) {
+        triangle->GetSubtriangles(&subtriangles);
+        found = true;
+        break;
+      }
     }
+  } while (!subtriangles.empty() && found);
+  if (found) {
+    DoAction(triangle, bary_p1, bary_p2, bary_p3);
   }
 }

@@ -24,6 +24,8 @@ class MetricsView : public GLView {
 
  private:
   static const uint8_t kFontColor[];
+  // Number of milliseconds between redisplaying view.
+  static const unsigned kDisplayDelay = 1000;
 
   void TimeCheck();
 
@@ -36,6 +38,7 @@ class MetricsView : public GLView {
   unsigned n_vertices_;
   cv::Point texture_size_;
   GLView* parent_;
+  timeval last_display_;
 };
 
 #endif  // EDITOR_INCLUDE_METRICS_VIEW_H_

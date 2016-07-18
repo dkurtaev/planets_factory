@@ -178,9 +178,10 @@ float Determinant(float* col_1, float* col_2) {
 // Triangle --------------------------------------------------------------------
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
-  edges_ = new Edge*[3];
-  points_ = new const Point3f*[3];
+  edges_.resize(3);
+  points_.resize(3);
   texture_coordinates_ = new uint16_t[6];
+  subtriangles_.reserve(4);
   points_[0] = v1;
   points_[1] = v2;
   points_[2] = v3;
@@ -191,8 +192,6 @@ Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
 
 Triangle::~Triangle() {
   delete[] texture_coordinates_;
-  delete[] points_;
-  delete[] edges_;
 }
 
 void Triangle::GetIndices(uint16_t* dst) const {
@@ -222,6 +221,19 @@ void Triangle::GetTexCoords(float* dst) const {
   }
 }
 
+void Triangle::AddSubtriangle(Triangle* subtriangle) {
+  subtriangles_.push_back(subtriangle);
+}
+
+void Triangle::GetSubtriangles(std::vector<Triangle*>* subtriangles) {
+  const uint8_t n_subtriangles = subtriangles_.size();
+  subtriangles->resize(n_subtriangles);
+  if (n_subtriangles != 0) {
+    std::copy(subtriangles_.begin(), subtriangles_.end(),
+              subtriangles->begin());
+  }
+}
+
 void Triangle::GetMiddlePointsTexCoords(uint16_t* dst) const {
   // Texture_coordinates_: p1u, p1v, p2u, p2v, p3u, p3v.
   for (uint8_t i = 0; i < 3; ++i) {
@@ -234,16 +246,13 @@ void Triangle::GetMiddlePointsTexCoords(uint16_t* dst) const {
   }
 }
 
-bool Triangle::IsIncludes(float x, float y, float z, float* bary_p1,
-                          float* bary_p2, float* bary_p3) {
-  // 1. Check that p is on triangle's plane.
-  //  p1 ______ p2      p on triangle's plane if determinant
-  //     \ *p /         | px p1x p2x p3x | is null.
-  //      \  /          | py p1y p2y p3y |
-  //       \/ p3        | pz p1z p2z p3z |
-  //                    | 1  1   1   1   |
-  static const float kZeroLimit = 1e-4f;
-
+bool Triangle::IsInsideCone(float x, float y, float z, float* bary_p1,
+                            float* bary_p2, float* bary_p3) {
+  // Solve linear system
+  // px = a*p1x + b*p2x + c*p3x
+  // py = a*p1y + b*p2y + c*p3y
+  // py = a*p1z + b*p2z + c*p3z
+  // if a, b, c in [0, 1] - point inside cone.
   float cols[4][3];
   cols[0][0] = x;
   cols[0][1] = y;
@@ -251,29 +260,16 @@ bool Triangle::IsIncludes(float x, float y, float z, float* bary_p1,
   for (uint8_t i = 0; i < 3; ++i) {
     points_[i]->GetPosition(cols[i + 1]);
   }
-
-  *bary_p1 = Determinant(cols[0], cols[2], cols[3]);
   float denominator = Determinant(cols[1], cols[2], cols[3]);
 
-  float determinant = -denominator;
-  determinant += *bary_p1;
-  determinant -= Determinant(cols[0], cols[1], cols[3]);
-  determinant += Determinant(cols[0], cols[1], cols[2]);
-  if (abs(determinant) < kZeroLimit) {
-    // 2. Check that barycentric coordinates in interval [0, 1]. This gives
-    //    point p is inside triangle.
-    // p = a*p1 + b*p2 + c*p3, where a,b,c - barycentric coordinates.
-    *bary_p1 /= denominator;
-    if (*bary_p1 < 0.0f || 1.0f < *bary_p1) return false;
+  *bary_p1 = Determinant(cols[0], cols[2], cols[3]) / denominator;
+  if (*bary_p1 < 0.0f || 1.0f < *bary_p1) return false;
 
-    *bary_p2 = Determinant(cols[1], cols[0], cols[3]) / denominator;
-    if (*bary_p2 < 0.0f || 1.0f < *bary_p2) return false;
+  *bary_p2 = Determinant(cols[1], cols[0], cols[3]) / denominator;
+  if (*bary_p2 < 0.0f || 1.0f < *bary_p2) return false;
 
-    *bary_p3 = Determinant(cols[1], cols[2], cols[0]) / denominator;
-    return (0.0f <= *bary_p3 && *bary_p3 <= 1.0f);
-  } else {
-    return false;
-  }
+  *bary_p3 = Determinant(cols[1], cols[2], cols[0]) / denominator;
+  return (0.0f <= *bary_p3 && *bary_p3 <= 1.0f);
 }
 
 void Triangle::GetNormal(int8_t* dst) {

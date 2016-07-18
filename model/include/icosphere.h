@@ -28,6 +28,8 @@ class Icosphere {
 
   std::vector<Triangle*>* GetTriangles();
 
+  std::vector<Triangle*>* GetInitTriangles();
+
   // Writing binary file with data of mesh. Editor's internal format.
   void Save(const std::string& file_path) const;
 
@@ -46,7 +48,12 @@ class Icosphere {
   void SplitTriangles(std::vector<Edge*>* edges);
 
   std::vector<Point3f*> vertices_;
+  // Actual triangles.
   std::vector<Triangle*> triangles_;
+  // Initial icosahedron triangles.
+  std::vector<Triangle*> init_triangles_;
+  // All triangles.
+  std::vector<Triangle*> all_triangles_;
   float* vertices_array_;
   uint16_t* indices_array_;
   uint16_t* tex_coord_array_;

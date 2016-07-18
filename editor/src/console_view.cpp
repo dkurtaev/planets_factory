@@ -9,11 +9,22 @@
 const uint8_t ConsoleView::kFontColor[] = {0, 204, 0};
 
 ConsoleView::ConsoleView(GLView* parent)
-  : GLView(1, 1, "", parent), parent_(parent), last_command_("") {
+  : GLView(1, 1, "", parent), parent_(parent), last_command_(""),
+    content_changed_(false) {
   Clear();
 }
 
 void ConsoleView::Display() {
+  if (!content_changed_) {
+    timeval now;
+    gettimeofday(&now, 0);
+    if ((now.tv_sec - last_display_.tv_sec) * 1e+3 +
+        (now.tv_usec - last_display_.tv_usec) * 1e-3 < kDisplayDelay) {
+      return;
+    }
+    last_display_ = now;
+  }
+
   glClearColor(0.19f, 0.04f, 0.34f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -26,27 +37,27 @@ void ConsoleView::Display() {
   glPushMatrix();
     glLoadIdentity();
 
-    int console_height = 0;
+    unsigned bmp_height = 0;
+    unsigned bmp_width;
+    unsigned font_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
     glColor3ubv(kFontColor);
     // Draw log.
     const uint8_t n_commands = commands_log_.size();
     for (uint8_t i = 0; i < n_commands; ++i) {
       std::string line = "planet@factory:~$ " + commands_log_[i];
       const uint8_t* text = reinterpret_cast<const uint8_t*>(line.c_str());
-      int bmp_length = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
-      int bmp_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
-      glRasterPos2i(0, console_height + bmp_height * 0.8f);
+      bmp_width = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
+      glRasterPos2i(0, bmp_height + font_height * 0.8f);
       glutBitmapString(GLUT_BITMAP_9_BY_15, text);
-      console_height += bmp_height;
+      bmp_height += font_height;
     }
     // Draw text line.
     std::string line = "planet@factory:~$ " + text_line_ + '_';
     const uint8_t* text = reinterpret_cast<const uint8_t*>(line.c_str());
-    int bmp_length = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
-    int bmp_height = glutBitmapHeight(GLUT_BITMAP_9_BY_15);
-    glRasterPos2i(0, console_height + bmp_height * 0.8f);
+    bmp_width = glutBitmapLength(GLUT_BITMAP_9_BY_15, text);
+    glRasterPos2i(0, bmp_height + font_height * 0.8f);
     glutBitmapString(GLUT_BITMAP_9_BY_15, text);
-    console_height += bmp_height;
+    bmp_height += font_height;
 
   glPopMatrix();
 
@@ -54,17 +65,20 @@ void ConsoleView::Display() {
   glPopMatrix();
 
   if (parent_ != 0) {
-    glutReshapeWindow(parent_->GetWidth(), console_height);
-    glutPositionWindow(0, parent_->GetHeight() - console_height);
+    glutReshapeWindow(parent_->GetWidth(), bmp_height);
+    glutPositionWindow(0, parent_->GetHeight() - bmp_height);
   } else {
-    glutReshapeWindow(bmp_length, console_height);
+    glutReshapeWindow(bmp_width, bmp_height);
   }
-
+  glutPostRedisplay();
   glutSwapBuffers();
+
+  content_changed_= display_height_ != bmp_height;  // For dynamically growing.
 }
 
 void ConsoleView::SetText(const std::string& text) {
   text_line_ = text;
+  content_changed_ = true;
 }
 
 void ConsoleView::SetCommand(const std::string& command) {
@@ -83,6 +97,7 @@ void ConsoleView::GetText(std::string* text) {
 void ConsoleView::Clear() {
   text_line_ = "";
   commands_log_.clear();
+  content_changed_ = true;
 }
 
 void ConsoleView::ProcessCommand(std::string* command) {
@@ -96,4 +111,5 @@ void ConsoleView::Write(const std::string& text) {
     commands_log_.erase(commands_log_.begin() + commands_log_.size() -
                         kDisplayLogDepth - 1);
   }
+  content_changed_ = true;
 }
