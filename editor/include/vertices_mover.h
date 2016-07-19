@@ -19,6 +19,9 @@ class VerticesMover : public VerticesToucher {
 
   virtual bool IsEnabled();
 
+  // Return angle of drawing cone for highlighting ring.
+  float GetHighlightingAngle(uint8_t n_splits) const;
+
  private:
   static const unsigned kAreaRadius = 4;
 

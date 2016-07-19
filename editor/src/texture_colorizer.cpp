@@ -350,6 +350,14 @@ void TextureColorizer::FlushAction(Backtrace* backtrace) {
   action_ = 0;
 }
 
+float TextureColorizer::GetHighlightingAngle() const {
+  // See https://github.com/dkurtaev/planets_factory/issues/1 icosahedron
+  // visualization.
+  const unsigned kMaxBrushSize = texture_->rows * (0.5f / 3.0f);
+  const float kBrushSize = brush_size_button_->GetBrushSize(kMaxBrushSize);
+  return (kBrushSize / kMaxBrushSize) * (M_PI / 6.0f);
+}
+
 TextureColorizerAction::TextureColorizerAction(cv::Mat* texture)
   : texture_(texture) {
   texture_copy_ = texture->clone();

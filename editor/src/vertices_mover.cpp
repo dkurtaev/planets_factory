@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/vertices_mover.h"
 
+#include <math.h>
+
 #include <map>
 #include <set>
 #include <vector>
@@ -78,6 +80,10 @@ void VerticesMover::InitAction() {
 
 void VerticesMover::FlushAction(Backtrace* backtrace) {
   backtrace->AddAction(new VerticesMoverAction(action_data_));
+}
+
+float VerticesMover::GetHighlightingAngle(uint8_t n_splits) const {
+  return (kAreaRadius + 1) * M_PI / (3.0f * (1 << n_splits));
 }
 
 VerticesMoverAction::VerticesMoverAction(const std::map<Point3f*, float>& data)

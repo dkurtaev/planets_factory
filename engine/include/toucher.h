@@ -25,13 +25,15 @@ class Toucher : public GLViewListener {
   // When mouse button released, write action to backtrace.
   virtual void FlushAction(Backtrace* backtrace) = 0;
 
- private:
   void ProcessTouch(int x, int y);
 
-  bool left_button_pressed_;
   double world_x_;
   double world_y_;
   double world_z_;
+  bool infinity_touch_;
+
+ private:
+  bool left_button_pressed_;
   Backtrace* backtrace_;
 };
 
