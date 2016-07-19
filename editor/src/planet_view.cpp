@@ -15,16 +15,14 @@
 #define GRID_SHADER_LOC(attrib) \
   glGetUniformLocation(grid_shader_program_, attrib)
 
-const float PlanetView::kMouseHighlightingColor[] = {0.0f, 0.8f, 0.0f, 0.3f};
-
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
-                       TextureColorizer* texture_colorizer,
+                       bool* sun_shading, TextureColorizer* texture_colorizer,
                        VerticesMover* vertices_mover)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
-    vertices_mover_(vertices_mover) {
+    vertices_mover_(vertices_mover), sun_shading_(sun_shading) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/planet_shader.vertex",
@@ -55,15 +53,16 @@ void PlanetView::Display() {
     const uint8_t loc_touch = PLANET_SHADER_LOC("u_process_touch");
     const uint8_t loc_touch_angle = PLANET_SHADER_LOC("u_touch_angle");
     const uint8_t loc_touch_coord = PLANET_SHADER_LOC("u_touch_coord");
-    const uint8_t loc_touch_color = PLANET_SHADER_LOC("u_highlighting_color");
     const uint8_t loc_sun_position = PLANET_SHADER_LOC("u_sun_position");
     const uint8_t loc_sun_radius = PLANET_SHADER_LOC("u_sun_radius");
     const uint8_t loc_planet_position = PLANET_SHADER_LOC("u_planet_position");
     const uint8_t loc_planet_radius = PLANET_SHADER_LOC("u_planet_radius");
+    const uint8_t loc_use_sun_shading = PLANET_SHADER_LOC("u_sun_shading");
 
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
 
+    glUniform1i(loc_use_sun_shading, *sun_shading_);
     glUniform3f(loc_sun_position, 100.0f, 100.0f, 100.0f);
     glUniform1f(loc_sun_radius, 10.0f);
     glUniform3f(loc_planet_position, 0.0f, 0.0f, 0.0f);
@@ -75,7 +74,6 @@ void PlanetView::Display() {
       float touch_point[3];
       highlighting_toucher_.GetTouchPoint(touch_point);
       glUniform1i(loc_touch, true);
-      glUniform4fv(loc_touch_color, 1, kMouseHighlightingColor);
       glUniform3fv(loc_touch_coord, 1, touch_point);
       if (texture_colorizer_->IsEnabled()) {
         glUniform1f(loc_touch_angle,

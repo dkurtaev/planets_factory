@@ -45,14 +45,12 @@ class PlanetView : public GLView {
  public:
   PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
-             TextureColorizer* texture_colorizer,
+             bool* sun_shading, TextureColorizer* texture_colorizer,
              VerticesMover* vertices_mover);
 
   virtual void Display();
 
  private:
-  static const float kMouseHighlightingColor[];
-
   void InitGL();
 
   void SetTexture();
@@ -65,6 +63,7 @@ class PlanetView : public GLView {
   unsigned grid_shader_program_;
   bool* draw_grid_;
   bool* draw_mesh_;
+  bool* sun_shading_;
   HighlightingToucher highlighting_toucher_;
   TextureColorizer* texture_colorizer_;
   VerticesMover* vertices_mover_;
