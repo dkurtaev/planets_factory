@@ -27,8 +27,8 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
     vertices_mover_(vertices_mover) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
-                               "../res/shaders/test_shader.vertex",
-                               "../res/shaders/test_shader.fragment");
+                               "../res/shaders/planet_shader.vertex",
+                               "../res/shaders/planet_shader.fragment");
   grid_shader_program_ = ShadersFactory::GetProgramFromFile(
                              "../res/shaders/icogrid_shader.vertex",
                              "../res/shaders/icogrid_shader.fragment");
@@ -52,15 +52,22 @@ void PlanetView::Display() {
     glUseProgram(planet_shader_program_);
     const uint8_t loc_model_matrix = PLANET_SHADER_LOC("u_modelview_matrix");
     const uint8_t loc_proj_matrix = PLANET_SHADER_LOC("u_projection_matrix");
-    const uint8_t loc_light_vec = PLANET_SHADER_LOC("u_light_vector");
     const uint8_t loc_touch = PLANET_SHADER_LOC("u_process_touch");
     const uint8_t loc_touch_angle = PLANET_SHADER_LOC("u_touch_angle");
     const uint8_t loc_touch_coord = PLANET_SHADER_LOC("u_touch_coord");
     const uint8_t loc_touch_color = PLANET_SHADER_LOC("u_highlighting_color");
+    const uint8_t loc_sun_position = PLANET_SHADER_LOC("u_sun_position");
+    const uint8_t loc_sun_radius = PLANET_SHADER_LOC("u_sun_radius");
+    const uint8_t loc_planet_position = PLANET_SHADER_LOC("u_planet_position");
+    const uint8_t loc_planet_radius = PLANET_SHADER_LOC("u_planet_radius");
 
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
-    glUniform3f(loc_light_vec, -100, -100, -100);
+
+    glUniform3f(loc_sun_position, 100.0f, 100.0f, 100.0f);
+    glUniform1f(loc_sun_radius, 10.0f);
+    glUniform3f(loc_planet_position, 0.0f, 0.0f, 0.0f);
+    glUniform1f(loc_planet_radius, 4.0f);
 
     // Highlighting ring.
     if (highlighting_toucher_.HasTouchPoint() &&
@@ -100,36 +107,15 @@ void PlanetView::Display() {
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
     icosphere_->DrawGrid();
   }
-
   glUseProgram(0);  // Disable shader program.
-
-  glBegin(GL_LINES);
-  for (int i = 0; i < 3; ++i) {
-    glColor3f(i == 0, i == 1, i == 2);
-    glVertex3f(0, 0, 0);
-    glVertex3f(i == 0 ? 100 : 0, i == 1 ? 100 : 0, i == 2 ? 100 : 0);
-  }
-  glEnd();
-
   glutSwapBuffers();
 }
 
 void PlanetView::InitGL() {
   glClearColor(0, 0, 0, 1);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_DEPTH_TEST);
-
   glEnable(GL_CULL_FACE);
   glFrontFace(GL_CCW);
-
-  glEnable(GL_LIGHT0);
-  GLfloat ambient[] = { 0.2, 0.2, 0.2, 1 };
-  GLfloat diffuse[] = { 0.8, 0.8, 0.8, 1 };
-  GLfloat position[] = { 100, 100, 100, 1 };
-  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-  glLightfv(GL_LIGHT0, GL_POSITION, position);
 }
 
 void PlanetView::SetTexture() {
