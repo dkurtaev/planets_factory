@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
 
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
-                         &draw_mesh);
+                         &draw_mesh, &texture_colorizer, &vertices_mover);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
   planet_view.AddListener(&vertices_mover);

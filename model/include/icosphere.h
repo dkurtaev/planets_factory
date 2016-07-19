@@ -33,6 +33,7 @@ class Icosphere {
   // Writing binary file with data of mesh. Editor's internal format.
   void Save(const std::string& file_path) const;
 
+  uint8_t GetNumSplits() const;
 
  private:
   void Clear();

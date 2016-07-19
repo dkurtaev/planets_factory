@@ -35,6 +35,9 @@ class TextureColorizer : public TrianglesToucher {
                    Switcher* is_enabled_swither,
                    Backtrace* backtrace);
 
+  // Return angle of drawing cone for highlighting ring.
+  float GetHighlightingAngle() const;
+
   ~TextureColorizer();
 
  private:

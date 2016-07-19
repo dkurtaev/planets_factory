@@ -442,3 +442,7 @@ void Icosphere::Save(const std::string& file_path) const {
   delete[] norms;
   file.close();
 }
+
+uint8_t Icosphere::GetNumSplits() const {
+  return n_splits_;
+}

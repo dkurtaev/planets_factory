@@ -10,6 +10,8 @@
 #include "include/camera.h"
 #include "include/icosphere.h"
 #include "include/toucher.h"
+#include "include/texture_colorizer.h"
+#include "include/vertices_mover.h"
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -42,13 +44,14 @@ class HighlightingToucher : public Toucher {
 class PlanetView : public GLView {
  public:
   PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
-             const cv::Mat* texture, bool* draw_grid, bool* draw_mesh);
+             const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
+             TextureColorizer* texture_colorizer,
+             VerticesMover* vertices_mover);
 
   virtual void Display();
 
  private:
   static const float kMouseHighlightingColor[];
-  static const float kMouseHighlightingAngle = 10.0f;
 
   void InitGL();
 
@@ -63,8 +66,8 @@ class PlanetView : public GLView {
   bool* draw_grid_;
   bool* draw_mesh_;
   HighlightingToucher highlighting_toucher_;
+  TextureColorizer* texture_colorizer_;
+  VerticesMover* vertices_mover_;
 };
-
-
 
 #endif  // EDITOR_INCLUDE_PLANET_VIEW_H_
