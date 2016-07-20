@@ -1,10 +1,10 @@
 attribute vec3 a_position;
 attribute vec2 a_tex_coord;
 attribute float a_self_rotation;
+attribute vec3 a_base_triangle_normal;
+attribute vec3 a_base_position;
 
 uniform mat4 u_planet_modelview_matrix;
-uniform vec3 u_base_triangle_normal;
-uniform vec3 u_base_position;
 uniform mat4 u_projection_matrix;
 
 varying vec2 v_tex_coord;
@@ -24,7 +24,7 @@ void main() {
   // 2. ox*nx + oy*ny + oz*nz = 0     ox*nx + oy*ny + oz*nz = 0
   //    ox*ax + oy*ay + oz*az = 0 => -ox*nz +       + oz*nx = 0 =>
   //    (ox, oy, oz) = (nx*ny, -nx*nx-nz*nz, ny*nz)
-  vec3 normal = normalize(u_base_triangle_normal);
+  vec3 normal = normalize(a_base_triangle_normal);
   vec3 abscissa = normalize( vec3(-normal.z, 0.0, normal.x) );
   vec3 ordinate = normalize( vec3(normal.x * normal.y,
                                   -normal.x * normal.x - normal.z * normal.z,
@@ -38,7 +38,7 @@ void main() {
     modelview_matrix[0][i] = ordinate[i];
     modelview_matrix[1][i] = normal[i];
     modelview_matrix[2][i] = abscissa[i];
-    modelview_matrix[3][i] = u_base_position[i];
+    modelview_matrix[3][i] = a_base_position[i];
   }
 
   v_tex_coord = a_tex_coord;

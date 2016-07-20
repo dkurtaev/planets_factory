@@ -15,6 +15,9 @@
 #define UNIFORM_LOC(name) \
   glGetUniformLocation(shader_program_, name)
 
+#define ATTRIB_LOC(name) \
+  glGetAttribLocation(shader_program_, name)
+
 Grass::Grass(const Triangle* base_triangle)
   : GameObject(base_triangle) {
   shader_program_ = ShadersFactory::GetProgramFromFile(
@@ -76,17 +79,19 @@ void Grass::SetupMesh() {
 void Grass::Draw() {
   glUseProgram(shader_program_);
   const uint8_t loc_parent_modelview = UNIFORM_LOC("u_planet_modelview_matrix");
-  const uint8_t loc_base_tri_normal = UNIFORM_LOC("u_base_triangle_normal");
-  const uint8_t loc_base_position = UNIFORM_LOC("u_base_position");
   const uint8_t loc_proj_matrix = UNIFORM_LOC("u_projection_matrix");
   const uint8_t loc_tex_alpha = UNIFORM_LOC("u_tex_alpha");
   const uint8_t loc_tex_color = UNIFORM_LOC("u_tex_color");
+  const uint8_t loc_self_rotation = ATTRIB_LOC("a_self_rotation");
+  const uint8_t loc_base_tri_normal = ATTRIB_LOC("a_base_triangle_normal");
+  const uint8_t loc_base_position = ATTRIB_LOC("a_base_position");
 
   float modelview_matrix[16];
   float projection_matrix[16];
-  float base_triangle_normal[3];
+  int8_t base_triangle_normal[36];
+  float base_position[36];
   float base_triangle_vertices[9];
-  float base_position[3];
+
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
   base_triangle_->GetNormal(base_triangle_normal);
@@ -97,11 +102,14 @@ void Grass::Draw() {
       base_position[i] += 0.33f * base_triangle_vertices[j * 3 + i];
     }
   }
+  for (uint8_t i = 1; i < 12; ++i) {
+    memcpy(base_triangle_normal + i * 3, base_triangle_normal,
+           sizeof(int8_t) * 3);
+    memcpy(base_position + i * 3, base_position, sizeof(float) * 3);
+  }
 
   glUniformMatrix4fv(loc_parent_modelview, 1, false, modelview_matrix);
   glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
-  glUniform3fv(loc_base_tri_normal, 1, base_triangle_normal);
-  glUniform3fv(loc_base_position, 1, base_position);
 
   glUniform1i(loc_tex_alpha, 0);
   glActiveTexture(GL_TEXTURE0);
@@ -117,8 +125,8 @@ void Grass::Draw() {
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, 0.5);
 
-  unsigned vbo[3];
-  glGenBuffers(3, vbo);
+  unsigned vbo[5];
+  glGenBuffers(5, vbo);
 
   // Coordinates VBOs.
   CHECK_NE(vbo[0], 0);
@@ -137,16 +145,33 @@ void Grass::Draw() {
 
   // Self rotations.
   CHECK_NE(vbo[2], 0);
-  int attrib_loc = glGetAttribLocation(shader_program_, "a_self_rotation");
   glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, rotations_,
                GL_STATIC_DRAW);
-  glVertexAttribPointer(attrib_loc, 1, GL_FLOAT, false, 0, 0);
-  glEnableVertexAttribArray(attrib_loc);
+  glVertexAttribPointer(loc_self_rotation, 1, GL_FLOAT, false, 0, 0);
+  glEnableVertexAttribArray(loc_self_rotation);
+
+  // Base triangle normal.
+  CHECK_NE(vbo[3], 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 36, base_triangle_normal,
+               GL_STATIC_DRAW);
+  glVertexAttribPointer(loc_base_tri_normal, 3, GL_BYTE, true, 0, 0);
+  glEnableVertexAttribArray(loc_base_tri_normal);
+
+  // Base position.
+  CHECK_NE(vbo[4], 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36, base_position,
+               GL_STATIC_DRAW);
+  glVertexAttribPointer(loc_base_position, 3, GL_FLOAT, true, 0, 0);
+  glEnableVertexAttribArray(loc_base_position);
 
   glDrawArrays(GL_QUADS, 0, 12);
 
-  glDisableVertexAttribArray(attrib_loc);
+  glDisableVertexAttribArray(loc_base_position);
+  glDisableVertexAttribArray(loc_base_tri_normal);
+  glDisableVertexAttribArray(loc_self_rotation);
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);
   glDeleteBuffers(2, vbo);
