@@ -112,7 +112,7 @@ void PlanetView::Display() {
   glPushMatrix();
     glLoadMatrixf(modelview_matrix);
     for (int i = 0; i < game_objects_->size(); ++i)
-      game_objects_->operator[](i)->Display();
+      game_objects_->operator[](i)->Draw();
   glPopMatrix();
 
   glUseProgram(0);  // Disable shader program.

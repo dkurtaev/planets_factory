@@ -1,13 +1,39 @@
 attribute vec3 a_position;
 attribute vec2 a_tex_coord;
 
-uniform mat4 u_modelview_matrix;
+uniform mat4 u_planet_modelview_matrix;
+uniform vec3 u_base_triangle_normal;
+uniform vec3 u_base_position;
 uniform mat4 u_projection_matrix;
 
 varying vec2 v_tex_coord;
 
 void main() {
+  // Let (nx, ny, nz) - normal.
+  // Wee need to find to vectors, (ax, ay, az) and (ox, oy, oz), orthogonal to
+  // normal and to each other.
+  // 1. ax*nx + ay*ny + az*nz = 0 => (ax, ay, az) = (-nz, 0, nx)
+  // 2. ox*nx + oy*ny + oz*nz = 0     ox*nx + oy*ny + oz*nz = 0
+  //    ox*ax + oy*ay + oz*az = 0 => -ox*nz +       + oz*nx = 0 =>
+  //    (ox, oy, oz) = (nx*ny, -nx*nx-nz*nz, ny*nz)
+  vec3 normal = normalize(u_base_triangle_normal);
+  vec3 abscissa = normalize( vec3(-normal.z, 0.0, normal.x) );
+  vec3 ordinate = normalize( vec3(normal.x * normal.y,
+                                  -normal.x * normal.x - normal.z * normal.z,
+                                  normal.y * normal.z) );
+  // ox oy oz 0
+  // nx ny nz 0
+  // ax ay az 0
+  // px py pz 1
+  mat4 modelview_matrix = mat4(1.0);  // 4x4 Identity matrix.
+  for (int i = 0; i < 3; ++i) {
+    modelview_matrix[0][i] = ordinate[i];
+    modelview_matrix[1][i] = normal[i];
+    modelview_matrix[2][i] = abscissa[i];
+    modelview_matrix[3][i] = u_base_position[i];
+  }
+
   v_tex_coord = a_tex_coord;
-  gl_Position = u_modelview_matrix * vec4(a_position, 1.0);
+  gl_Position = modelview_matrix * vec4(a_position, 1.0);
   gl_Position = u_projection_matrix * gl_Position;
 }

@@ -81,20 +81,35 @@ void Grass::SetupMesh() {
   }
 }
 
-void Grass::DrawObject() {
+void Grass::Draw() {
   glUseProgram(shader_program_);
-  const uint8_t loc_model_matrix = UNIFORM_LOC("u_modelview_matrix");
+  const uint8_t loc_parent_modelview = UNIFORM_LOC("u_planet_modelview_matrix");
+  const uint8_t loc_base_tri_normal = UNIFORM_LOC("u_base_triangle_normal");
+  const uint8_t loc_base_position = UNIFORM_LOC("u_base_position");
   const uint8_t loc_proj_matrix = UNIFORM_LOC("u_projection_matrix");
   const uint8_t loc_tex_alpha = UNIFORM_LOC("u_tex_alpha");
   const uint8_t loc_tex_color = UNIFORM_LOC("u_tex_color");
 
   float modelview_matrix[16];
   float projection_matrix[16];
+  float base_triangle_normal[3];
+  float base_triangle_vertices[9];
+  float base_position[3];
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
+  base_triangle_->GetNormal(base_triangle_normal);
+  base_triangle_->GetCoords(base_triangle_vertices);
+  for (uint8_t i = 0; i < 3; ++i) {
+    base_position[i] = 0.0f;
+    for (uint8_t j = 0; j < 3; ++j) {
+      base_position[i] += 0.33f * base_triangle_vertices[j * 3 + i];
+    }
+  }
 
-  glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
+  glUniformMatrix4fv(loc_parent_modelview, 1, false, modelview_matrix);
   glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
+  glUniform3fv(loc_base_tri_normal, 1, base_triangle_normal);
+  glUniform3fv(loc_base_position, 1, base_position);
 
   glUniform1i(loc_tex_alpha, 0);
   glActiveTexture(GL_TEXTURE0);

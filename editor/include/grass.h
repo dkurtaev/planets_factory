@@ -13,12 +13,12 @@ class Grass : public GameObject {
 
   ~Grass();
 
+  virtual void Draw();
+
  private:
   void SetupTextures();
 
   void SetupMesh();
-
-  virtual void DrawObject();
 
   unsigned shader_program_;
   unsigned texture_alpha_id_;

@@ -7,14 +7,11 @@
 
 class GameObject {
  public:
-  GameObject(const Triangle* base_triangle);
+  GameObject(const Triangle* base_triangle) : base_triangle_(base_triangle) {}
 
-  void Display();
+  virtual void Draw() = 0;
 
  protected:
-  virtual void DrawObject() = 0;
-
- private:
   const Triangle* base_triangle_;
 };
 
