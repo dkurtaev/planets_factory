@@ -18,13 +18,12 @@
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
-                       VerticesMover* vertices_mover,
-                       std::vector<GameObject*>* game_objects)
+                       VerticesMover* vertices_mover, GrassField* grass_field)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
     vertices_mover_(vertices_mover), sun_shading_(sun_shading),
-    game_objects_(game_objects) {
+    grass_field_(grass_field) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/planet_shader.vertex",
@@ -111,8 +110,7 @@ void PlanetView::Display() {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
     glLoadMatrixf(modelview_matrix);
-    for (int i = 0; i < game_objects_->size(); ++i)
-      game_objects_->operator[](i)->Draw();
+    grass_field_->Draw();
   glPopMatrix();
 
   glUseProgram(0);  // Disable shader program.

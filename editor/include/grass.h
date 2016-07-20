@@ -1,32 +1,27 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#ifndef EDITOR_INCLUDE_GRASS_H_
-#define EDITOR_INCLUDE_GRASS_H_
+#ifndef EDITOR_INCLUDE_GRASS_FIELD_H_
+#define EDITOR_INCLUDE_GRASS_FIELD_H_
 
-#include <opencv2/opencv.hpp>
+#include <vector>
 
-#include "include/game_object.h"
+#include "include/structures.h"
 
-class Grass : public GameObject {
+class GrassField {
  public:
-  Grass(const Triangle* base_triangle);
+  void AddGrassObject(const Triangle* base_triangle);
 
-  ~Grass();
+  void Draw() const;
 
-  virtual void Draw();
+  void Init();
 
  private:
   void SetupTextures();
 
-  void SetupMesh();
-
   unsigned shader_program_;
   unsigned texture_alpha_id_;
   unsigned texture_color_id_;
-  uint8_t* vertices_ids_;
-  float* rotations_;
-  int8_t* base_triangle_normal_;
-  float* base_position_;
+  std::vector<const Triangle*> base_triangles_;
 };
 
-#endif  // EDITOR_INCLUDE_GRASS_H_
+#endif  // EDITOR_INCLUDE_GRASS_FIELD_H_

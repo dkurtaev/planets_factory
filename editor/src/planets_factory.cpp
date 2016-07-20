@@ -18,7 +18,6 @@
 #include "include/console_view.h"
 #include "include/console_view_listener.h"
 #include "include/backtrace.h"
-#include "include/game_object.h"
 #include "include/grass.h"
 
 #include <GL/freeglut.h>
@@ -69,22 +68,23 @@ int main(int argc, char** argv) {
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
   Switcher sun_shading_switcher("Sun shader", &use_sun_shading);
 
-  std::vector<GameObject*> game_objects;
+  GrassField grass_field;
+  // grass_field.AddGrassObject(triangles->operator[](0));
+  // grass_field.AddGrassObject(triangles->operator[](15));
 
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
                          &draw_mesh, &use_sun_shading, &texture_colorizer,
-                         &vertices_mover, &game_objects);
+                         &vertices_mover, &grass_field);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
-  // for (int i = 0; i < triangles->size() / 40; ++i) {
-  //   game_objects.push_back(new Grass(triangles->operator[](i)));
-  // }
+  grass_field.Init();
 
-  Grass grass(triangles->operator[](0));
-  game_objects.push_back(&grass);
+  for (int i = 0; i < triangles->size() / 2; ++i) {
+    grass_field.AddGrassObject(triangles->operator[](i));
+  }
 
   ConsoleView console_view(&planet_view);
 
