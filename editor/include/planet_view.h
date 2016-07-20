@@ -12,6 +12,7 @@
 #include "include/toucher.h"
 #include "include/texture_colorizer.h"
 #include "include/vertices_mover.h"
+#include "include/game_object.h"
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -46,7 +47,8 @@ class PlanetView : public GLView {
   PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
              bool* sun_shading, TextureColorizer* texture_colorizer,
-             VerticesMover* vertices_mover);
+             VerticesMover* vertices_mover,
+             std::vector<GameObject*>* game_objects);
 
   virtual void Display();
 
@@ -67,6 +69,7 @@ class PlanetView : public GLView {
   HighlightingToucher highlighting_toucher_;
   TextureColorizer* texture_colorizer_;
   VerticesMover* vertices_mover_;
+  std::vector<GameObject*>* game_objects_;
 };
 
 #endif  // EDITOR_INCLUDE_PLANET_VIEW_H_

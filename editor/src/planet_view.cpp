@@ -18,11 +18,13 @@
 PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
-                       VerticesMover* vertices_mover)
+                       VerticesMover* vertices_mover,
+                       std::vector<GameObject*>* game_objects)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
-    vertices_mover_(vertices_mover), sun_shading_(sun_shading) {
+    vertices_mover_(vertices_mover), sun_shading_(sun_shading),
+    game_objects_(game_objects) {
   InitGL();
   planet_shader_program_ = ShadersFactory::GetProgramFromFile(
                                "../res/shaders/planet_shader.vertex",
@@ -58,6 +60,7 @@ void PlanetView::Display() {
     const uint8_t loc_planet_position = PLANET_SHADER_LOC("u_planet_position");
     const uint8_t loc_planet_radius = PLANET_SHADER_LOC("u_planet_radius");
     const uint8_t loc_use_sun_shading = PLANET_SHADER_LOC("u_sun_shading");
+    const uint8_t loc_texture = PLANET_SHADER_LOC("u_texture");
 
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
@@ -88,12 +91,11 @@ void PlanetView::Display() {
     }
 
     // Texture.
+    glUniform1i(loc_texture, 0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
                  0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
-    glUniform1i(3, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id_);
 
     icosphere_->Draw();
   }
@@ -105,6 +107,14 @@ void PlanetView::Display() {
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
     icosphere_->DrawGrid();
   }
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+    glLoadMatrixf(modelview_matrix);
+    for (int i = 0; i < game_objects_->size(); ++i)
+      game_objects_->operator[](i)->Display();
+  glPopMatrix();
+
   glUseProgram(0);  // Disable shader program.
   glutSwapBuffers();
 }

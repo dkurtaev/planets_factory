@@ -88,18 +88,34 @@ class Triangle {
 
   ~Triangle();
 
+  // Getters.
   void GetIndices(uint16_t* dst) const;
-
-  void GetMiddlePointsIndices(uint16_t* dst) const;
-
-  void SetTexCoords(const uint16_t* src);
 
   void GetTexCoords(uint16_t* dst) const;
 
   void GetTexCoords(float* dst) const;
 
+  // Triangle's normal. Not normalized.
+  void GetNormal(int8_t* dst) const;
+
+  // Triangle's normal. Normalized.
+  void GetNormal(float* dst) const;
+
+  // Writing vertices space coordinates into array of 9 floats.
+  void GetCoords(float* dst) const;
+
+  void GetMiddlePointsIndices(uint16_t* dst) const;
+
   void GetMiddlePointsTexCoords(uint16_t* dst) const;
 
+  void GetSubtriangles(std::vector<Triangle*>* subtriangles) const;
+
+  // Setters.
+  void SetTexCoords(const uint16_t* src);
+
+  void AddSubtriangle(Triangle* subtriangle);
+
+  // Checkers.
   // Returns true if point p is inside triangle's cone.
   // Cone vertex at (0, 0, 0).
   // p1______p2
@@ -108,14 +124,7 @@ class Triangle {
   //     \/ p3
   // If true, set barycentric coordinates bary_p* relatively triangle's points.
   bool IsInsideCone(float x, float y, float z, float* bary_p1, float* bary_p2,
-                    float* bary_p3);
-
-  // Triangle's normal. Not normalized.
-  void GetNormal(int8_t* dst);
-
-  void AddSubtriangle(Triangle* subtriangle);
-
-  void GetSubtriangles(std::vector<Triangle*>* subtriangles);
+                    float* bary_p3) const;
 
  private:
   std::vector<Edge*> edges_;
@@ -127,5 +136,7 @@ class Triangle {
 float Determinant(float* col_1, float* col_2, float* col_3);
 
 float Determinant(float* col_1, float* col_2);
+
+void Normalize(float* vec);
 
 #endif  // MODEL_INCLUDE_STRUCTURES_H_

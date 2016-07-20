@@ -1,10 +1,10 @@
 uniform sampler2D u_texture;
 // Sun shading.
+uniform bool u_sun_shading;
 uniform vec3 u_sun_position;
 uniform float u_sun_radius;
 uniform vec3 u_planet_position;
 uniform float u_planet_radius;
-uniform bool u_sun_shading;
 // Highlighting ring.
 uniform bool u_process_touch;
 uniform float u_touch_angle;

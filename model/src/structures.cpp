@@ -175,6 +175,13 @@ float Determinant(float* col_1, float* col_2) {
   return col_1[0] * col_2[1] - col_1[1] * col_2[0];
 }
 
+void Normalize(float* vec) {
+  float norm = sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
+  vec[0] /= norm;
+  vec[1] /= norm;
+  vec[2] /= norm;
+}
+
 // Triangle --------------------------------------------------------------------
 Triangle::Triangle(const Point3f* v1, const Point3f* v2, const Point3f* v3,
                    Edge* e1, Edge* e2, Edge* e3) {
@@ -225,7 +232,7 @@ void Triangle::AddSubtriangle(Triangle* subtriangle) {
   subtriangles_.push_back(subtriangle);
 }
 
-void Triangle::GetSubtriangles(std::vector<Triangle*>* subtriangles) {
+void Triangle::GetSubtriangles(std::vector<Triangle*>* subtriangles) const {
   const uint8_t n_subtriangles = subtriangles_.size();
   subtriangles->resize(n_subtriangles);
   if (n_subtriangles != 0) {
@@ -247,7 +254,7 @@ void Triangle::GetMiddlePointsTexCoords(uint16_t* dst) const {
 }
 
 bool Triangle::IsInsideCone(float x, float y, float z, float* bary_p1,
-                            float* bary_p2, float* bary_p3) {
+                            float* bary_p2, float* bary_p3) const {
   // Solve linear system
   // px = a*p1x + b*p2x + c*p3x
   // py = a*p1y + b*p2y + c*p3y
@@ -272,7 +279,7 @@ bool Triangle::IsInsideCone(float x, float y, float z, float* bary_p1,
   return (0.0f <= *bary_p3 && *bary_p3 <= 1.0f);
 }
 
-void Triangle::GetNormal(int8_t* dst) {
+void Triangle::GetNormal(int8_t* dst) const {
   float points[3][3];
   float normal[3];
   for (uint8_t i = 0; i < 3; ++i) {
@@ -297,4 +304,18 @@ void Triangle::GetNormal(int8_t* dst) {
   for (uint8_t i = 0; i < 3; ++i) {
     dst[i] = INT8_MAX * (normal[i] / norm);
   }
+}
+
+void Triangle::GetNormal(float* dst) const {
+  int8_t int_normal[3];
+  GetNormal(int_normal);
+  for (uint8_t i = 0; i < 3; ++i) {
+    dst[i] = static_cast<float>(int_normal[i]) / INT8_MAX;
+  }
+}
+
+void Triangle::GetCoords(float* dst) const {
+  points_[0]->GetPosition(dst);
+  points_[1]->GetPosition(dst + 3);
+  points_[2]->GetPosition(dst + 6);
 }
