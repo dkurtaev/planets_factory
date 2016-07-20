@@ -1,21 +1,45 @@
-attribute vec3 a_position;
-attribute vec2 a_tex_coord;
+attribute float a_point_idx;
 attribute float a_self_rotation;
 attribute vec3 a_base_triangle_normal;
 attribute vec3 a_base_position;
 
 uniform mat4 u_planet_modelview_matrix;
 uniform mat4 u_projection_matrix;
+uniform float u_width;
+uniform float u_height;
 
 varying vec2 v_tex_coord;
 
 void main() {
-  float rot_cos = cos(radians(a_self_rotation));
-  float rot_sin = sin(radians(a_self_rotation));
+  // 4 kinds of points:
+  // 2 ----- 1   | idx |       coords |    tex |
+  // |       |   |   0 |  (w/2, 0, 0) | (1, 1) |
+  // 3 ----- 0   |   1 |  (w/2, h, 0) | (1, 0) |
+  //             |   2 | (-w/2, h, 0) | (0, 0) |
+  //             |   3 | (-w/2, 0, 0) | (0, 1) |
   vec3 position;
-  position.x = rot_cos * a_position.x + rot_sin * a_position.z;
-  position.y = a_position.y;
-  position.z = -rot_sin * a_position.x + rot_cos * a_position.z;
+  float x;
+  if (a_point_idx == 0.0 || a_point_idx == 1.0) {
+    x = u_width / 2.0;
+    if (a_point_idx == 0.0) {
+      position.y = 0.0;
+      v_tex_coord = vec2(1.0, 1.0);
+    } else {
+      position.y = u_height;
+      v_tex_coord = vec2(1.0, 0.0);
+    }
+  } else {
+    x = -u_width / 2.0;
+    if (a_point_idx == 2.0) {
+      position.y = u_height;
+      v_tex_coord = vec2(0.0, 0.0);
+    } else {
+      position.y = 0.0;
+      v_tex_coord = vec2(0.0, 1.0);
+    }
+  }
+  position.x = x * cos(radians(a_self_rotation));
+  position.z = -x * sin(radians(a_self_rotation));
 
   // Let (nx, ny, nz) - normal.
   // Wee need to find to vectors, (ax, ay, az) and (ox, oy, oz), orthogonal to
@@ -41,7 +65,6 @@ void main() {
     modelview_matrix[3][i] = a_base_position[i];
   }
 
-  v_tex_coord = a_tex_coord;
   gl_Position = modelview_matrix * vec4(position, 1.0);
   gl_Position = u_projection_matrix * gl_Position;
 }

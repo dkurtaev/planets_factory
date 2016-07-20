@@ -23,9 +23,8 @@ class Grass : public GameObject {
   unsigned shader_program_;
   unsigned texture_alpha_id_;
   unsigned texture_color_id_;
-  float* vertices_;
+  uint8_t* vertices_ids_;
   float* rotations_;
-  uint8_t* tex_coords_;
   int8_t* base_triangle_normal_;
   float* base_position_;
 };
