@@ -1,5 +1,6 @@
 attribute vec3 a_position;
 attribute vec2 a_tex_coord;
+attribute float a_self_rotation;
 
 uniform mat4 u_planet_modelview_matrix;
 uniform vec3 u_base_triangle_normal;
@@ -9,6 +10,13 @@ uniform mat4 u_projection_matrix;
 varying vec2 v_tex_coord;
 
 void main() {
+  float rot_cos = cos(radians(a_self_rotation));
+  float rot_sin = sin(radians(a_self_rotation));
+  vec3 position;
+  position.x = rot_cos * a_position.x + rot_sin * a_position.z;
+  position.y = a_position.y;
+  position.z = -rot_sin * a_position.x + rot_cos * a_position.z;
+
   // Let (nx, ny, nz) - normal.
   // Wee need to find to vectors, (ax, ay, az) and (ox, oy, oz), orthogonal to
   // normal and to each other.
@@ -34,6 +42,6 @@ void main() {
   }
 
   v_tex_coord = a_tex_coord;
-  gl_Position = modelview_matrix * vec4(a_position, 1.0);
+  gl_Position = modelview_matrix * vec4(position, 1.0);
   gl_Position = u_projection_matrix * gl_Position;
 }

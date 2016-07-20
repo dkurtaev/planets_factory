@@ -27,6 +27,7 @@ Grass::Grass(const Triangle* base_triangle)
 Grass::~Grass() {
   delete[] vertices_;
   delete[] tex_coords_;
+  delete[] rotations_;
 }
 
 void Grass::SetupTextures() {
@@ -57,27 +58,18 @@ void Grass::SetupMesh() {
 
   vertices_ = new float[36];
   tex_coords_ = new uint8_t[24];
+  rotations_ = new float[12];
 
   float x = kWidth / 2.0f;
   float z = 0.0f;
-  float r_matrix[4];
-  r_matrix[0] = r_matrix[3] = 0.5f;
-  r_matrix[1] = sqrt(3.0f) / 2.0f;
-  r_matrix[2] = -r_matrix[1];
-
-  uint8_t single_tex_coords[] = {255, 255, 255, 0, 0, 0, 0, 255};
-  float* dst = vertices_;
+  float src_verts[] = {x, 0.0f, z, x, kHeight, z, -x, kHeight, -z, -x, 0.0f, z};
+  uint8_t src_tex_coords[] = {255, 255, 255, 0, 0, 0, 0, 255};
   for (uint8_t i = 0; i < 3; ++i) {
-    dst[0] = x; dst[1] = 0.0f; dst[2] = z;
-    dst[3] = x; dst[4] = kHeight; dst[5] = z;
-    dst[6] = -x; dst[7] = kHeight; dst[8] = -z;
-    dst[9] = -x; dst[10] = 0.0f; dst[11] = -z;
-
-    x = r_matrix[0] * dst[0] + r_matrix[1] * dst[2];
-    z = r_matrix[2] * dst[0] + r_matrix[3] * dst[2];
-
-    dst += 12;
-    memcpy(tex_coords_ + i * 8, single_tex_coords, sizeof(uint8_t) * 8);
+    memcpy(vertices_ + i * 12, src_verts, sizeof(float) * 12);
+    memcpy(tex_coords_ + i * 8, src_tex_coords, sizeof(uint8_t) * 8);
+    for (uint8_t j = 0; j < 4; ++j) {
+      rotations_[i * 4 + j] = 60.0f * i;
+    }
   }
 }
 
@@ -125,8 +117,8 @@ void Grass::Draw() {
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, 0.5);
 
-  unsigned vbo[2];
-  glGenBuffers(2, vbo);
+  unsigned vbo[3];
+  glGenBuffers(3, vbo);
 
   // Coordinates VBOs.
   CHECK_NE(vbo[0], 0);
@@ -143,8 +135,18 @@ void Grass::Draw() {
   glVertexAttribPointer(TEX_ATTRIB, 2, GL_UNSIGNED_BYTE, true, 0, 0);
   glEnableVertexAttribArray(TEX_ATTRIB);
 
+  // Self rotations.
+  CHECK_NE(vbo[2], 0);
+  int attrib_loc = glGetAttribLocation(shader_program_, "a_self_rotation");
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, rotations_,
+               GL_STATIC_DRAW);
+  glVertexAttribPointer(attrib_loc, 1, GL_FLOAT, false, 0, 0);
+  glEnableVertexAttribArray(attrib_loc);
+
   glDrawArrays(GL_QUADS, 0, 12);
 
+  glDisableVertexAttribArray(attrib_loc);
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);
   glDeleteBuffers(2, vbo);
