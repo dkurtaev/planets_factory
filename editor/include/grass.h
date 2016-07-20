@@ -11,12 +11,20 @@ class Grass : public GameObject {
  public:
   Grass(const Triangle* base_triangle);
 
+  ~Grass();
+
  private:
+  void SetupTextures();
+
+  void SetupMesh();
+
   virtual void DrawObject();
 
   unsigned shader_program_;
   unsigned texture_alpha_id_;
   unsigned texture_color_id_;
+  float* vertices_;
+  uint8_t* tex_coords_;
 };
 
 #endif  // EDITOR_INCLUDE_GRASS_H_

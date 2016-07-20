@@ -20,7 +20,16 @@ Grass::Grass(const Triangle* base_triangle)
   shader_program_ = ShadersFactory::GetProgramFromFile(
                         "../res/shaders/grass_shader.vertex",
                         "../res/shaders/grass_shader.fragment");
+  SetupTextures();
+  SetupMesh();
+}
 
+Grass::~Grass() {
+  delete[] vertices_;
+  delete[] tex_coords_;
+}
+
+void Grass::SetupTextures() {
   cv::Mat texture = cv::imread("./grass_color.png");
   CHECK(texture.data);
   glGenTextures(1, &texture_color_id_);
@@ -42,9 +51,12 @@ Grass::Grass(const Triangle* base_triangle)
                GL_UNSIGNED_BYTE, texture.data);
 }
 
-void Grass::DrawObject() {
+void Grass::SetupMesh() {
   static const float kWidth = 0.7f;
   static const float kHeight = 0.5f;
+
+  vertices_ = new float[36];
+  tex_coords_ = new uint8_t[24];
 
   float x = kWidth / 2.0f;
   float z = 0.0f;
@@ -53,8 +65,8 @@ void Grass::DrawObject() {
   r_matrix[1] = sqrt(3.0f) / 2.0f;
   r_matrix[2] = -r_matrix[1];
 
-  float vertices[36];
-  float* dst = vertices;
+  uint8_t single_tex_coords[] = {255, 255, 255, 0, 0, 0, 0, 255};
+  float* dst = vertices_;
   for (uint8_t i = 0; i < 3; ++i) {
     dst[0] = x; dst[1] = 0.0f; dst[2] = z;
     dst[3] = x; dst[4] = kHeight; dst[5] = z;
@@ -63,10 +75,13 @@ void Grass::DrawObject() {
 
     x = r_matrix[0] * dst[0] + r_matrix[1] * dst[2];
     z = r_matrix[2] * dst[0] + r_matrix[3] * dst[2];
-    dst += 12;
-  }
-  uint8_t tex_coords[] = {255, 255, 255, 0, 0, 0, 0, 255};
 
+    dst += 12;
+    memcpy(tex_coords_ + i * 8, single_tex_coords, sizeof(uint8_t) * 8);
+  }
+}
+
+void Grass::DrawObject() {
   glUseProgram(shader_program_);
   const uint8_t loc_model_matrix = UNIFORM_LOC("u_modelview_matrix");
   const uint8_t loc_proj_matrix = UNIFORM_LOC("u_projection_matrix");
@@ -98,25 +113,22 @@ void Grass::DrawObject() {
   unsigned vbo[2];
   glGenBuffers(2, vbo);
 
+  // Coordinates VBOs.
+  CHECK_NE(vbo[0], 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36, vertices_, GL_STATIC_DRAW);
+  glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, true, 0, 0);
+  glEnableVertexAttribArray(COORDS_ATTRIB);
+
   // Texture coordinates VBO.
   CHECK_NE(vbo[1], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 8, tex_coords,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 24, tex_coords_,
                GL_STATIC_DRAW);
   glVertexAttribPointer(TEX_ATTRIB, 2, GL_UNSIGNED_BYTE, true, 0, 0);
   glEnableVertexAttribArray(TEX_ATTRIB);
 
-  // Coordinates VBOs.
-  CHECK_NE(vbo[0], 0);
-  glEnableVertexAttribArray(COORDS_ATTRIB);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  for (uint8_t i = 0; i < 3; ++i) {
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, vertices + i * 12,
-                 GL_STATIC_DRAW);
-    glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, false, 0, 0);
-    
-    glDrawArrays(GL_QUADS, 0, 4);
-  }
+  glDrawArrays(GL_QUADS, 0, 12);
 
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);

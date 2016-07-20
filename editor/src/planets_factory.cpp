@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
-  // for (int i = 0; i < triangles->size() / 20; ++i) {
-  //   game_objects.push_back(new Grass(triangles->operator[](i)));
-  // }
+  for (int i = 0; i < triangles->size() / 40; ++i) {
+    game_objects.push_back(new Grass(triangles->operator[](i)));
+  }
 
   // Grass grass(triangles->operator[](0));
   // game_objects.push_back(&grass);
