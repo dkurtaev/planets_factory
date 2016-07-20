@@ -26,6 +26,8 @@ class Grass : public GameObject {
   float* vertices_;
   float* rotations_;
   uint8_t* tex_coords_;
+  int8_t* base_triangle_normal_;
+  float* base_position_;
 };
 
 #endif  // EDITOR_INCLUDE_GRASS_H_

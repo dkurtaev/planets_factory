@@ -31,6 +31,8 @@ Grass::~Grass() {
   delete[] vertices_;
   delete[] tex_coords_;
   delete[] rotations_;
+  delete[] base_triangle_normal_;
+  delete[] base_position_;
 }
 
 void Grass::SetupTextures() {
@@ -62,6 +64,8 @@ void Grass::SetupMesh() {
   vertices_ = new float[36];
   tex_coords_ = new uint8_t[24];
   rotations_ = new float[12];
+  base_triangle_normal_ = new int8_t[36];
+  base_position_ = new float[36];
 
   float x = kWidth / 2.0f;
   float z = 0.0f;
@@ -88,24 +92,22 @@ void Grass::Draw() {
 
   float modelview_matrix[16];
   float projection_matrix[16];
-  int8_t base_triangle_normal[36];
-  float base_position[36];
-  float base_triangle_vertices[9];
-
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
   glGetFloatv(GL_PROJECTION_MATRIX, projection_matrix);
-  base_triangle_->GetNormal(base_triangle_normal);
+
+  float base_triangle_vertices[9];
   base_triangle_->GetCoords(base_triangle_vertices);
   for (uint8_t i = 0; i < 3; ++i) {
-    base_position[i] = 0.0f;
+    base_position_[i] = 0.0f;
     for (uint8_t j = 0; j < 3; ++j) {
-      base_position[i] += 0.33f * base_triangle_vertices[j * 3 + i];
+      base_position_[i] += 0.33f * base_triangle_vertices[j * 3 + i];
     }
   }
+  base_triangle_->GetNormal(base_triangle_normal_);
   for (uint8_t i = 1; i < 12; ++i) {
-    memcpy(base_triangle_normal + i * 3, base_triangle_normal,
+    memcpy(base_triangle_normal_ + i * 3, base_triangle_normal_,
            sizeof(int8_t) * 3);
-    memcpy(base_position + i * 3, base_position, sizeof(float) * 3);
+    memcpy(base_position_ + i * 3, base_position_, sizeof(float) * 3);
   }
 
   glUniformMatrix4fv(loc_parent_modelview, 1, false, modelview_matrix);
@@ -154,7 +156,7 @@ void Grass::Draw() {
   // Base triangle normal.
   CHECK_NE(vbo[3], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 36, base_triangle_normal,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 36, base_triangle_normal_,
                GL_STATIC_DRAW);
   glVertexAttribPointer(loc_base_tri_normal, 3, GL_BYTE, true, 0, 0);
   glEnableVertexAttribArray(loc_base_tri_normal);
@@ -162,7 +164,7 @@ void Grass::Draw() {
   // Base position.
   CHECK_NE(vbo[4], 0);
   glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36, base_position,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36, base_position_,
                GL_STATIC_DRAW);
   glVertexAttribPointer(loc_base_position, 3, GL_FLOAT, true, 0, 0);
   glEnableVertexAttribArray(loc_base_position);
