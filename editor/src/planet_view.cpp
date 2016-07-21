@@ -25,12 +25,19 @@ PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
     vertices_mover_(vertices_mover), sun_shading_(sun_shading),
     grass_field_(grass_field) {
   InitGL();
-  planet_shader_program_ = ShadersFactory::GetProgramFromFile(
-                               "../res/shaders/planet_shader.vertex",
-                               "../res/shaders/planet_shader.fragment");
-  grid_shader_program_ = ShadersFactory::GetProgramFromFile(
-                             "../res/shaders/icogrid_shader.vertex",
-                             "../res/shaders/icogrid_shader.fragment");
+
+  std::vector<std::string> vertex_shaders(1);
+  std::vector<std::string> fragment_shaders(2);
+  vertex_shaders[0] = "../res/shaders/planet_shader.vertex";
+  fragment_shaders[0] = "../res/shaders/planet_shader.fragment";
+  fragment_shaders[1] = "../res/shaders/sun_shading.fragment";
+  planet_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
+                                                              fragment_shaders);
+  fragment_shaders.resize(1);
+  vertex_shaders[0] = "../res/shaders/icogrid_shader.vertex";
+  fragment_shaders[0] = "../res/shaders/icogrid_shader.fragment";
+  grid_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
+                                                            fragment_shaders);
   SetTexture();
   AddListener(&highlighting_toucher_);
 }

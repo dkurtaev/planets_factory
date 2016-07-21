@@ -23,9 +23,12 @@ void GrassField::AddGrassObject(const Triangle* base_triangle) {
 }
 
 void GrassField::Init() {
-  shader_program_ = ShadersFactory::GetProgramFromFile(
-                        "../res/shaders/grass_shader.vertex",
-                        "../res/shaders/grass_shader.fragment");
+  std::vector<std::string> vertex_shaders(1);
+  std::vector<std::string> fragment_shaders(1);
+  vertex_shaders[0] = "../res/shaders/grass_shader.vertex";
+  fragment_shaders[0] = "../res/shaders/grass_shader.fragment";
+  shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
+                                                       fragment_shaders);
   SetupTextures();
 }
 
