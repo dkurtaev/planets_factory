@@ -1,6 +1,7 @@
 attribute vec3 a_position;
 attribute vec3 a_normal;
 attribute vec2 a_tex_coord;
+attribute float a_norm;
 
 uniform mat4 u_modelview_matrix;
 uniform mat4 u_projection_matrix;
@@ -12,7 +13,7 @@ varying vec3 v_position;
 void main() {
   v_normal = a_normal;
   v_tex_coord = a_tex_coord;
-  gl_Position = u_modelview_matrix * vec4(a_position, 1.0);
+  gl_Position = u_modelview_matrix * vec4(a_position * a_norm, 1.0);
   v_position = vec3(gl_Position);
   gl_Position = u_projection_matrix * gl_Position;
 }
