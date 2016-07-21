@@ -13,7 +13,8 @@ class GrassField {
 
   ~GrassField();
 
-  void AddGrassObject(const Triangle* base_triangle);
+  void AddGrassObject(const Triangle* base_triangle, float bary_p1,
+                      float bary_p2, float bary_p3);
 
   void Draw();
 
@@ -24,10 +25,15 @@ class GrassField {
 
   void UpdateVBOs();
 
+  struct Base {
+    const Triangle* triangle;
+    float bary_coords[3];
+  };
+
+  std::vector<Base> bases_;
   unsigned shader_program_;
   unsigned texture_alpha_id_;
   unsigned texture_color_id_;
-  std::vector<const Triangle*> base_triangles_;
   bool need_to_update_vbo_;
   unsigned vertices_ids_vbo_;
   unsigned rotations_vbo_;

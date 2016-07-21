@@ -22,9 +22,14 @@ GrassField::GrassField()
   : need_to_update_vbo_(false), vertices_ids_vbo_(0), rotations_vbo_(0),
     base_tris_normals_vbo_(0), base_positions_vbo_(0) {}
 
-
-void GrassField::AddGrassObject(const Triangle* base_triangle) {
-  base_triangles_.push_back(base_triangle);
+void GrassField::AddGrassObject(const Triangle* base_triangle, float bary_p1,
+                                float bary_p2, float bary_p3) {
+  Base base;
+  base.triangle = base_triangle;
+  base.bary_coords[0] = bary_p1;
+  base.bary_coords[1] = bary_p2;
+  base.bary_coords[2] = bary_p3;
+  bases_.push_back(base);
   need_to_update_vbo_ = true;
 }
 
@@ -69,7 +74,7 @@ void GrassField::SetupTextures() {
 }
 
 void GrassField::UpdateVBOs() {
-  const unsigned n_grass_objects = base_triangles_.size();
+  const unsigned n_grass_objects = bases_.size();
   const unsigned n_quads = 3 * n_grass_objects;
   uint8_t* vertices_ids = new uint8_t[12 * n_grass_objects];
   float* rotations = new float[12 * n_grass_objects];
@@ -92,14 +97,16 @@ void GrassField::UpdateVBOs() {
     memcpy(rotations + i * 12, rotations, sizeof(float) * 12);
     memcpy(vertices_ids + i * 12, vertices_ids, sizeof(uint8_t) * 12);
 
-    base_triangles_[i]->GetCoords(base_triangle_vertices);
-    base_triangles_[i]->GetNormal(base_triangle_normal + i * 36);
+    const Triangle* triangle = bases_[i].triangle;
+    float* bary_coords = bases_[i].bary_coords;
+    triangle->GetCoords(base_triangle_vertices);
+    triangle->GetNormal(base_triangle_normal + i * 36);
 
     // Compute middle point of triangle.
     for (uint8_t j = 0; j < 3; ++j) {
       middle_point[j] = 0.0f;
       for (uint8_t k = 0; k < 3; ++k) {
-        middle_point[j] += 0.33f * base_triangle_vertices[k * 3 + j];
+        middle_point[j] += bary_coords[k] * base_triangle_vertices[k * 3 + j];
       }
     }
     memcpy(base_position + i * 36, middle_point, sizeof(float) * 3);
@@ -155,7 +162,7 @@ void GrassField::Draw() {
   static const float kWidth = 0.7f;
   static const float kHeight = 0.5f;
 
-  if (base_triangles_.empty()) {
+  if (bases_.empty()) {
     return;
   }
 
@@ -231,7 +238,7 @@ void GrassField::Draw() {
   glVertexAttribPointer(loc_base_position, 3, GL_FLOAT, true, 0, 0);
   glEnableVertexAttribArray(loc_base_position);
 
-  glDrawArrays(GL_QUADS, 0, 12 * base_triangles_.size());
+  glDrawArrays(GL_QUADS, 0, 12 * bases_.size());
 
   glDisableVertexAttribArray(loc_point_idx);
   glDisableVertexAttribArray(loc_base_position);

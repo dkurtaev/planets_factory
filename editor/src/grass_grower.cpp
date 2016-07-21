@@ -11,5 +11,5 @@ GrassGrower::GrassGrower(GrassField* grass_field,
 
 void GrassGrower::DoAction(Triangle* triangle, float bary_p1, float bary_p2,
                            float bary_p3) {
-  grass_field_->AddGrassObject(triangle);
+  grass_field_->AddGrassObject(triangle, bary_p1, bary_p2, bary_p3);
 }
