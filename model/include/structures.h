@@ -26,6 +26,8 @@ class Point3f {
 
   void GetPosition(float* dst) const;
 
+  void GetPosition(int16_t* dst, float* norm) const;
+
   void SetColor(uint8_t r, uint8_t g, uint8_t b);
 
   void SetColor(const uint8_t* src);

@@ -67,6 +67,7 @@ class Icosphere {
   uint8_t* colors_array_;
   uint8_t n_splits_;
   unsigned coordinates_vbo_;
+  unsigned norms_vbo_;
   unsigned normals_vbo_;
   unsigned tex_coords_vbo_;
   bool need_to_update_vbo_;

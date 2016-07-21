@@ -50,6 +50,7 @@ void Icosphere::Clear() {
   delete[] tex_coord_array_;
 
   glDeleteBuffers(1, &coordinates_vbo_);
+  glDeleteBuffers(1, &norms_vbo_);
   glDeleteBuffers(1, &normals_vbo_);
   glDeleteBuffers(1, &tex_coords_vbo_);
 }
@@ -220,25 +221,30 @@ void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
 
 void Icosphere::UpdateVBOs() {
   const unsigned n_tris = triangles_.size();
-  float* vertices = new float[9 * n_tris];
+
+  int16_t* vertices = new int16_t[9 * n_tris];
   int8_t* normals = new int8_t[9 * n_tris];
+  float* norms = new float[3 * n_tris];
 
-  unsigned offset;
-  float* vertices_indent = vertices;
+  int16_t* vertices_indent = vertices;
   int8_t* normals_indent = normals;
+  float* norms_indent = norms;
+  uint16_t* indices_indent = indices_array_;
 
-  const uint8_t sizeof_float_x3 = sizeof(float) * 3;
-  const uint8_t sizeof_uint8_t_x3 = sizeof(uint8_t) * 3;
+  const uint8_t sizeof_int16_t_x3 = sizeof(int16_t) * 3;
+  const uint8_t sizeof_int8_t_x3 = sizeof(int8_t) * 3;
   for (unsigned i = 0; i < n_tris; ++i) {
     triangles_[i]->GetNormal(normals_indent);
-    memcpy(normals_indent + 3, normals_indent, sizeof_uint8_t_x3);
-    memcpy(normals_indent + 6, normals_indent, sizeof_uint8_t_x3);
+    memcpy(normals_indent + 3, normals_indent, sizeof_int8_t_x3);
+    memcpy(normals_indent + 6, normals_indent, sizeof_int8_t_x3);
     normals_indent += 9;
+
     for (uint8_t j = 0; j < 3; ++j) {
-      offset = indices_array_[i * 3 + j] * 3;
-      memcpy(vertices_indent, vertices_array_ + offset, sizeof_float_x3);
+      vertices_[indices_indent[j]]->GetPosition(vertices_indent, norms_indent);
       vertices_indent += 3;
+      norms_indent += 1;
     }
+    indices_indent += 3;
   }
 
   // Coordinates VBO.
@@ -246,7 +252,15 @@ void Icosphere::UpdateVBOs() {
   glGenBuffers(1, &coordinates_vbo_);
   CHECK_NE(coordinates_vbo_, 0);
   glBindBuffer(GL_ARRAY_BUFFER, coordinates_vbo_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris, vertices,
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int16_t) * 9 * n_tris, vertices,
+               GL_STATIC_DRAW);
+
+  // Norms VBO.
+  glDeleteBuffers(1, &norms_vbo_);
+  glGenBuffers(1, &norms_vbo_);
+  CHECK_NE(norms_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, norms_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * n_tris, norms,
                GL_STATIC_DRAW);
 
   // Normals VBO.
@@ -268,6 +282,7 @@ void Icosphere::UpdateVBOs() {
   need_to_update_vbo_ = false;
   delete[] vertices;
   delete[] normals;
+  delete[] norms;
 }
 
 void Icosphere::Draw() {
@@ -277,8 +292,16 @@ void Icosphere::Draw() {
 
   // Coordinates VBO.
   glBindBuffer(GL_ARRAY_BUFFER, coordinates_vbo_);
-  glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(COORDS_ATTRIB, 3, GL_SHORT, true, 0, 0);
   glEnableVertexAttribArray(COORDS_ATTRIB);
+
+  // Norms VBO.
+  int shader_program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program);
+  const uint8_t loc_norm = glGetAttribLocation(shader_program, "a_norm");
+  glBindBuffer(GL_ARRAY_BUFFER, norms_vbo_);
+  glVertexAttribPointer(loc_norm, 1, GL_FLOAT, false, 0, 0);
+  glEnableVertexAttribArray(loc_norm);
 
   // Normals VBO.
   glBindBuffer(GL_ARRAY_BUFFER, normals_vbo_);
@@ -292,6 +315,7 @@ void Icosphere::Draw() {
 
   glDrawArrays(GL_TRIANGLES, 0, 3 * triangles_.size());
 
+  glDisableVertexAttribArray(loc_norm);
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(NORMALS_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);

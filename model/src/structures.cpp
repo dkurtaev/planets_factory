@@ -78,6 +78,13 @@ void Point3f::GetPosition(float* dst) const {
   memcpy(dst, vertices_array_offset_, sizeof(float) * 3);
 }
 
+void Point3f::GetPosition(int16_t* dst, float* norm) const {
+  for (uint8_t i = 0; i < 3; ++i) {
+    dst[i] = INT16_MAX * (vertices_array_offset_[i] / norm_);
+  }
+  *norm = norm_;
+}
+
 void Point3f::ResetNeighborhood() {
   neighborhood_.clear();
   edges_.clear();
