@@ -75,6 +75,8 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
 
+  icosphere.BindTexCoordsVBO();
+
   ConsoleView console_view(&planet_view);
 
   SaveButton save_button(&icosphere, &console_view);

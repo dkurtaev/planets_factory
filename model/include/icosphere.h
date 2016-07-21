@@ -35,6 +35,8 @@ class Icosphere {
 
   uint8_t GetNumSplits() const;
 
+  void BindTexCoordsVBO();
+
  private:
   void Clear();
 
@@ -62,6 +64,7 @@ class Icosphere {
   // color for vertices on initial edges.
   uint8_t* colors_array_;
   uint8_t n_splits_;
+  unsigned tex_coords_vbo_;
 };
 
 #endif  // MODEL_INCLUDE_ICOSPHERE_H_

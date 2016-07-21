@@ -48,6 +48,8 @@ void Icosphere::Clear() {
   delete[] indices_array_;
   delete[] colors_array_;
   delete[] tex_coord_array_;
+
+  glDeleteBuffers(1, &tex_coords_vbo_);
 }
 
 void Icosphere::Build(const std::string& src_file, float radius) {
@@ -237,8 +239,8 @@ void Icosphere::Draw() const {
     }
   }
 
-  unsigned vbo[4];
-  glGenBuffers(4, vbo);
+  unsigned vbo[2];
+  glGenBuffers(2, vbo);
 
   // Coordinates VBO.
   CHECK_NE(vbo[0], 0);
@@ -249,18 +251,15 @@ void Icosphere::Draw() const {
   glEnableVertexAttribArray(COORDS_ATTRIB);
 
   // Normals VBO.
-  CHECK_NE(vbo[2], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+  CHECK_NE(vbo[1], 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris,
                normals, GL_STATIC_DRAW);
   glVertexAttribPointer(NORMALS_ATTRIB, 3, GL_BYTE, true, 0, 0);
   glEnableVertexAttribArray(NORMALS_ATTRIB);
 
   // Texture coordinates VBO.
-  CHECK_NE(vbo[3], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
-               tex_coord_array_, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, tex_coords_vbo_);
   glVertexAttribPointer(TEX_ATTRIB, 2, GL_UNSIGNED_SHORT, true, 0, 0);
   glEnableVertexAttribArray(TEX_ATTRIB);
 
@@ -269,9 +268,18 @@ void Icosphere::Draw() const {
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(NORMALS_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);
-  glDeleteBuffers(4, vbo);
+  glDeleteBuffers(2, vbo);
   delete[] vertices;
   delete[] normals;
+}
+
+void Icosphere::BindTexCoordsVBO() {
+  glGenBuffers(1, &tex_coords_vbo_);
+  CHECK_NE(tex_coords_vbo_, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, tex_coords_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
+               tex_coord_array_, GL_STATIC_DRAW);
 }
 
 void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
