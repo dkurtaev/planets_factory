@@ -49,6 +49,8 @@ void Icosphere::Clear() {
   delete[] colors_array_;
   delete[] tex_coord_array_;
 
+  glDeleteBuffers(1, &coordinates_vbo_);
+  glDeleteBuffers(1, &normals_vbo_);
   glDeleteBuffers(1, &tex_coords_vbo_);
 }
 
@@ -191,6 +193,7 @@ void Icosphere::Build(const std::string& src_file, float radius) {
   for (unsigned i = 0; i < kNumEdges; ++i) {
     delete edges[i];
   }
+  need_to_update_vbo_ = true;
 }
 
 void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
@@ -215,8 +218,7 @@ void Icosphere::AddTriangle(uint16_t v1, uint16_t v2, uint16_t v3,
   triangles_.push_back(new_triangle);
 }
 
-void Icosphere::Draw() const {
-  // Mesh.
+void Icosphere::UpdateVBOs() {
   const unsigned n_tris = triangles_.size();
   float* vertices = new float[9 * n_tris];
   int8_t* normals = new int8_t[9 * n_tris];
@@ -239,22 +241,47 @@ void Icosphere::Draw() const {
     }
   }
 
-  unsigned vbo[2];
-  glGenBuffers(2, vbo);
+  // Coordinates VBO.
+  glDeleteBuffers(1, &coordinates_vbo_);
+  glGenBuffers(1, &coordinates_vbo_);
+  CHECK_NE(coordinates_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, coordinates_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris, vertices,
+               GL_STATIC_DRAW);
+
+  // Normals VBO.
+  glDeleteBuffers(1, &normals_vbo_);
+  glGenBuffers(1, &normals_vbo_);
+  CHECK_NE(normals_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, normals_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris, normals,
+               GL_STATIC_DRAW);
+
+  // Texture coordinates VBO.
+  glDeleteBuffers(1, &tex_coords_vbo_);
+  glGenBuffers(1, &tex_coords_vbo_);
+  CHECK_NE(tex_coords_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, tex_coords_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
+               tex_coord_array_, GL_STATIC_DRAW);
+
+  need_to_update_vbo_ = false;
+  delete[] vertices;
+  delete[] normals;
+}
+
+void Icosphere::Draw() {
+  if (need_to_update_vbo_) {
+    UpdateVBOs();
+  }
 
   // Coordinates VBO.
-  CHECK_NE(vbo[0], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9 * n_tris,
-               vertices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, coordinates_vbo_);
   glVertexAttribPointer(COORDS_ATTRIB, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(COORDS_ATTRIB);
 
   // Normals VBO.
-  CHECK_NE(vbo[1], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 9 * n_tris,
-               normals, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, normals_vbo_);
   glVertexAttribPointer(NORMALS_ATTRIB, 3, GL_BYTE, true, 0, 0);
   glEnableVertexAttribArray(NORMALS_ATTRIB);
 
@@ -268,18 +295,6 @@ void Icosphere::Draw() const {
   glDisableVertexAttribArray(TEX_ATTRIB);
   glDisableVertexAttribArray(NORMALS_ATTRIB);
   glDisableVertexAttribArray(COORDS_ATTRIB);
-  glDeleteBuffers(2, vbo);
-  delete[] vertices;
-  delete[] normals;
-}
-
-void Icosphere::BindTexCoordsVBO() {
-  glGenBuffers(1, &tex_coords_vbo_);
-  CHECK_NE(tex_coords_vbo_, 0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, tex_coords_vbo_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(uint16_t) * 6 * triangles_.size(),
-               tex_coord_array_, GL_STATIC_DRAW);
 }
 
 void Icosphere::SplitTriangles(std::vector<Edge*>* edges) {
@@ -453,4 +468,8 @@ void Icosphere::Save(const std::string& file_path) const {
 
 uint8_t Icosphere::GetNumSplits() const {
   return n_splits_;
+}
+
+void Icosphere::Update() {
+  need_to_update_vbo_ = true;
 }

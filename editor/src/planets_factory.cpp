@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
   Switcher move_up_mover_switcher("Terrain up");
   Switcher move_down_mover_switcher("Terrain down");
-  VerticesMover vertices_mover(vertices, &move_up_mover_switcher,
+  VerticesMover vertices_mover(&icosphere, &move_up_mover_switcher,
                                &move_down_mover_switcher,
                                &backtrace);
   std::vector<Switcher*> radio_group;
@@ -74,8 +74,6 @@ int main(int argc, char** argv) {
   planet_view.AddListener(&texture_colorizer);
   planet_view.AddListener(&vertices_mover);
   planet_view.AsRootView();
-
-  icosphere.BindTexCoordsVBO();
 
   ConsoleView console_view(&planet_view);
 

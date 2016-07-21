@@ -12,12 +12,12 @@
 
 #include <glog/logging.h>
 
-VerticesMover::VerticesMover(std::vector<Point3f*>* vertices,
+VerticesMover::VerticesMover(Icosphere* icosphere,
                              Switcher* is_move_up_swither,
                              Switcher* is_move_down_swither,
                              Backtrace* backtrace)
-  : VerticesToucher(vertices, backtrace), is_move_up_(false),
-    is_move_down_(false) {
+  : VerticesToucher(icosphere->GetVertices(), backtrace), is_move_up_(false),
+    is_move_down_(false), icosphere_(icosphere) {
   is_move_up_swither->SetFlag(&is_move_up_);
   is_move_down_swither->SetFlag(&is_move_down_);
 }
@@ -68,6 +68,7 @@ void VerticesMover::DoAction(Point3f* vertex) {
       }
     }
   }
+  icosphere_->Update();
 }
 
 bool VerticesMover::IsEnabled() {

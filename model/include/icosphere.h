@@ -19,7 +19,7 @@ class Icosphere {
   void Build(const std::string& src_file, float radius = 1.0f);
 
   // Drawing textured mesh.
-  void Draw() const;
+  void Draw();
 
   // Drawing icosphere grid.
   void DrawGrid() const;
@@ -35,7 +35,7 @@ class Icosphere {
 
   uint8_t GetNumSplits() const;
 
-  void BindTexCoordsVBO();
+  void Update();
 
  private:
   void Clear();
@@ -49,6 +49,8 @@ class Icosphere {
 
   // Used for building icosphere from icosahedron.
   void SplitTriangles(std::vector<Edge*>* edges);
+
+  void UpdateVBOs();
 
   std::vector<Point3f*> vertices_;
   // Actual triangles.
@@ -64,7 +66,10 @@ class Icosphere {
   // color for vertices on initial edges.
   uint8_t* colors_array_;
   uint8_t n_splits_;
+  unsigned coordinates_vbo_;
+  unsigned normals_vbo_;
   unsigned tex_coords_vbo_;
+  bool need_to_update_vbo_;
 };
 
 #endif  // MODEL_INCLUDE_ICOSPHERE_H_
