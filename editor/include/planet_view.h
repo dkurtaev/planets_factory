@@ -44,7 +44,7 @@ class HighlightingToucher : public Toucher {
 
 class PlanetView : public GLView {
  public:
-  PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
+  PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
              bool* sun_shading, TextureColorizer* texture_colorizer,
              VerticesMover* vertices_mover, GrassField* grass_field);
@@ -57,7 +57,7 @@ class PlanetView : public GLView {
   void SetTexture();
 
   Camera camera_;
-  const Icosphere* icosphere_;
+  Icosphere* icosphere_;
   unsigned texture_id_;
   const cv::Mat* texture_;
   unsigned planet_shader_program_;

@@ -15,7 +15,7 @@
 #define GRID_SHADER_LOC(attrib) \
   glGetUniformLocation(grid_shader_program_, attrib)
 
-PlanetView::PlanetView(const Icosphere* icosphere, SphericalCS* camera_cs,
+PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
                        VerticesMover* vertices_mover, GrassField* grass_field)

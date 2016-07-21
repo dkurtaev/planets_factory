@@ -11,10 +11,11 @@
 #include "include/structures.h"
 #include "include/switcher.h"
 #include "include/backtrace.h"
+#include "include/icosphere.h"
 
 class VerticesMover : public VerticesToucher {
  public:
-  VerticesMover(std::vector<Point3f*>* vertices, Switcher* is_move_up_swither,
+  VerticesMover(Icosphere* icosphere, Switcher* is_move_up_swither,
                 Switcher* is_move_down_swither, Backtrace* backtrace);
 
   virtual bool IsEnabled();
@@ -35,6 +36,7 @@ class VerticesMover : public VerticesToucher {
   bool is_move_up_;
   bool is_move_down_;
   std::map<Point3f*, float> action_data_;
+  Icosphere* icosphere_;
 };
 
 class VerticesMoverAction : public Action {
