@@ -18,8 +18,20 @@
 #define ATTRIB_LOC(name) \
   glGetAttribLocation(shader_program_, name)
 
+GrassField::GrassField()
+  : need_to_update_vbo_(false) {}
+
+
 void GrassField::AddGrassObject(const Triangle* base_triangle) {
   base_triangles_.push_back(base_triangle);
+  need_to_update_vbo_ = true;
+}
+
+GrassField::~GrassField() {
+  glDeleteBuffers(1, &vertices_ids_vbo_);
+  glDeleteBuffers(1, &rotations_vbo_);
+  glDeleteBuffers(1, &base_tris_normals_vbo_);
+  glDeleteBuffers(1, &base_positions_vbo_);
 }
 
 void GrassField::Init() {
@@ -55,15 +67,7 @@ void GrassField::SetupTextures() {
                GL_UNSIGNED_BYTE, texture.data);
 }
 
-void GrassField::Draw() const {
-  static const float kWidth = 0.7f;
-  static const float kHeight = 0.5f;
-
-  if (base_triangles_.empty()) {
-    return;
-  }
-
-  // Setup data.
+void GrassField::UpdateVBOs() {
   const unsigned n_grass_objects = base_triangles_.size();
   const unsigned n_quads = 3 * n_grass_objects;
   uint8_t* vertices_ids = new uint8_t[12 * n_grass_objects];
@@ -105,6 +109,57 @@ void GrassField::Draw() const {
       memcpy(base_position + i * 36 + j * 3,
              base_position + i * 36, sizeof(float) * 3);
     }
+  }
+
+  // Vertex kinds VBO.
+  glDeleteBuffers(1, &vertices_ids_vbo_);
+  glGenBuffers(1, &vertices_ids_vbo_);
+  CHECK_NE(vertices_ids_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vertices_ids_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 12 * n_grass_objects,
+               vertices_ids, GL_STATIC_DRAW);
+
+  // Self rotations.
+  glDeleteBuffers(1, &rotations_vbo_);
+  glGenBuffers(1, &rotations_vbo_);
+  CHECK_NE(rotations_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, rotations_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12 * n_grass_objects,
+               rotations, GL_STATIC_DRAW);
+
+  // Base triangle normal.
+  glDeleteBuffers(1, &base_tris_normals_vbo_);
+  glGenBuffers(1, &base_tris_normals_vbo_);
+  CHECK_NE(base_tris_normals_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, base_tris_normals_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 36 * n_grass_objects,
+               base_triangle_normal, GL_STATIC_DRAW);
+
+  // Base position.
+  glDeleteBuffers(1, &base_positions_vbo_);
+  glGenBuffers(1, &base_positions_vbo_);
+  CHECK_NE(base_positions_vbo_, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, base_positions_vbo_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36 * n_grass_objects,
+               base_position, GL_STATIC_DRAW);
+
+  need_to_update_vbo_ = false;
+  delete[] vertices_ids;
+  delete[] rotations;
+  delete[] base_triangle_normal;
+  delete[] base_position;
+}
+
+void GrassField::Draw() {
+  static const float kWidth = 0.7f;
+  static const float kHeight = 0.5f;
+
+  if (base_triangles_.empty()) {
+    return;
+  }
+
+  if (need_to_update_vbo_) {
+    UpdateVBOs();
   }
 
   glUseProgram(shader_program_);
@@ -155,56 +210,35 @@ void GrassField::Draw() const {
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, 0.5);
 
-  unsigned vbo[4];
-  glGenBuffers(4, vbo);
-
   // Vertex kinds VBO.
-  CHECK_NE(vbo[0], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(uint8_t) * 12 * n_grass_objects,
-               vertices_ids, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, vertices_ids_vbo_);
   glVertexAttribPointer(loc_point_idx, 1, GL_UNSIGNED_BYTE, false, 0, 0);
   glEnableVertexAttribArray(loc_point_idx);
 
   // Self rotations.
-  CHECK_NE(vbo[1], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12 * n_grass_objects,
-               rotations, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, rotations_vbo_);
   glVertexAttribPointer(loc_self_rotation, 1, GL_FLOAT, false, 0, 0);
   glEnableVertexAttribArray(loc_self_rotation);
 
   // Base triangle normal.
-  CHECK_NE(vbo[2], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(int8_t) * 36 * n_grass_objects,
-               base_triangle_normal, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, base_tris_normals_vbo_);
   glVertexAttribPointer(loc_base_tri_normal, 3, GL_BYTE, true, 0, 0);
   glEnableVertexAttribArray(loc_base_tri_normal);
 
   // Base position.
-  CHECK_NE(vbo[3], 0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 36 * n_grass_objects,
-               base_position, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, base_positions_vbo_);
   glVertexAttribPointer(loc_base_position, 3, GL_FLOAT, true, 0, 0);
   glEnableVertexAttribArray(loc_base_position);
 
-  glDrawArrays(GL_QUADS, 0, 12 * n_grass_objects);
+  glDrawArrays(GL_QUADS, 0, 12 * base_triangles_.size());
 
   glDisableVertexAttribArray(loc_point_idx);
   glDisableVertexAttribArray(loc_base_position);
   glDisableVertexAttribArray(loc_base_tri_normal);
   glDisableVertexAttribArray(loc_self_rotation);
-  glDeleteBuffers(4, vbo);
 
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
   glEnable(GL_CULL_FACE);
   glUseProgram(0);
-
-  delete[] vertices_ids;
-  delete[] rotations;
-  delete[] base_triangle_normal;
-  delete[] base_position;
 }
