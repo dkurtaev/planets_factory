@@ -10,8 +10,7 @@
 class Edge;
 class Point3f {
  public:
-  Point3f(uint16_t id, float x, float y, float z, float* vertices_array_offset,
-          uint8_t* colors_array_offset);
+  explicit Point3f(uint16_t id, float x = 0, float y = 0, float z = 0);
 
   static void MiddlePoint(const Point3f& p1, const Point3f& p2,
                           Point3f* middle_point);
@@ -28,9 +27,9 @@ class Point3f {
 
   void GetPosition(int16_t* dst, float* norm) const;
 
-  void SetColor(uint8_t r, uint8_t g, uint8_t b);
-
   void SetColor(const uint8_t* src);
+
+  void GetColor(uint8_t* dst) const;
 
   float GetNorm() const { return norm_; }
 
@@ -48,11 +47,11 @@ class Point3f {
 
  private:
   uint16_t id_;
-  float* vertices_array_offset_;
-  uint8_t* colors_array_offset_;
   float norm_;
   std::vector<Point3f*> neighborhood_;
   std::vector<Edge*> edges_;
+  std::vector<uint8_t> color_;
+  std::vector<float> coordinates_;
 };
 
 class Edge {

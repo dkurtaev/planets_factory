@@ -59,12 +59,8 @@ class Icosphere {
   std::vector<Triangle*> init_triangles_;
   // All triangles.
   std::vector<Triangle*> all_triangles_;
-  float* vertices_array_;
   uint16_t* indices_array_;
   uint16_t* tex_coord_array_;
-  // Using for drawing icosphere grid. One color for internal vertices, other
-  // color for vertices on initial edges.
-  uint8_t* colors_array_;
   uint8_t n_splits_;
   unsigned coordinates_vbo_;
   unsigned norms_vbo_;
