@@ -10,10 +10,8 @@
 #include <vector>
 
 // Point3f ---------------------------------------------------------------------
-Point3f::Point3f(uint16_t id, float x, float y, float z,
-                 float* vertices_array_offset, uint8_t* colors_array_offset)
-  : id_(id), vertices_array_offset_(vertices_array_offset),
-    colors_array_offset_(colors_array_offset) {
+Point3f::Point3f(uint16_t id, float x, float y, float z)
+  : id_(id), color_(3, 0), coordinates_(3) {
   SetPosition(x, y, z);
   neighborhood_.reserve(6);  // Maximal numer of neighbors.
   edges_.reserve(6);
@@ -21,41 +19,43 @@ Point3f::Point3f(uint16_t id, float x, float y, float z,
 
 void Point3f::Normalize(float target_norm) {
   float coeff = target_norm / norm_;
-  vertices_array_offset_[0] *= coeff;
-  vertices_array_offset_[1] *= coeff;
-  vertices_array_offset_[2] *= coeff;
+  coordinates_[0] *= coeff;
+  coordinates_[1] *= coeff;
+  coordinates_[2] *= coeff;
   norm_ = target_norm;
 }
 
 void Point3f::SetPosition(float x, float y, float z) {
-  vertices_array_offset_[0] = x;
-  vertices_array_offset_[1] = y;
-  vertices_array_offset_[2] = z;
+  coordinates_[0] = x;
+  coordinates_[1] = y;
+  coordinates_[2] = z;
   norm_ = sqrt(x * x + y * y + z * z);
 }
 
-void Point3f::SetColor(uint8_t r, uint8_t g, uint8_t b) {
-  colors_array_offset_[0] = r;
-  colors_array_offset_[1] = g;
-  colors_array_offset_[2] = b;
+void Point3f::SetColor(const uint8_t* src) {
+  color_[0] = src[0];
+  color_[1] = src[1];
+  color_[2] = src[2];
 }
 
-void Point3f::SetColor(const uint8_t* src) {
-  memcpy(colors_array_offset_, src, sizeof(uint8_t) * 3);
+void Point3f::GetColor(uint8_t* dst) const {
+  dst[0] = color_[0];
+  dst[1] = color_[1];
+  dst[2] = color_[2];
 }
 
 void Point3f::MiddlePoint(const Point3f& p1, const Point3f& p2,
                           Point3f* middle_point) {
   middle_point->SetPosition(
-    0.5f * (p1.vertices_array_offset_[0] + p2.vertices_array_offset_[0]),
-    0.5f * (p1.vertices_array_offset_[1] + p2.vertices_array_offset_[1]),
-    0.5f * (p1.vertices_array_offset_[2] + p2.vertices_array_offset_[2]));
+    0.5f * (p1.coordinates_[0] + p2.coordinates_[0]),
+    0.5f * (p1.coordinates_[1] + p2.coordinates_[1]),
+    0.5f * (p1.coordinates_[2] + p2.coordinates_[2]));
 }
 
 float Point3f::SquaredDistanceTo(float x, float y, float z) {
-  return pow(vertices_array_offset_[0] - x, 2) +
-         pow(vertices_array_offset_[1] - y, 2) +
-         pow(vertices_array_offset_[2] - z, 2);
+  return pow(coordinates_[0] - x, 2) +
+         pow(coordinates_[1] - y, 2) +
+         pow(coordinates_[2] - z, 2);
 }
 
 void Point3f::AddNeighbor(Point3f* point, Edge* edge) {
@@ -69,13 +69,22 @@ void Point3f::GetNeighborhood(std::vector<Point3f*>* neighborhood) {
 }
 
 void Point3f::GetPosition(float* x, float* y, float* z) const {
-  *x = vertices_array_offset_[0];
-  *y = vertices_array_offset_[1];
-  *z = vertices_array_offset_[2];
+  *x = coordinates_[0];
+  *y = coordinates_[1];
+  *z = coordinates_[2];
 }
 
 void Point3f::GetPosition(float* dst) const {
-  memcpy(dst, vertices_array_offset_, sizeof(float) * 3);
+  dst[0] = coordinates_[0];
+  dst[1] = coordinates_[1];
+  dst[2] = coordinates_[2];
+}
+
+void Point3f::GetPosition(int16_t* dst, float* norm) const {
+  for (uint8_t i = 0; i < 3; ++i) {
+    dst[i] = INT16_MAX * (coordinates_[i] / norm_);
+  }
+  *norm = norm_;
 }
 
 void Point3f::ResetNeighborhood() {
