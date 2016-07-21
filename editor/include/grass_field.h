@@ -16,7 +16,7 @@ class GrassField {
   void AddGrassObject(const Triangle* base_triangle, float bary_p1,
                       float bary_p2, float bary_p3);
 
-  void Draw();
+  void Draw(bool sun_shading);
 
   void Init();
 

@@ -72,13 +72,15 @@ int main(int argc, char** argv) {
   bool draw_grid = false;
   bool draw_mesh = true;
   bool use_sun_shading = false;
+  bool draw_grass = true;
   Switcher draw_grid_switcher("Grid", &draw_grid);
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
   Switcher sun_shading_switcher("Sun shader", &use_sun_shading);
+  Switcher draw_grass_switcher("Draw grass", &draw_grass);
 
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
                          &draw_mesh, &use_sun_shading, &texture_colorizer,
-                         &vertices_mover, &grass_field);
+                         &vertices_mover, &grass_field, &draw_grass);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
   planet_view.AddListener(&vertices_mover);
@@ -108,6 +110,7 @@ int main(int argc, char** argv) {
   buttons.push_back(&sun_shading_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
+  buttons.push_back(&draw_grass_switcher);
   buttons.push_back(&save_button);
   buttons.push_back(&load_button);
   ActionsView actions_view(buttons, &planet_view);

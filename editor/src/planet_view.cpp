@@ -18,12 +18,13 @@
 PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
-                       VerticesMover* vertices_mover, GrassField* grass_field)
+                       VerticesMover* vertices_mover, GrassField* grass_field,
+                       bool* draw_grass)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
     vertices_mover_(vertices_mover), sun_shading_(sun_shading),
-    grass_field_(grass_field) {
+    grass_field_(grass_field), draw_grass_(draw_grass) {
   InitGL();
 
   std::vector<std::string> vertex_shaders(1);
@@ -104,7 +105,9 @@ void PlanetView::Display() {
                  0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
 
     icosphere_->Draw();
+    glUseProgram(0);
   }
+
   if (*draw_grid_) {
     glUseProgram(grid_shader_program_);
     const uint8_t loc_model_matrix = GRID_SHADER_LOC("u_modelview_matrix");
@@ -112,15 +115,16 @@ void PlanetView::Display() {
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
     icosphere_->DrawGrid();
+    glUseProgram(0);
   }
 
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-    glLoadMatrixf(modelview_matrix);
-    grass_field_->Draw();
-  glPopMatrix();
-
-  glUseProgram(0);  // Disable shader program.
+  if (*draw_grass_) {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+      glLoadMatrixf(modelview_matrix);
+      grass_field_->Draw(*sun_shading_);
+    glPopMatrix();
+  }
   glutSwapBuffers();
 }
 

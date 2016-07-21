@@ -3,6 +3,8 @@
 #ifndef EDITOR_INCLUDE_PLANET_VIEW_H_
 #define EDITOR_INCLUDE_PLANET_VIEW_H_
 
+#include <vector>
+
 #include <opencv2/opencv.hpp>
 
 #include "include/glview.h"
@@ -47,7 +49,8 @@ class PlanetView : public GLView {
   PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
              bool* sun_shading, TextureColorizer* texture_colorizer,
-             VerticesMover* vertices_mover, GrassField* grass_field);
+             VerticesMover* vertices_mover, GrassField* grass_field,
+             bool* draw_grass);
 
   virtual void Display();
 
@@ -65,6 +68,7 @@ class PlanetView : public GLView {
   bool* draw_grid_;
   bool* draw_mesh_;
   bool* sun_shading_;
+  bool* draw_grass_;
   HighlightingToucher highlighting_toucher_;
   TextureColorizer* texture_colorizer_;
   VerticesMover* vertices_mover_;

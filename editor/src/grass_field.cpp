@@ -158,7 +158,7 @@ void GrassField::UpdateVBOs() {
   delete[] base_position;
 }
 
-void GrassField::Draw() {
+void GrassField::Draw(bool sun_shading) {
   static const float kWidth = 0.7f;
   static const float kHeight = 0.5f;
 
@@ -188,7 +188,7 @@ void GrassField::Draw() {
   const uint8_t loc_planet_position = UNIFORM_LOC("u_planet_position");
   const uint8_t loc_planet_radius = UNIFORM_LOC("u_planet_radius");
 
-  glUniform1i(loc_use_sun_shading, true);
+  glUniform1i(loc_use_sun_shading, sun_shading);
   glUniform3f(loc_sun_position, 100.0f, 100.0f, 100.0f);
   glUniform1f(loc_sun_radius, 10.0f);
   glUniform3f(loc_planet_position, 0.0f, 0.0f, 0.0f);
