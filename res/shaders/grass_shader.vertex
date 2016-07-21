@@ -5,10 +5,10 @@ attribute vec3 a_base_position;
 
 uniform mat4 u_planet_modelview_matrix;
 uniform mat4 u_projection_matrix;
-uniform float u_width;
-uniform float u_height;
+uniform vec2 u_grass_size;  // (width, height)
 
 varying vec2 v_tex_coord;
+varying vec3 v_position;
 
 void main() {
   // 4 kinds of points:
@@ -20,18 +20,18 @@ void main() {
   vec3 position;
   float x;
   if (a_point_idx == 0.0 || a_point_idx == 1.0) {
-    x = u_width / 2.0;
+    x = u_grass_size.x / 2.0;
     if (a_point_idx == 0.0) {
       position.y = 0.0;
       v_tex_coord = vec2(1.0, 1.0);
     } else {
-      position.y = u_height;
+      position.y = u_grass_size.y;
       v_tex_coord = vec2(1.0, 0.0);
     }
   } else {
-    x = -u_width / 2.0;
+    x = -u_grass_size.x / 2.0;
     if (a_point_idx == 2.0) {
-      position.y = u_height;
+      position.y = u_grass_size.y;
       v_tex_coord = vec2(0.0, 0.0);
     } else {
       position.y = 0.0;
@@ -57,14 +57,10 @@ void main() {
   // nx ny nz 0
   // ax ay az 0
   // px py pz 1
-  mat4 modelview_matrix = mat4(1.0);  // 4x4 Identity matrix.
-  for (int i = 0; i < 3; ++i) {
-    modelview_matrix[0][i] = ordinate[i];
-    modelview_matrix[1][i] = normal[i];
-    modelview_matrix[2][i] = abscissa[i];
-    modelview_matrix[3][i] = a_base_position[i];
-  }
-
-  gl_Position = modelview_matrix * vec4(position, 1.0);
+  mat4 modelview_matrix = mat4(vec4(ordinate, 0.0), vec4(normal, 0.0),
+                               vec4(abscissa, 0.0), vec4(a_base_position, 1.0));
+  gl_Position = u_planet_modelview_matrix * vec4(position, 1.0);
+  gl_Position = modelview_matrix * gl_Position;
+  v_position = vec3(gl_Position);
   gl_Position = u_projection_matrix * gl_Position;
 }

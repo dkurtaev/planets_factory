@@ -24,9 +24,10 @@ void GrassField::AddGrassObject(const Triangle* base_triangle) {
 
 void GrassField::Init() {
   std::vector<std::string> vertex_shaders(1);
-  std::vector<std::string> fragment_shaders(1);
+  std::vector<std::string> fragment_shaders(2);
   vertex_shaders[0] = "../res/shaders/grass_shader.vertex";
   fragment_shaders[0] = "../res/shaders/grass_shader.fragment";
+  fragment_shaders[1] = "../res/shaders/sun_shading.fragment";
   shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
                                                        fragment_shaders);
   SetupTextures();
@@ -111,12 +112,25 @@ void GrassField::Draw() const {
   const uint8_t loc_proj_matrix = UNIFORM_LOC("u_projection_matrix");
   const uint8_t loc_tex_alpha = UNIFORM_LOC("u_tex_alpha");
   const uint8_t loc_tex_color = UNIFORM_LOC("u_tex_color");
-  const uint8_t loc_grass_width = UNIFORM_LOC("u_width");
-  const uint8_t loc_grass_height = UNIFORM_LOC("u_height");
+  const uint8_t loc_grass_size = UNIFORM_LOC("u_grass_size");
   const uint8_t loc_self_rotation = ATTRIB_LOC("a_self_rotation");
   const uint8_t loc_base_tri_normal = ATTRIB_LOC("a_base_triangle_normal");
   const uint8_t loc_base_position = ATTRIB_LOC("a_base_position");
   const uint8_t loc_point_idx = ATTRIB_LOC("a_point_idx");
+
+  //
+  const uint8_t loc_use_sun_shading = UNIFORM_LOC("u_sun_shading");
+  const uint8_t loc_sun_position = UNIFORM_LOC("u_sun_position");
+  const uint8_t loc_sun_radius = UNIFORM_LOC("u_sun_radius");
+  const uint8_t loc_planet_position = UNIFORM_LOC("u_planet_position");
+  const uint8_t loc_planet_radius = UNIFORM_LOC("u_planet_radius");
+
+  glUniform1i(loc_use_sun_shading, true);
+  glUniform3f(loc_sun_position, 100.0f, 100.0f, 100.0f);
+  glUniform1f(loc_sun_radius, 10.0f);
+  glUniform3f(loc_planet_position, 0.0f, 0.0f, 0.0f);
+  glUniform1f(loc_planet_radius, 4.0f);
+  //
 
   float modelview_matrix[16];
   float projection_matrix[16];
@@ -125,8 +139,7 @@ void GrassField::Draw() const {
 
   glUniformMatrix4fv(loc_parent_modelview, 1, false, modelview_matrix);
   glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
-  glUniform1f(loc_grass_width, kWidth);
-  glUniform1f(loc_grass_height, kHeight);
+  glUniform2f(loc_grass_size, kWidth, kHeight);
 
   glUniform1i(loc_tex_alpha, 0);
   glActiveTexture(GL_TEXTURE0);
