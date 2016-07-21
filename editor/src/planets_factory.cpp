@@ -19,6 +19,7 @@
 #include "include/console_view_listener.h"
 #include "include/backtrace.h"
 #include "include/grass_field.h"
+#include "include/grass_grower.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -34,6 +35,7 @@ int main(int argc, char** argv) {
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
   Backtrace backtrace;
+  GrassField grass_field;
 
   std::vector<Triangle*>* init_triangles = icosphere.GetInitTriangles();
   std::vector<Triangle*>* triangles = icosphere.GetTriangles();
@@ -56,10 +58,16 @@ int main(int argc, char** argv) {
   VerticesMover vertices_mover(&icosphere, &move_up_mover_switcher,
                                &move_down_mover_switcher,
                                &backtrace);
+
+  Switcher grass_grower_switcher("Grass");
+  GrassGrower grass_grower(&grass_field, triangles, &backtrace,
+                           &grass_grower_switcher);
+
   std::vector<Switcher*> radio_group;
   move_up_mover_switcher.AddToRadioGroup(&radio_group);
   move_down_mover_switcher.AddToRadioGroup(&radio_group);
   texture_colorizer_enable_switcher.AddToRadioGroup(&radio_group);
+  grass_grower_switcher.AddToRadioGroup(&radio_group);
 
   bool draw_grid = false;
   bool draw_mesh = true;
@@ -68,23 +76,16 @@ int main(int argc, char** argv) {
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
   Switcher sun_shading_switcher("Sun shader", &use_sun_shading);
 
-  GrassField grass_field;
-  // grass_field.AddGrassObject(triangles->operator[](0));
-  // grass_field.AddGrassObject(triangles->operator[](15));
-
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
                          &draw_mesh, &use_sun_shading, &texture_colorizer,
                          &vertices_mover, &grass_field);
   planet_view.AddListener(&camera_mover);
   planet_view.AddListener(&texture_colorizer);
   planet_view.AddListener(&vertices_mover);
+  planet_view.AddListener(&grass_grower);
   planet_view.AsRootView();
 
   grass_field.Init();
-
-  for (int i = 0; i < triangles->size() / 2; ++i) {
-    grass_field.AddGrassObject(triangles->operator[](i));
-  }
 
   ConsoleView console_view(&planet_view);
 
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
   buttons.push_back(&brush_size_button);
   buttons.push_back(&move_up_mover_switcher);
   buttons.push_back(&move_down_mover_switcher);
+  buttons.push_back(&grass_grower_switcher);
   buttons.push_back(&sun_shading_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
