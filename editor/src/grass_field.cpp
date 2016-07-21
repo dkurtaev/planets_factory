@@ -1,6 +1,6 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
-#include "include/grass.h"
+#include "include/grass_field.h"
 
 #include <math.h>
 
@@ -19,7 +19,8 @@
   glGetAttribLocation(shader_program_, name)
 
 GrassField::GrassField()
-  : need_to_update_vbo_(false) {}
+  : need_to_update_vbo_(false), vertices_ids_vbo_(0), rotations_vbo_(0),
+    base_tris_normals_vbo_(0), base_positions_vbo_(0) {}
 
 
 void GrassField::AddGrassObject(const Triangle* base_triangle) {

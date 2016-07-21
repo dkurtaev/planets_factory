@@ -20,7 +20,8 @@
 #include "include/shaders_factory.h"
 
 Icosphere::Icosphere(float radius, const std::string& src_file)
-  : indices_array_(0), tex_coord_array_(0) {
+  : indices_array_(0), tex_coord_array_(0), coordinates_vbo_(0), norms_vbo_(0),
+    normals_vbo_(0), tex_coords_vbo_(0) {
   Build(src_file, radius);
 }
 

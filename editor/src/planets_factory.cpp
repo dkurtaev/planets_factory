@@ -18,7 +18,7 @@
 #include "include/console_view.h"
 #include "include/console_view_listener.h"
 #include "include/backtrace.h"
-#include "include/grass.h"
+#include "include/grass_field.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>

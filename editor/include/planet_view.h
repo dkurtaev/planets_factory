@@ -12,7 +12,7 @@
 #include "include/toucher.h"
 #include "include/texture_colorizer.h"
 #include "include/vertices_mover.h"
-#include "include/grass.h"
+#include "include/grass_field.h"
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
