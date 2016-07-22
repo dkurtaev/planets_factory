@@ -253,3 +253,7 @@ void GrassField::Draw(bool sun_shading) {
   glEnable(GL_CULL_FACE);
   glUseProgram(0);
 }
+
+void GrassField::Update() {
+  need_to_update_vbo_ = true;
+}

@@ -15,9 +15,9 @@
 VerticesMover::VerticesMover(Icosphere* icosphere,
                              Switcher* is_move_up_swither,
                              Switcher* is_move_down_swither,
-                             Backtrace* backtrace)
+                             Backtrace* backtrace, GrassField* grass_field)
   : VerticesToucher(icosphere->GetVertices(), backtrace), is_move_up_(false),
-    is_move_down_(false), icosphere_(icosphere) {
+    is_move_down_(false), icosphere_(icosphere), grass_field_(grass_field) {
   is_move_up_swither->SetFlag(&is_move_up_);
   is_move_down_swither->SetFlag(&is_move_down_);
 }
@@ -69,6 +69,7 @@ void VerticesMover::DoAction(Point3f* vertex) {
     }
   }
   icosphere_->Update();
+  grass_field_->Update();
 }
 
 bool VerticesMover::IsEnabled() {

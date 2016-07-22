@@ -20,6 +20,8 @@ class GrassField {
 
   void Init();
 
+  void Update();
+
  private:
   void SetupTextures();
 

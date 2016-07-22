@@ -4,6 +4,7 @@
 #define EDITOR_INCLUDE_GRASS_GROWER_H_
 
 #include <vector>
+#include <map>
 
 #include "include/triangles_toucher.h"
 #include "include/grass_field.h"
@@ -16,6 +17,8 @@ class GrassGrower : public TrianglesToucher {
               Backtrace* backtrace, Switcher* is_enabled_swither);
 
  private:
+  static const uint8_t kMaxNumGrassObjects = 3;
+
   virtual void DoAction(Triangle* triangle, float bary_p1, float bary_p2,
                         float bary_p3);
 
@@ -24,6 +27,8 @@ class GrassGrower : public TrianglesToucher {
   virtual void FlushAction(Backtrace* backtrace) {}
 
   GrassField* grass_field_;
+  // Number of grass objects on base triangles.
+  std::map<Triangle*, uint8_t> grass_log_;
 };
 
 #endif  // EDITOR_INCLUDE_GRASS_GROWER_H_

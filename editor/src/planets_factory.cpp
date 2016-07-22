@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   Switcher move_down_mover_switcher("Terrain down");
   VerticesMover vertices_mover(&icosphere, &move_up_mover_switcher,
                                &move_down_mover_switcher,
-                               &backtrace);
+                               &backtrace, &grass_field);
 
   Switcher grass_grower_switcher("Grass");
   GrassGrower grass_grower(&grass_field, triangles, &backtrace,

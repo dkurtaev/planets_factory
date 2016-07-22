@@ -14,7 +14,9 @@ MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
                          const std::vector<Triangle*>& triangles,
                          const cv::Mat& texture)
   : GLView(1, 1, "", parent), parent_(parent), n_triangles_(triangles.size()),
-    n_vertices_(vertices.size()), texture_size_(texture.size()) {}
+    n_vertices_(vertices.size()), texture_size_(texture.size()) {
+  gettimeofday(&last_display_, 0);
+}
 
 void MetricsView::Display() {
   TimeCheck();

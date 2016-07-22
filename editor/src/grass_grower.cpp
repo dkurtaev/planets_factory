@@ -13,5 +13,13 @@ GrassGrower::GrassGrower(GrassField* grass_field,
 
 void GrassGrower::DoAction(Triangle* triangle, float bary_p1, float bary_p2,
                            float bary_p3) {
-  grass_field_->AddGrassObject(triangle, bary_p1, bary_p2, bary_p3);
+  std::map<Triangle*, uint8_t>::iterator it = grass_log_.find(triangle);
+  if (it == grass_log_.end() || it->second < kMaxNumGrassObjects) {
+    grass_field_->AddGrassObject(triangle, bary_p1, bary_p2, bary_p3);
+    if (it == grass_log_.end()) {
+      grass_log_[triangle] = 1;
+    } else {
+      it->second += 1;
+    }
+  }
 }
