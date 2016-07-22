@@ -3,6 +3,7 @@
 #include "include/planet_view.h"
 
 #include <string>
+#include <vector>
 
 #include <GL/freeglut.h>
 #include <glog/logging.h>
@@ -18,20 +19,29 @@
 PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
-                       VerticesMover* vertices_mover)
+                       VerticesMover* vertices_mover, GrassField* grass_field,
+                       bool* draw_grass)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
-    vertices_mover_(vertices_mover), sun_shading_(sun_shading) {
+    vertices_mover_(vertices_mover), sun_shading_(sun_shading),
+    grass_field_(grass_field), draw_grass_(draw_grass) {
   InitGL();
-  planet_shader_program_ = ShadersFactory::GetProgramFromFile(
-                               "../res/shaders/planet_shader.vertex",
-                               "../res/shaders/planet_shader.fragment");
-  grid_shader_program_ = ShadersFactory::GetProgramFromFile(
-                             "../res/shaders/icogrid_shader.vertex",
-                             "../res/shaders/icogrid_shader.fragment");
+
+  std::vector<std::string> vertex_shaders(1);
+  std::vector<std::string> fragment_shaders(2);
+  vertex_shaders[0] = "../res/shaders/planet_shader.vertex";
+  fragment_shaders[0] = "../res/shaders/planet_shader.fragment";
+  fragment_shaders[1] = "../res/shaders/sun_shading.fragment";
+  planet_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
+                                                              fragment_shaders);
+  fragment_shaders.resize(1);
+  vertex_shaders[0] = "../res/shaders/icogrid_shader.vertex";
+  fragment_shaders[0] = "../res/shaders/icogrid_shader.fragment";
+  grid_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
+                                                            fragment_shaders);
   SetTexture();
-  AddListener(&highlighting_toucher_);
+  AddIcosphereToucher(&highlighting_toucher_);
 }
 
 void PlanetView::Display() {
@@ -58,6 +68,7 @@ void PlanetView::Display() {
     const uint8_t loc_planet_position = PLANET_SHADER_LOC("u_planet_position");
     const uint8_t loc_planet_radius = PLANET_SHADER_LOC("u_planet_radius");
     const uint8_t loc_use_sun_shading = PLANET_SHADER_LOC("u_sun_shading");
+    const uint8_t loc_texture = PLANET_SHADER_LOC("u_texture");
 
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
@@ -88,15 +99,21 @@ void PlanetView::Display() {
     }
 
     // Texture.
+    glUniform1i(loc_texture, 0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
                  0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
-    glUniform1i(3, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id_);
 
     icosphere_->Draw();
+    glUseProgram(0);
+
+    const unsigned n_touchers = icosphere_touchers_.size();
+    for (unsigned i = 0; i < n_touchers; ++i) {
+      icosphere_touchers_[i]->SolveTouchRequests();
+    }
   }
+
   if (*draw_grid_) {
     glUseProgram(grid_shader_program_);
     const uint8_t loc_model_matrix = GRID_SHADER_LOC("u_modelview_matrix");
@@ -104,8 +121,16 @@ void PlanetView::Display() {
     glUniformMatrix4fv(loc_model_matrix, 1, false, modelview_matrix);
     glUniformMatrix4fv(loc_proj_matrix, 1, false, projection_matrix);
     icosphere_->DrawGrid();
+    glUseProgram(0);
   }
-  glUseProgram(0);  // Disable shader program.
+
+  if (*draw_grass_) {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+      glLoadMatrixf(modelview_matrix);
+      grass_field_->Draw(*sun_shading_);
+    glPopMatrix();
+  }
   glutSwapBuffers();
 }
 
@@ -124,12 +149,21 @@ void PlanetView::SetTexture() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+void PlanetView::AddIcosphereToucher(Toucher* toucher) {
+  icosphere_touchers_.push_back(toucher);
+  AddListener(toucher);
+}
+
 void HighlightingToucher::MouseMove(int x, int y) {
-  Toucher::ProcessTouch(x, y);
+  callback_requests_.push(MOUSE_MOVE);
+  requests_data_.push(x);
+  requests_data_.push(y);
 }
 
 void HighlightingToucher::PassiveMouseMove(int x, int y) {
-  Toucher::ProcessTouch(x, y);
+  callback_requests_.push(MOUSE_MOVE);
+  requests_data_.push(x);
+  requests_data_.push(y);
 }
 
 bool HighlightingToucher::HasTouchPoint() {
@@ -140,4 +174,17 @@ void HighlightingToucher::GetTouchPoint(float* dst) {
   dst[0] = world_x_;
   dst[1] = world_y_;
   dst[2] = world_z_;
+}
+
+void HighlightingToucher::SolveTouchRequests() {
+  while (!callback_requests_.empty()) {
+    if (callback_requests_.front() == MOUSE_MOVE) {
+      int x = requests_data_.front();
+      requests_data_.pop();
+      int y = requests_data_.front();
+      requests_data_.pop();
+      Toucher::ProcessTouch(x, y);
+    }
+    callback_requests_.pop();
+  }
 }

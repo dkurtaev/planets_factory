@@ -1,0 +1,34 @@
+uniform float u_planet_radius;
+uniform float u_sun_radius;
+uniform vec3 u_sun_position;
+uniform vec3 u_planet_position;
+
+void SunShading(vec3 v_position) {
+  // Check sun covering.
+  //                      ___0____
+  //                     /   |  / \
+  //                    /    | /   \
+  //                 1 |_____|/_____| -1
+  //                   | cover\     |
+  //                    \angle \   /
+  //                     \___|__\_/
+  //                         0
+  //   <-- sun             planet
+  vec3 light_vector = u_sun_position - u_planet_position;
+  float distance_to_sun = sqrt(dot(light_vector, light_vector));
+  vec3 n_position = normalize(v_position - u_planet_position);
+  vec3 n_light_vector = normalize(light_vector);
+
+  // cos(cover_angle) = (r - R) / d. Value in [-1, 0];
+  float sun_cover = (u_planet_radius - u_sun_radius) / distance_to_sun;
+  float fragment_cover_value = dot(n_position, n_light_vector);  // in [-1, 1]
+
+  fragment_cover_value = max(fragment_cover_value, sun_cover);
+  float sun_power = (fragment_cover_value - sun_cover) / (1.0f - sun_cover);
+  gl_FragColor *= sqrt(sun_power);
+  gl_FragColor[3] = 1.0f;
+}
+
+vec3 GetLightVector() {
+  return normalize(u_sun_position - u_planet_position);
+}

@@ -18,6 +18,8 @@
 #include "include/console_view.h"
 #include "include/console_view_listener.h"
 #include "include/backtrace.h"
+#include "include/grass_field.h"
+#include "include/grass_grower.h"
 
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
@@ -33,6 +35,7 @@ int main(int argc, char** argv) {
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
   Backtrace backtrace;
+  GrassField grass_field;
 
   std::vector<Triangle*>* init_triangles = icosphere.GetInitTriangles();
   std::vector<Triangle*>* triangles = icosphere.GetTriangles();
@@ -54,26 +57,37 @@ int main(int argc, char** argv) {
   Switcher move_down_mover_switcher("Terrain down");
   VerticesMover vertices_mover(&icosphere, &move_up_mover_switcher,
                                &move_down_mover_switcher,
-                               &backtrace);
+                               &backtrace, &grass_field);
+
+  Switcher grass_grower_switcher("Grass");
+  GrassGrower grass_grower(&grass_field, triangles, &backtrace,
+                           &grass_grower_switcher);
+
   std::vector<Switcher*> radio_group;
   move_up_mover_switcher.AddToRadioGroup(&radio_group);
   move_down_mover_switcher.AddToRadioGroup(&radio_group);
   texture_colorizer_enable_switcher.AddToRadioGroup(&radio_group);
+  grass_grower_switcher.AddToRadioGroup(&radio_group);
 
   bool draw_grid = false;
   bool draw_mesh = true;
   bool use_sun_shading = false;
+  bool draw_grass = true;
   Switcher draw_grid_switcher("Grid", &draw_grid);
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
   Switcher sun_shading_switcher("Sun shader", &use_sun_shading);
+  Switcher draw_grass_switcher("Draw grass", &draw_grass);
 
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
                          &draw_mesh, &use_sun_shading, &texture_colorizer,
-                         &vertices_mover);
+                         &vertices_mover, &grass_field, &draw_grass);
   planet_view.AddListener(&camera_mover);
-  planet_view.AddListener(&texture_colorizer);
-  planet_view.AddListener(&vertices_mover);
+  planet_view.AddIcosphereToucher(&texture_colorizer);
+  planet_view.AddIcosphereToucher(&vertices_mover);
+  planet_view.AddIcosphereToucher(&grass_grower);
   planet_view.AsRootView();
+
+  grass_field.Init();
 
   ConsoleView console_view(&planet_view);
 
@@ -92,9 +106,11 @@ int main(int argc, char** argv) {
   buttons.push_back(&brush_size_button);
   buttons.push_back(&move_up_mover_switcher);
   buttons.push_back(&move_down_mover_switcher);
+  buttons.push_back(&grass_grower_switcher);
   buttons.push_back(&sun_shading_switcher);
   buttons.push_back(&draw_grid_switcher);
   buttons.push_back(&draw_mesh_switcher);
+  buttons.push_back(&draw_grass_switcher);
   buttons.push_back(&save_button);
   buttons.push_back(&load_button);
   ActionsView actions_view(buttons, &planet_view);

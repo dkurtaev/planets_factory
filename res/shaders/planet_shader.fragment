@@ -1,9 +1,5 @@
 uniform sampler2D u_texture;
 // Sun shading.
-uniform vec3 u_sun_position;
-uniform float u_sun_radius;
-uniform vec3 u_planet_position;
-uniform float u_planet_radius;
 uniform bool u_sun_shading;
 // Highlighting ring.
 uniform bool u_process_touch;
@@ -14,30 +10,9 @@ varying vec3 v_normal;
 varying vec2 v_tex_coord;
 varying vec3 v_position;
 
-void SunShading(vec3 light_vector, vec4 n_light_vector) {
-  // Check sun covering.
-  //                      ___0____
-  //                     /   |  / \
-  //                    /    | /   \
-  //                 1 |_____|/_____| -1
-  //                   | cover\     |
-  //                    \angle \   /
-  //                     \___|__\_/
-  //                         0
-  //   <-- sun             planet
+void SunShading(vec3 v_position);
 
-  float distance_to_sun = sqrt(dot(light_vector, light_vector));
-  vec4 n_position = vec4( normalize(v_position - u_planet_position), 0.0f );
-
-  // cos(cover_angle) = (r - R) / d. Value in [-1, 0];
-  float sun_cover = (u_planet_radius - u_sun_radius) / distance_to_sun;
-  float fragment_cover_value = dot(n_position, n_light_vector);  // in [-1, 1]
-
-  fragment_cover_value = max(fragment_cover_value, sun_cover);
-  float sun_power = (fragment_cover_value - sun_cover) / (1.0f - sun_cover);
-  gl_FragColor *= sqrt(sun_power);
-  gl_FragColor[3] = 1.0f;
-}
+vec3 GetLightVector();
 
 void HighlightingRing() {
   float c_highlighting_internal_ring_radius = 0.8f;  // in [0, 1]
@@ -53,15 +28,14 @@ void HighlightingRing() {
 }
 
 void main() {
-  vec3 light_vector = u_sun_position - u_planet_position;
-  vec4 n_light_vector = vec4( normalize(light_vector), 0.0f);
-  vec4 n_normal = vec4( normalize(v_normal), 0.0f);
+  vec3 n_light_vector = GetLightVector();
+  vec3 n_normal = normalize(v_normal);
 
   float lum_value = (dot(n_light_vector, n_normal) + 2.0f) / 3.0f;
   gl_FragColor = texture2D(u_texture, v_tex_coord) * lum_value;
 
   if (u_sun_shading) {
-    SunShading(light_vector, n_light_vector);
+    SunShading(v_position);
   }
   if (u_process_touch) {
     HighlightingRing();

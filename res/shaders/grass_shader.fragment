@@ -1,0 +1,16 @@
+uniform sampler2D u_tex_color;
+uniform sampler2D u_tex_alpha;
+uniform bool u_sun_shading;
+
+varying vec2 v_tex_coord;
+varying vec3 v_position;
+
+void SunShading(vec3 v_position);
+
+void main() {
+  gl_FragColor = texture2D(u_tex_color, v_tex_coord);
+  if (u_sun_shading) {
+    SunShading(v_position);
+  }
+  gl_FragColor[3] = texture2D(u_tex_alpha, v_tex_coord)[0];
+}

@@ -3,6 +3,10 @@
 #ifndef MODEL_INCLUDE_SHADERS_FACTORY_H_
 #define MODEL_INCLUDE_SHADERS_FACTORY_H_
 
+#include <string>
+#include <vector>
+#include <set>
+
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -14,14 +18,19 @@ enum Attrib { COORDS_ATTRIB,   // Vertex coordinates attribute (a_position).
 
 class ShadersFactory {
  public:
-  static unsigned GetProgramFromFile(const char* vert_shader_path,
-                                     const char* frag_shader_path);
+  static unsigned GetProgramFromFile(
+      const std::vector<std::string>& vert_shader_paths,
+      const std::vector<std::string>& frag_shader_paths);
 
-  static unsigned GetProgramFromSource(const char* vert_shader_src,
-                                       const char* frag_shader_src);
+  static unsigned GetProgramFromSource(
+      const std::vector<std::string>& vert_shader_src,
+      const std::vector<std::string>& frag_shader_src);
 
  private:
-  static unsigned CreateShader(GLenum type, const char* src);
+  static unsigned CreateShader(GLenum type,
+                               const std::vector<std::string>& src);
+
+  static std::set<unsigned> created_programs_;
 };
 
 #endif  // MODEL_INCLUDE_SHADERS_FACTORY_H_

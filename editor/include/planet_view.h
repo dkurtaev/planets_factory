@@ -3,6 +3,8 @@
 #ifndef EDITOR_INCLUDE_PLANET_VIEW_H_
 #define EDITOR_INCLUDE_PLANET_VIEW_H_
 
+#include <vector>
+
 #include <opencv2/opencv.hpp>
 
 #include "include/glview.h"
@@ -12,6 +14,7 @@
 #include "include/toucher.h"
 #include "include/texture_colorizer.h"
 #include "include/vertices_mover.h"
+#include "include/grass_field.h"
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -28,6 +31,8 @@ class HighlightingToucher : public Toucher {
   virtual void MouseMove(int x, int y);
 
   virtual void PassiveMouseMove(int x, int y);
+
+  virtual void SolveTouchRequests();
 
   bool HasTouchPoint();
 
@@ -46,9 +51,13 @@ class PlanetView : public GLView {
   PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
              bool* sun_shading, TextureColorizer* texture_colorizer,
-             VerticesMover* vertices_mover);
+             VerticesMover* vertices_mover, GrassField* grass_field,
+             bool* draw_grass);
 
   virtual void Display();
+
+  // Icosphere touchers reads depth buffer with icosphere only.
+  void AddIcosphereToucher(Toucher* toucher);
 
  private:
   void InitGL();
@@ -64,9 +73,12 @@ class PlanetView : public GLView {
   bool* draw_grid_;
   bool* draw_mesh_;
   bool* sun_shading_;
+  bool* draw_grass_;
   HighlightingToucher highlighting_toucher_;
   TextureColorizer* texture_colorizer_;
   VerticesMover* vertices_mover_;
+  GrassField* grass_field_;
+  std::vector<Toucher*> icosphere_touchers_;
 };
 
 #endif  // EDITOR_INCLUDE_PLANET_VIEW_H_

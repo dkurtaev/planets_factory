@@ -4,8 +4,9 @@
 
 #include <fstream>
 #include <string>
-#include <iostream>
 #include <sstream>
+#include <vector>
+#include <set>
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -13,30 +14,46 @@
 
 #include <glog/logging.h>
 
-unsigned ShadersFactory::GetProgramFromFile(const char* vert_shader_path,
-                                            const char* frag_shader_path) {
-  std::ifstream file(vert_shader_path);
-  CHECK(file.is_open())
-      << "Vertex shader \"" << vert_shader_path << "\" not found";
-  std::stringstream vert_shader_src;
-  vert_shader_src << file.rdbuf();
-  file.close();
+std::set<unsigned> ShadersFactory::created_programs_;
 
-  file.open(frag_shader_path);
-  CHECK(file.is_open())
-      << "Fragment shader \"" << frag_shader_path << "\" not found";
-  std::stringstream frag_shader_src;
-  frag_shader_src << file.rdbuf();
-  file.close();
+unsigned ShadersFactory::GetProgramFromFile(
+    const std::vector<std::string>& vert_shader_paths,
+    const std::vector<std::string>& frag_shader_paths) {
+  std::ifstream file;
+  const uint8_t n_vert_shader_paths = vert_shader_paths.size();
+  const uint8_t n_frag_shader_paths = frag_shader_paths.size();
+  std::vector<std::string> vert_shader_src(n_vert_shader_paths);
+  std::vector<std::string> frag_shader_src(n_frag_shader_paths);
 
-  return GetProgramFromSource(vert_shader_src.str().c_str(),
-                              frag_shader_src.str().c_str());
+  for (uint8_t i = 0; i < n_vert_shader_paths; ++i) {
+    file.open(vert_shader_paths[i].c_str());
+    CHECK(file.is_open())
+        << "Vertex shader \"" << vert_shader_paths[i] << "\" not found";
+    std::stringstream ss;
+    ss << file.rdbuf();
+    file.close();
+    vert_shader_src[i] = ss.str();
+  }
+  for (uint8_t i = 0; i < n_frag_shader_paths; ++i) {
+    file.open(frag_shader_paths[i].c_str());
+    CHECK(file.is_open())
+        << "Fragment shader \"" << frag_shader_paths[i] << "\" not found";
+    std::stringstream ss;
+    ss << file.rdbuf();
+    file.close();
+    frag_shader_src[i] = ss.str();
+  }
+  return GetProgramFromSource(vert_shader_src, frag_shader_src);
 }
 
-unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
-                                              const char* frag_shader_src) {
+unsigned ShadersFactory::GetProgramFromSource(
+    const std::vector<std::string>& vert_shader_src,
+    const std::vector<std::string>& frag_shader_src) {
   unsigned program = glCreateProgram();
-  CHECK_NE(program, 0);
+  CHECK(program != 0) << "Program creating failed";
+  CHECK(created_programs_.find(program) == created_programs_.end())
+      << "Not unique program id";
+  created_programs_.insert(program);
 
   unsigned vert_shader = CreateShader(GL_VERTEX_SHADER, vert_shader_src);
   unsigned frag_shader = CreateShader(GL_FRAGMENT_SHADER, frag_shader_src);
@@ -66,10 +83,18 @@ unsigned ShadersFactory::GetProgramFromSource(const char* vert_shader_src,
   return program;
 }
 
-unsigned ShadersFactory::CreateShader(GLenum type, const char* src) {
+unsigned ShadersFactory::CreateShader(GLenum type,
+                                      const std::vector<std::string>& src) {
   unsigned shader = glCreateShader(type);
   CHECK(shader != 0) << "Shader creating failed";
-  glShaderSource(shader, 1, &src, 0);
+
+  const uint8_t n_src = src.size();
+  const char** src_array = new const char*[n_src];
+  for (uint8_t i = 0; i < n_src; ++i) {
+    src_array[i] = src[i].c_str();
+  }
+  glShaderSource(shader, n_src, src_array, 0);
+  delete[] src_array;
 
   glCompileShader(shader);
   int success = GL_FALSE;

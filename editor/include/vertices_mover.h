@@ -12,11 +12,13 @@
 #include "include/switcher.h"
 #include "include/backtrace.h"
 #include "include/icosphere.h"
+#include "include/grass_field.h"
 
 class VerticesMover : public VerticesToucher {
  public:
   VerticesMover(Icosphere* icosphere, Switcher* is_move_up_swither,
-                Switcher* is_move_down_swither, Backtrace* backtrace);
+                Switcher* is_move_down_swither, Backtrace* backtrace,
+                GrassField* grass_field);
 
   virtual bool IsEnabled();
 
@@ -37,6 +39,7 @@ class VerticesMover : public VerticesToucher {
   bool is_move_down_;
   std::map<Point3f*, float> action_data_;
   Icosphere* icosphere_;
+  GrassField* grass_field_;
 };
 
 class VerticesMoverAction : public Action {
