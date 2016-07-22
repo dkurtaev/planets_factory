@@ -257,3 +257,9 @@ void GrassField::Draw(bool sun_shading) {
 void GrassField::Update() {
   need_to_update_vbo_ = true;
 }
+
+void GrassField::RemoveLastGrassObjects(unsigned n_objects) {
+  need_to_update_vbo_ = true;
+  CHECK_GE(bases_.size(), n_objects);
+  bases_.erase(bases_.end() - n_objects, bases_.end());
+}

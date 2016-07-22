@@ -16,6 +16,9 @@ class GrassField {
   void AddGrassObject(const Triangle* base_triangle, float bary_p1,
                       float bary_p2, float bary_p3);
 
+  // Remove specific number of last added grass objects.
+  void RemoveLastGrassObjects(unsigned n_objects);
+
   void Draw(bool sun_shading);
 
   void Init();
