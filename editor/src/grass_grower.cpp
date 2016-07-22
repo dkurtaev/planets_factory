@@ -7,7 +7,8 @@
 GrassGrower::GrassGrower(GrassField* grass_field,
                          std::vector<Triangle*>* triangles,
                          Backtrace* backtrace, Switcher* is_enabled_swither)
-  : TrianglesToucher(triangles, backtrace), grass_field_(grass_field) {
+  : TrianglesToucher(triangles, backtrace), grass_field_(grass_field),
+    n_last_added_objects_(0) {
   is_enabled_swither->SetFlag(&is_enabled_);
 }
 
