@@ -32,6 +32,8 @@ class HighlightingToucher : public Toucher {
 
   virtual void PassiveMouseMove(int x, int y);
 
+  virtual void SolveTouchRequests();
+
   bool HasTouchPoint();
 
   void GetTouchPoint(float* dst);
@@ -54,6 +56,9 @@ class PlanetView : public GLView {
 
   virtual void Display();
 
+  // Icosphere touchers reads depth buffer with icosphere only.
+  void AddIcosphereToucher(Toucher* toucher);
+
  private:
   void InitGL();
 
@@ -73,6 +78,7 @@ class PlanetView : public GLView {
   TextureColorizer* texture_colorizer_;
   VerticesMover* vertices_mover_;
   GrassField* grass_field_;
+  std::vector<Toucher*> icosphere_touchers_;
 };
 
 #endif  // EDITOR_INCLUDE_PLANET_VIEW_H_

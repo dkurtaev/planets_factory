@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
                          &draw_mesh, &use_sun_shading, &texture_colorizer,
                          &vertices_mover, &grass_field, &draw_grass);
   planet_view.AddListener(&camera_mover);
-  planet_view.AddListener(&texture_colorizer);
-  planet_view.AddListener(&vertices_mover);
-  planet_view.AddListener(&grass_grower);
+  planet_view.AddIcosphereToucher(&texture_colorizer);
+  planet_view.AddIcosphereToucher(&vertices_mover);
+  planet_view.AddIcosphereToucher(&grass_grower);
   planet_view.AsRootView();
 
   grass_field.Init();

@@ -3,6 +3,8 @@
 #ifndef ENGINE_INCLUDE_TOUCHER_H_
 #define ENGINE_INCLUDE_TOUCHER_H_
 
+#include <queue>
+
 #include "include/glview_listener.h"
 #include "include/backtrace.h"
 
@@ -16,7 +18,15 @@ class Toucher : public GLViewListener {
 
   virtual void DoEvents();
 
+  virtual void PassiveMouseMove(int x, int y) {}
+
+  // Different touchers needs to different depth buffers states. This method
+  // calls in cooresponding moments for solving touch requests.
+  virtual void SolveTouchRequests();
+
  protected:
+  enum Callback { MOUSE_FUNC, MOUSE_MOVE, DO_EVENTS };
+
   virtual void ProcessTouch(float x, float y, float z) = 0;
 
   // Initialize new action for writing.
@@ -31,6 +41,8 @@ class Toucher : public GLViewListener {
   double world_y_;
   double world_z_;
   bool infinity_touch_;
+  std::queue<Callback> callback_requests_;
+  std::queue<int> requests_data_;
 
  private:
   bool left_button_pressed_;

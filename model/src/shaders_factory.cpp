@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <set>
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>

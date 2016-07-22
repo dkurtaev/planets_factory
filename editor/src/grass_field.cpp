@@ -4,6 +4,9 @@
 
 #include <math.h>
 
+#include <string>
+#include <vector>
+
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/freeglut.h>

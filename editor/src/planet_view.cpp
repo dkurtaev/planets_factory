@@ -3,6 +3,7 @@
 #include "include/planet_view.h"
 
 #include <string>
+#include <vector>
 
 #include <GL/freeglut.h>
 #include <glog/logging.h>
@@ -40,7 +41,7 @@ PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
   grid_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
                                                             fragment_shaders);
   SetTexture();
-  AddListener(&highlighting_toucher_);
+  AddIcosphereToucher(&highlighting_toucher_);
 }
 
 void PlanetView::Display() {
@@ -106,6 +107,11 @@ void PlanetView::Display() {
 
     icosphere_->Draw();
     glUseProgram(0);
+
+    const unsigned n_touchers = icosphere_touchers_.size();
+    for (unsigned i = 0; i < n_touchers; ++i) {
+      icosphere_touchers_[i]->SolveTouchRequests();
+    }
   }
 
   if (*draw_grid_) {
@@ -143,12 +149,21 @@ void PlanetView::SetTexture() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+void PlanetView::AddIcosphereToucher(Toucher* toucher) {
+  icosphere_touchers_.push_back(toucher);
+  AddListener(toucher);
+}
+
 void HighlightingToucher::MouseMove(int x, int y) {
-  Toucher::ProcessTouch(x, y);
+  callback_requests_.push(MOUSE_MOVE);
+  requests_data_.push(x);
+  requests_data_.push(y);
 }
 
 void HighlightingToucher::PassiveMouseMove(int x, int y) {
-  Toucher::ProcessTouch(x, y);
+  callback_requests_.push(MOUSE_MOVE);
+  requests_data_.push(x);
+  requests_data_.push(y);
 }
 
 bool HighlightingToucher::HasTouchPoint() {
@@ -159,4 +174,17 @@ void HighlightingToucher::GetTouchPoint(float* dst) {
   dst[0] = world_x_;
   dst[1] = world_y_;
   dst[2] = world_z_;
+}
+
+void HighlightingToucher::SolveTouchRequests() {
+  while (!callback_requests_.empty()) {
+    if (callback_requests_.front() == MOUSE_MOVE) {
+      int x = requests_data_.front();
+      requests_data_.pop();
+      int y = requests_data_.front();
+      requests_data_.pop();
+      Toucher::ProcessTouch(x, y);
+    }
+    callback_requests_.pop();
+  }
 }

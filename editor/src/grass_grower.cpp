@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/grass_grower.h"
 
+#include <vector>
+
 GrassGrower::GrassGrower(GrassField* grass_field,
                          std::vector<Triangle*>* triangles,
                          Backtrace* backtrace, Switcher* is_enabled_swither)
