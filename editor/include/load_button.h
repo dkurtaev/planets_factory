@@ -5,21 +5,17 @@
 
 #include "include/button.h"
 #include "include/icosphere.h"
-#include "include/console_view.h"
 #include "include/backtrace.h"
 
 class LoadButton : public Button {
  public:
-  LoadButton(Icosphere* icosphere, ConsoleView* console_view,
-             Backtrace* backtrace);
+  // Clearing backtrace when loading new model.
+  LoadButton(Icosphere* icosphere, Backtrace* backtrace);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
-  virtual void DoEvents();
-
  private:
   Icosphere* icosphere_;
-  ConsoleView* console_view_;
   Backtrace* backtrace_;
 };
 
