@@ -16,7 +16,6 @@
 #include "include/save_button.h"
 #include "include/load_button.h"
 #include "include/console_view.h"
-#include "include/console_view_listener.h"
 #include "include/backtrace.h"
 #include "include/grass_field.h"
 #include "include/grass_grower.h"
