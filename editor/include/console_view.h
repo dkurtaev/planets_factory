@@ -11,8 +11,7 @@
 
 #include "include/glview.h"
 #include "include/glview_listener.h"
-#include "include/console_view.h"
-#include "include/save_button.h"
+#include "include/save_load_buttons.h"
 #include "include/switcher.h"
 #include "include/backtrace.h"
 
