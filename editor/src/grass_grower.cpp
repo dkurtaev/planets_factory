@@ -3,6 +3,7 @@
 #include "include/grass_grower.h"
 
 #include <vector>
+#include <map>
 
 GrassGrower::GrassGrower(GrassField* grass_field,
                          std::vector<Triangle*>* triangles,

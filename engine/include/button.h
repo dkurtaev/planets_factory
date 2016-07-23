@@ -28,6 +28,8 @@ class Button : public GLViewListener {
   //     v  y
   void Display(int semiwidth, int semiheight);
 
+  std::string GetText() { return text_; }
+
  protected:
   std::string text_;
   uint8_t font_color_[3];
