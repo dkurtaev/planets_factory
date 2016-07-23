@@ -6,11 +6,14 @@
 #include <stdint.h>
 
 #include "include/glview.h"
-#include "include/slider_listener.h"
+#include "include/glview_listener.h"
 
+class SliderListener;
 class SliderView : public GLView {
  public:
   explicit SliderView(const SliderView* slider_view = 0);
+
+  ~SliderView();
 
   virtual void Display();
 
@@ -27,7 +30,19 @@ class SliderView : public GLView {
 
   // Value in [0, 1].
   float power_;
-  SliderListener listener_;
+  SliderListener* listener_;
+};
+
+class SliderListener : public GLViewListener {
+ public:
+  explicit SliderListener(SliderView* slider_view);
+
+  virtual void MouseMove(int x, int y);
+
+  virtual void MouseFunc(int button, int state, int x, int y);
+
+ private:
+  SliderView* slider_view_;
 };
 
 #endif  // EDITOR_INCLUDE_SLIDER_VIEW_H_

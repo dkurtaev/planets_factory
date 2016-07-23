@@ -7,8 +7,8 @@
 
 #include "include/glview.h"
 #include "include/layout.h"
-#include "include/hsv_palette_listener.h"
 
+class PaletteListener;
 class PaletteView : public GLView {
  public:
   explicit PaletteView(const PaletteView* palette_view = 0);
@@ -60,8 +60,8 @@ class PaletteView : public GLView {
   void UpdateVPaletteColors();
 
   Layout layout_;
-  HSVPaletteListener v_palette_listener_;
-  HSVPaletteListener hs_palette_listener_;
+  PaletteListener* v_palette_listener_;
+  PaletteListener* hs_palette_listener_;
 
   unsigned hs_palette_texture_id_;
   uint8_t* hs_palette_colors_;
@@ -70,6 +70,21 @@ class PaletteView : public GLView {
   uint8_t* v_palette_colors_;
 
   float selected_hsv_[3];
+};
+
+class PaletteListener : public GLViewListener {
+ public:
+  enum Target { HUESAT, VALUE };
+
+  PaletteListener(Target target, PaletteView* palette_view);
+
+  virtual void MouseMove(int x, int y);
+
+  virtual void MouseFunc(int button, int state, int x, int y);
+
+ private:
+  Target target_;
+  PaletteView* palette_view_;
 };
 
 #endif  // EDITOR_INCLUDE_PALETTE_VIEW_H_

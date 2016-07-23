@@ -11,12 +11,14 @@
 #include <GL/freeglut.h>
 
 PaletteView::PaletteView(const PaletteView* palette_view)
-  : GLView(kViewWidth, kViewHeight, "Select color"),
-    v_palette_listener_(VALUE, this), hs_palette_listener_(HUESAT, this) {
+  : GLView(kViewWidth, kViewHeight, "Select color") {
   const int hs_palette_width = (kHSPaletteRight - kHSPaletteLeft + 1);
   const int hs_palette_height = (kHSPaletteTop - kHSPaletteBottom + 1);
   const int v_palette_width = (kVPaletteRight - kVPaletteLeft + 1);
   const int v_palette_height = (kVPaletteTop - kVPaletteBottom + 1);
+
+  v_palette_listener_ = new PaletteListener(PaletteListener::VALUE, this);
+  hs_palette_listener_ = new PaletteListener(PaletteListener::HUESAT, this);
 
   hs_palette_colors_ = new uint8_t[hs_palette_width * hs_palette_height * 3];
   v_palette_colors_ = new uint8_t[v_palette_width * v_palette_height * 3];
@@ -67,19 +69,21 @@ PaletteView::PaletteView(const PaletteView* palette_view)
                     static_cast<float>(kVPaletteRight) / kViewWidth,
                     static_cast<float>(kVPaletteBottom) / kViewHeight,
                     static_cast<float>(kVPaletteTop) / kViewHeight);
-  layout_.AddListener(&v_palette_listener_, v_palette_roi);
+  layout_.AddListener(v_palette_listener_, v_palette_roi);
 
   Roi hs_palette_roi(static_cast<float>(kHSPaletteLeft) / kViewWidth,
                      static_cast<float>(kHSPaletteRight) / kViewWidth,
                      static_cast<float>(kHSPaletteBottom) / kViewHeight,
                      static_cast<float>(kHSPaletteTop) / kViewHeight);
-  layout_.AddListener(&hs_palette_listener_, hs_palette_roi);
+  layout_.AddListener(hs_palette_listener_, hs_palette_roi);
   AddListener(&layout_);
 }
 
 PaletteView::~PaletteView() {
   delete[] hs_palette_colors_;
   delete[] v_palette_colors_;
+  delete v_palette_listener_;
+  delete hs_palette_listener_;
 }
 
 void PaletteView::Display() {
@@ -197,4 +201,37 @@ void PaletteView::SetHueSaturation(float hue, float saturation) {
 
 void PaletteView::GetSelectedColor(uint8_t* rgb) const {
   HSVtoRGB(selected_hsv_[0], selected_hsv_[1], selected_hsv_[2], rgb);
+}
+
+PaletteListener::PaletteListener(Target target, PaletteView* palette_view)
+  : target_(target), palette_view_(palette_view) {}
+
+void PaletteListener::MouseMove(int x, int y) {
+  switch (target_) {
+    case HUESAT:
+      palette_view_->SetHueSaturation(
+          static_cast<float>(x) / display_width_,
+          1.0f - static_cast<float>(y) / display_height_);
+      break;
+    case VALUE:
+      palette_view_->SetValue(1.0 - static_cast<float>(y) / display_height_);
+      break;
+    default: break;
+  }
+}
+
+void PaletteListener::MouseFunc(int button, int state, int x, int y) {
+  if (!state) {
+    switch (target_) {
+      case HUESAT:
+        palette_view_->SetHueSaturation(
+            static_cast<float>(x) / display_width_,
+            1.0f - static_cast<float>(y) / display_height_);
+        break;
+      case VALUE:
+        palette_view_->SetValue(1.0 - static_cast<float>(y) / display_height_);
+        break;
+      default: break;
+    }
+  }
 }

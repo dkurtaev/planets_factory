@@ -2,15 +2,22 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/slider_view.h"
 
+#include <algorithm>
+
 #include <GL/freeglut.h>
 
 const uint8_t SliderView::kMarkerColor[] = {0, 204, 0};
 const uint8_t SliderView::kPowerConeColor[] = {204, 204, 0};
 
 SliderView::SliderView(const SliderView* slider_view)
-  : GLView(kViewWidth, kViewHeight), listener_(this) {
-  AddListener(&listener_);
+  : GLView(kViewWidth, kViewHeight) {
+  listener_ = new SliderListener(this);
+  AddListener(listener_);
   power_ = (slider_view ? slider_view->power_ : 0.5f);
+}
+
+SliderView::~SliderView() {
+  delete listener_;  
 }
 
 void SliderView::Display() {
@@ -53,4 +60,19 @@ float SliderView::GetPower() const {
 
 void SliderView::SetPower(float power) {
   power_ = power;
+}
+
+SliderListener::SliderListener(SliderView* slider_view)
+  : slider_view_(slider_view) {}
+
+void SliderListener::MouseMove(int x, int y) {
+  float power = static_cast<float>(x) / display_width_;
+  power = std::max(0.0f, std::min(power, 1.0f));
+  slider_view_->SetPower(power);
+}
+
+void SliderListener::MouseFunc(int button, int state, int x, int y) {
+  if (!state) {
+    slider_view_->SetPower(static_cast<float>(x) / display_width_);
+  }
 }

@@ -9,6 +9,7 @@
 #include "include/icosphere.h"
 #include "include/console_view.h"
 
+class ConsoleView;
 class SaveButton : public Button {
  public:
   SaveButton(const Icosphere* icosphere, ConsoleView* console_view);
