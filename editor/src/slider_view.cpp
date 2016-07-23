@@ -17,7 +17,7 @@ SliderView::SliderView(const SliderView* slider_view)
 }
 
 SliderView::~SliderView() {
-  delete listener_;  
+  delete listener_;
 }
 
 void SliderView::Display() {

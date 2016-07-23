@@ -1,0 +1,21 @@
+<menu='actions_view'>
+  
+  <menu='Tools'>
+    <button> Color </button>
+    <button> Palette </button>
+    <button> Brush+size </button>
+    <button> Terrain+up </button>
+    <button> Terrain+down </button>
+    <button> Grass </button>
+  </menu>
+
+  <menu='Show/Hide'>
+    <button> Sun+shading </button>
+    <button> Draw+grass </button>
+    <button> Grid </button>
+    <button> Mesh </button>
+  </menu>
+  
+  <button> Save </button>
+  <button> Load </button>
+</menu>

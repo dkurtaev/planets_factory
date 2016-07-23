@@ -123,6 +123,11 @@ void Layout::Reshape(int display_width, int display_height) {
   display_height_ = display_height;
 }
 
+void Layout::Clear() {
+  listeners_.clear();
+  listeners_rois_.clear();
+}
+
 // Roi -------------------------------------------------------------------------
 bool Roi::IsIncludes(float x, float y) const {
   return (x >= left_ && x <= right_ && y >= top_ && y <= bottom_);

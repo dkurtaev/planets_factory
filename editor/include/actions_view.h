@@ -4,17 +4,24 @@
 #define EDITOR_INCLUDE_ACTIONS_VIEW_H_
 
 #include <vector>
+#include <string>
+#include <map>
 
 #include "include/glview.h"
 #include "include/button.h"
 #include "include/layout.h"
 
+class SubmenuOpener;
 class ActionsView : public GLView {
  public:
-  ActionsView(std::vector<Button*> buttons, GLView* parent = 0, int sub_x = 0,
-              int sub_y = 0);
+  ActionsView(const std::vector<Button*>& buttons, const std::string& config,
+              GLView* parent = 0);
+
+  ~ActionsView();
 
   virtual void Display();
+
+  void SetMenu(const std::vector<Button*>& buttons);
 
  private:
   static const unsigned kInitButtonRoiWidth = 150;
@@ -25,9 +32,31 @@ class ActionsView : public GLView {
   static const float kTopIdent = 0.2f;
   static const float kBottomIdent = 0.2f;
 
+  void ParseConfig(const std::string& path,
+                   const std::vector<Button*>& buttons);
+
+  void ParseMenu(std::ifstream* ifs,
+                 const std::map<std::string, Button*>& all_buttons,
+                 std::vector<Button*>* menu_buttons);
+
   std::vector<Button*> buttons_;
   Layout layout_;
   std::vector<Roi> buttons_rois_;
+  std::vector<SubmenuOpener*> created_submenus_;
+};
+
+// Shell of button for menu implementation.
+class SubmenuOpener : public Button {
+ public:
+  SubmenuOpener(ActionsView* actions_view, const std::string& title);
+
+  virtual void MouseFunc(int button, int state, int x, int y);
+
+  void AddToSubmenu(Button* item);
+
+ private:
+  ActionsView* actions_view_;
+  std::vector<Button*> submenu_;
 };
 
 #endif  // EDITOR_INCLUDE_ACTIONS_VIEW_H_

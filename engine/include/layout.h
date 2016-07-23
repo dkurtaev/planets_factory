@@ -16,6 +16,8 @@ class Layout : public GLViewListener {
 
   void AddListener(GLViewListener* listener, const Roi& roi);
 
+  void Clear();
+
   virtual void MouseFunc(int button, int state, int x, int y);
 
   virtual void MouseMove(int x, int y);

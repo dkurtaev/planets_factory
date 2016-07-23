@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   bool draw_grass = true;
   Switcher draw_grid_switcher("Grid", &draw_grid);
   Switcher draw_mesh_switcher("Mesh", &draw_mesh);
-  Switcher sun_shading_switcher("Sun shader", &use_sun_shading);
+  Switcher sun_shading_switcher("Sun shading", &use_sun_shading);
   Switcher draw_grass_switcher("Draw grass", &draw_grass);
 
   PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
   buttons.push_back(&draw_grass_switcher);
   buttons.push_back(&save_button);
   buttons.push_back(&load_button);
-  ActionsView actions_view(buttons, &planet_view);
+  ActionsView actions_view(buttons, "../actions_view_config.xml", &planet_view);
   actions_view.AddListener(&console_view_listener);
 
   MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
