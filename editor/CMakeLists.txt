@@ -6,6 +6,7 @@ set(PROJECT_SOURCE_DIR "./src/")
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Qt5Widgets)
 
 file(GLOB_RECURSE sources "${PROJECT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE headers "${PROJECT_INCLUDE_DIR}/*.h")
@@ -19,4 +20,5 @@ target_link_libraries(
   engine
   model
   glog
+  Qt5::Widgets
 )

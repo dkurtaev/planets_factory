@@ -97,8 +97,10 @@ void GrassField::UpdateVBOs() {
   float base_triangle_vertices[9];
   float middle_point[3];
   for (unsigned i = 0; i < n_grass_objects; ++i) {
-    memcpy(rotations + i * 12, rotations, sizeof(float) * 12);
-    memcpy(vertices_ids + i * 12, vertices_ids, sizeof(uint8_t) * 12);
+    if (i != 0) {
+      memcpy(rotations + i * 12, rotations, sizeof(float) * 12);
+      memcpy(vertices_ids + i * 12, vertices_ids, sizeof(uint8_t) * 12);
+    }
 
     const Triangle* triangle = bases_[i].triangle;
     float* bary_coords = bases_[i].bary_coords;

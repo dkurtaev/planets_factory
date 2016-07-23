@@ -60,7 +60,6 @@ class ConsoleView : public GLView {
   timeval last_display_;
 };
 
-class SaveButton;
 class ConsoleViewListener : public GLViewListener {
  public:
   ConsoleViewListener(ConsoleView* console_view, SaveButton* save_button,

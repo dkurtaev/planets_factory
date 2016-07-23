@@ -23,9 +23,11 @@
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
 #include <glog/logging.h>
+#include <QApplication>
 
 int main(int argc, char** argv) {
   GLView::InitGLContext();
+  QApplication app(argc, argv);
 
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
@@ -90,7 +92,7 @@ int main(int argc, char** argv) {
 
   ConsoleView console_view(&planet_view);
 
-  SaveButton save_button(&icosphere, &console_view);
+  SaveButton save_button(&icosphere);
   LoadButton load_button(&icosphere, &console_view, &backtrace);
 
   ConsoleViewListener console_view_listener(&console_view, &save_button,
