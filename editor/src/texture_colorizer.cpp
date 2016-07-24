@@ -77,7 +77,7 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   // Setup selected color from palette view.
   uint8_t color[3];
   change_color_button_->GetSelectedColor(color);
-  cv::Scalar cv_color(color[0], color[1], color[2]);
+  cv::Scalar cv_color(color[2], color[1], color[0]);  // BGR.
 
   // Compute texture coordinates of touch point.
   float tex_coords[kNumTexCoords];

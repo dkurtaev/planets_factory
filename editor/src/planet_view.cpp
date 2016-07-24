@@ -102,8 +102,8 @@ void PlanetView::Display() {
     glUniform1i(loc_texture, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_->cols, texture_->rows,
-                 0, GL_RGB, GL_UNSIGNED_BYTE, texture_->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, texture_->cols, texture_->rows,
+                 0, GL_BGR, GL_UNSIGNED_BYTE, texture_->data);
 
     icosphere_->Draw();
     glUseProgram(0);

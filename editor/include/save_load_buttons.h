@@ -9,9 +9,11 @@
 #include "include/icosphere.h"
 #include "include/backtrace.h"
 
+#include <opencv2/opencv.hpp>
+
 class SaveButton : public Button {
  public:
-  explicit SaveButton(const Icosphere* icosphere);
+  SaveButton(const Icosphere* icosphere, const cv::Mat* texture);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
@@ -19,7 +21,9 @@ class SaveButton : public Button {
 
  private:
   const Icosphere* icosphere_;
-  std::string last_path_;
+  const cv::Mat* texture_;
+  std::string last_model_path_;
+  std::string last_texture_path_;
 };
 
 class LoadButton : public Button {

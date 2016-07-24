@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
   ConsoleView console_view(&planet_view);
 
-  SaveButton save_button(&icosphere);
+  SaveButton save_button(&icosphere, &texture);
   LoadButton load_button(&icosphere, &backtrace);
 
   ConsoleViewListener console_view_listener(&console_view, &save_button,

@@ -9,28 +9,46 @@
 #include <QObject>
 #include <QString>
 
-SaveButton::SaveButton(const Icosphere* icosphere)
-  : Button("Save"), icosphere_(icosphere), last_path_("") {}
+SaveButton::SaveButton(const Icosphere* icosphere, const cv::Mat* texture)
+  : Button("Save"), icosphere_(icosphere), last_model_path_(""),
+    last_texture_path_(""), texture_(texture) {}
 
 void SaveButton::MouseFunc(int button, int state, int x, int y) {
   if (!state) {
+    // Mesh.
     QString title = QObject::tr("Save model");
     QString ext = QObject::tr("All files (*)");
     QString q_file_path =
         QFileDialog::getSaveFileName(0, title, "", ext, 0,
                                      QFileDialog::DontUseNativeDialog);
-    std::string file_path = q_file_path.toStdString();
-    if (file_path != "") {
-      last_path_ = file_path;
+    std::string model_file_path = q_file_path.toStdString();
+    if (model_file_path != "") {
+      last_model_path_ = model_file_path;
+    }
+    // Texture.
+    title = QObject::tr("Save texture");
+    ext = QObject::tr("Image Files (*.png *.jpg *.bmp)");
+    q_file_path =
+        QFileDialog::getSaveFileName(0, title, "", ext, 0,
+                                     QFileDialog::DontUseNativeDialog);
+    std::string texture_file_path = q_file_path.toStdString();
+    if (texture_file_path != "") {
+      last_texture_path_ = texture_file_path;
+    }
+    if (model_file_path != "" || texture_file_path != "") {
       Save();
     }
   }
 }
 
 void SaveButton::Save() {
-  if (last_path_ != "") {
-    icosphere_->Save(last_path_);
-    std::cout << "Model saved as " << last_path_ << std::endl;
+  if (last_model_path_ != "") {
+    icosphere_->Save(last_model_path_);
+    std::cout << "Model saved as " << last_model_path_ << std::endl;
+  }
+  if (last_texture_path_ != "") {
+    cv::imwrite(last_texture_path_, *texture_);
+    std::cout << "Texture saved as " << last_texture_path_ << std::endl;
   }
 }
 
