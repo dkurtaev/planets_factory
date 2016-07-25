@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   grass_field.Init();
 
   SaveButton save_button(&icosphere, &texture_colorizer);
-  LoadButton load_button(&icosphere, &backtrace);
+  LoadButton load_button(&icosphere, &backtrace, &texture_colorizer);
 
   ShortcutsListener shortcuts_listener(&save_button, &draw_grid_switcher,
                                        &texture_colorizer_enable_switcher,

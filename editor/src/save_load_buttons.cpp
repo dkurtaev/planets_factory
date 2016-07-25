@@ -53,11 +53,14 @@ void SaveButton::Save() const {
   }
 }
 
-LoadButton::LoadButton(Icosphere* icosphere, Backtrace* backtrace)
-  : Button("Load"), icosphere_(icosphere), backtrace_(backtrace) {}
+LoadButton::LoadButton(Icosphere* icosphere, Backtrace* backtrace,
+                       TextureColorizer* texture_colorizer)
+  : Button("Load"), icosphere_(icosphere), backtrace_(backtrace),
+    texture_colorizer_(texture_colorizer) {}
 
 void LoadButton::MouseFunc(int button, int state, int x, int y) {
   if (!state) {
+    // Mesh.
     QString title = QObject::tr("Load model");
     QString ext = QObject::tr("All files (*)");
     QString q_file_path =
@@ -68,6 +71,18 @@ void LoadButton::MouseFunc(int button, int state, int x, int y) {
       icosphere_->Build(file_path);
       backtrace_->Clear();
       std::cout << "Model loaded from " << file_path << std::endl;
+    }
+    // Texture.
+    title = QObject::tr("Load texture");
+    ext = QObject::tr("Image Files (*.png *.jpg *.bmp)");
+    q_file_path =
+        QFileDialog::getOpenFileName(0, title, "", ext, 0,
+                                     QFileDialog::DontUseNativeDialog);
+    file_path = q_file_path.toStdString();
+    if (file_path != "") {
+      texture_colorizer_->ImportTexture(file_path);
+      backtrace_->Clear();
+      std::cout << "Texture loaded from " << file_path << std::endl;
     }
   }
 }

@@ -373,8 +373,14 @@ void TextureColorizer::ExportTexture(const std::string& path) const {
     }
     cv::fillConvexPoly(mask, points, cv::Scalar(0));
   }
+  cv::erode(mask, mask, cv::Mat());
   texture_copy.setTo(0, mask);
   cv::imwrite(path, texture_copy);
+}
+
+void TextureColorizer::ImportTexture(const std::string& path) {
+  cv::Mat import_texture = cv::imread(path);
+  import_texture.copyTo(*texture_);
 }
 
 TextureColorizerAction::TextureColorizerAction(cv::Mat* texture)

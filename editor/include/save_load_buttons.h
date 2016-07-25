@@ -29,13 +29,15 @@ class SaveButton : public Button {
 class LoadButton : public Button {
  public:
   // Clearing backtrace when loading new model.
-  LoadButton(Icosphere* icosphere, Backtrace* backtrace);
+  LoadButton(Icosphere* icosphere, Backtrace* backtrace,
+             TextureColorizer* texture_colorizer);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
  private:
   Icosphere* icosphere_;
   Backtrace* backtrace_;
+  TextureColorizer* texture_colorizer_;
 };
 
 #endif  // EDITOR_INCLUDE_SAVE_LOAD_BUTTONS_H_

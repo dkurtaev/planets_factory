@@ -40,6 +40,8 @@ class TextureColorizer : public TrianglesToucher {
 
   void ExportTexture(const std::string& path) const;
 
+  void ImportTexture(const std::string& path);
+
   ~TextureColorizer();
 
  private:

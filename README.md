@@ -11,6 +11,12 @@ sudo apt-get install freeglut3-dev libxmu-dev libxi-dev
 sudo apt-get install libopencv-dev
 ```
 
+* Qt5
+
+```
+sudo apt-get install qtbase5-dev
+```
+
 * Cmake >= 3.0 for glog
 
 ```
