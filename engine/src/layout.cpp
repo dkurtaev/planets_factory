@@ -2,6 +2,8 @@
 // e-mail: dmitry.kurtaev@gmail.com
 #include "include/layout.h"
 
+#include <algorithm>
+
 #include <GL/freeglut.h>
 
 #define FOREACH_LISTENER_IN_ROI \
@@ -13,14 +15,12 @@
       if (listeners_[i]->IsEnabled())
 
 // Layout ----------------------------------------------------------------------
-Layout::Layout() {
-  last_mouse_x_ = -1;
-  last_mouse_y_ = -1;
-}
+Layout::Layout()
+  : last_mouse_x_(-1), last_mouse_y_(-1), clear_request_(false) {}
 
 void Layout::AddListener(GLViewListener* listener, const Roi& roi) {
-  listeners_.push_back(listener);
-  listeners_rois_.push_back(roi);
+  new_listeners_.push_back(listener);
+  new_listeners_rois_.push_back(roi);
 }
 
 void Layout::MouseFunc(int button, int state, int x, int y) {
@@ -92,7 +92,24 @@ void Layout::SpecialKeyReleased(int key, int x, int y) {
 }
 
 void Layout::DoEvents() {
-  const unsigned n_listeners = listeners_.size();
+  if (clear_request_) {
+    listeners_.clear();
+    listeners_rois_.clear();
+    clear_request_ = false;
+  }
+
+  unsigned n_listeners = new_listeners_.size();
+  if (n_listeners != 0) {
+    listeners_.resize(n_listeners);
+    listeners_rois_.resize(n_listeners);
+    std::copy(new_listeners_.begin(), new_listeners_.end(), listeners_.begin());
+    std::copy(new_listeners_rois_.begin(), new_listeners_rois_.end(),
+              listeners_rois_.begin());
+    new_listeners_.clear();
+    new_listeners_rois_.clear();
+  }
+
+  n_listeners = listeners_.size();
   for (unsigned i = 0; i < n_listeners; ++i) {
     if (listeners_[i]->IsEnabled()) {
       listeners_[i]->DoEvents();
@@ -124,8 +141,7 @@ void Layout::Reshape(int display_width, int display_height) {
 }
 
 void Layout::Clear() {
-  listeners_.clear();
-  listeners_rois_.clear();
+  clear_request_ = true;
 }
 
 // Roi -------------------------------------------------------------------------
