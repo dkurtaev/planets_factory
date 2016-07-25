@@ -35,13 +35,11 @@ class CameraMover : public GLViewListener {
   // Radius incrementing value if wheel used.
   static const float kRadiusIncrement = 0.7f;
 
-  static float TimeFrom(const timeval& tv);
-
   void MoveCamera();
 
   SphericalCS* camera_cs_;
   bool ctrl_key_pressed_;
-  bool left_button_pressed_;
+  bool move_button_pressed_;
   float last_mouse_x_;
   float last_mouse_y_;
 

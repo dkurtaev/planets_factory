@@ -6,18 +6,22 @@
 
 #include <GL/freeglut.h>
 
+#include "include/structures.h"
+
 CameraMover::CameraMover(SphericalCS* camera_cs)
-  : camera_cs_(camera_cs), left_button_pressed_(false),
-    ctrl_key_pressed_(false), is_inertial_moving_(false) {}
+  : camera_cs_(camera_cs), move_button_pressed_(false),
+    ctrl_key_pressed_(false), is_inertial_moving_(false) {
+  gettimeofday(&last_mouse_move_, 0);
+}
 
 void CameraMover::MouseFunc(int button, int state, int x, int y) {
   switch (button) {
     case GLUT_RIGHT_BUTTON: {
-      left_button_pressed_ = !state;
+      move_button_pressed_ = !state;
       last_mouse_x_ = x;
       last_mouse_y_ = y;
       if (!ctrl_key_pressed_) {
-        if (left_button_pressed_) {
+        if (move_button_pressed_) {
           is_inertial_moving_ = false;
         } else {
           if (TimeFrom(last_mouse_move_) <= kAccelerationDelay) {
@@ -43,7 +47,7 @@ void CameraMover::MouseFunc(int button, int state, int x, int y) {
 }
 
 void CameraMover::MouseMove(int x, int y) {
-  if (left_button_pressed_) {
+  if (move_button_pressed_) {
     if (!ctrl_key_pressed_) {
       gettimeofday(&init_tv_, 0);
       init_dx_ = (x - last_mouse_x_) / display_width_;
@@ -109,13 +113,6 @@ void CameraMover::MoveCamera() {
   if (is_inertial_moving_ && dx * dx + dy * dy < kMinimalSpeed) {
     is_inertial_moving_ = false;
   }
-}
-
-float CameraMover::TimeFrom(const timeval& tv) {
-  timeval current_tv;
-  gettimeofday(&current_tv, 0);
-  return ((current_tv.tv_sec - tv.tv_sec) * 1e+3 +
-          (current_tv.tv_usec - tv.tv_usec) * 1e-3);
 }
 
 void CameraMover::DoEvents() {

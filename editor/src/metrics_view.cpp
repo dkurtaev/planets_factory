@@ -21,13 +21,10 @@ MetricsView::MetricsView(GLView* parent, const std::vector<Point3f*>& vertices,
 void MetricsView::Display() {
   TimeCheck();
 
-  timeval now;
-  gettimeofday(&now, 0);
-  if ((now.tv_sec - last_display_.tv_sec) * 1e+3 +
-      (now.tv_usec - last_display_.tv_usec) * 1e-3 < kDisplayDelay) {
+  if (TimeFrom(last_display_) < kDisplayDelay) {
     return;
   }
-  last_display_ = now;
+  gettimeofday(&last_display_, 0);
 
   // Draw info.
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -115,10 +112,7 @@ void MetricsView::TimeCheck() {
 
   // Remove old times.
   do {
-    timeval last_time = frames_times_.front();
-    unsigned ms = (current_time.tv_sec - last_time.tv_sec) * 1e+3 +
-                  (current_time.tv_usec - last_time.tv_usec) * 1e-3;
-    if (ms > kPeriod) {
+    if (TimeFrom(frames_times_.front()) > kPeriod) {
       frames_times_.pop();
     } else {
       break;
