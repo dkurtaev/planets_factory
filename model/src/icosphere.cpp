@@ -19,10 +19,16 @@
 
 #include "include/shaders_factory.h"
 
-Icosphere::Icosphere(float radius, const std::string& src_file)
+Icosphere::Icosphere(const YAML::Node& config_node)
   : indices_array_(0), tex_coord_array_(0), coordinates_vbo_(0), norms_vbo_(0),
-    normals_vbo_(0), tex_coords_vbo_(0) {
-  Build(src_file, radius);
+    normals_vbo_(0), tex_coords_vbo_(0), config_node_(&config_node) {
+  std::string src_file;
+  float radius;
+  unsigned n_splits;
+  config_node["source_file"] >> src_file;
+  config_node["radius"] >> radius;
+  config_node["splits"] >> n_splits;
+  Build(src_file, radius, n_splits);
 }
 
 Icosphere::~Icosphere() {
@@ -53,13 +59,12 @@ void Icosphere::Clear() {
   glDeleteBuffers(1, &tex_coords_vbo_);
 }
 
-void Icosphere::Build(const std::string& src_file, float radius) {
+void Icosphere::Build(const std::string& src_file, float radius,
+                      unsigned n_splits) {
   // Characteristics of icosahedron.
   static const unsigned kInitNumTriangles = 20;
   static const unsigned kInitNumVertices = 12;
   static const unsigned kInitNumEdges = 30;
-  // Number of triangles splitting procedure calls.
-  static const unsigned kNumSplits = 4;
   // Colors of grid nodes.
   static const uint8_t kInitEdgesColor[] = { 204, 0, 0 };
   static const uint8_t kSubEdgesColor[] = { 0, 204, 0 };
@@ -71,7 +76,7 @@ void Icosphere::Build(const std::string& src_file, float radius) {
     file.read(reinterpret_cast<char*>(&n_splits_), sizeof(n_splits_));
     file.close();
   } else {
-    n_splits_ = kNumSplits;
+    n_splits_ = n_splits;
   }
   // Characteristics of final icosphere.
   // After each split:
@@ -416,7 +421,12 @@ std::vector<Triangle*>* Icosphere::GetInitTriangles() {
 void Icosphere::SetTexCoords() {
   CHECK_EQ(triangles_.size(), 20);
 
-  std::ifstream file("../res/tex_coords/coords_1.txt");
+  std::string path;
+  (*config_node_)["texture_coords_file"] >> path;
+
+  std::ifstream file(path.c_str());
+  CHECK(file.is_open()) << "File with icosphere texture coordinates not found";
+
   uint16_t texture_coordinates[6];
   for (uint8_t i = 0; i < 20; ++i) {
     for (uint8_t j = 0; j < 6; ++j) {

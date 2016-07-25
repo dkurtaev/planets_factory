@@ -40,7 +40,7 @@ class ActionsView : public GLView {
   void ParseMenu(const YAML::Node& node,
                  const std::map<std::string, Button*>& all_buttons,
                  std::vector<Button*>* menu_buttons);
-  
+
   std::vector<Button*> buttons_;
   Layout layout_;
   std::vector<Roi> buttons_rois_;

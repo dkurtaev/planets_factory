@@ -1,6 +1,7 @@
 // Copyright © 2016 Dmitry Kurtaev. All rights reserved.
 // e-mail: dmitry.kurtaev@gmail.com
 #include <vector>
+#include <fstream>
 
 #include "include/planet_view.h"
 #include "include/actions_view.h"
@@ -23,17 +24,25 @@
 #include <opencv2/opencv.hpp>
 #include <glog/logging.h>
 #include <QApplication>
-
-#include <fstream>
+#include <yaml-cpp/yaml.h>
 
 int main(int argc, char** argv) {
   GLView::InitGLContext();
   QApplication app(argc, argv);
 
+  // Configuration nodes:
+  // icosphere
+  std::ifstream config_file("../config.yaml");
+  CHECK(config_file.is_open()) << "Not found configuration file ../config.yaml";
+
+  YAML::Parser parser(config_file);
+  YAML::Node config_node;
+  parser.GetNextDocument(config_node);
+
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
   CameraMover camera_mover(&camera_cs);
-  Icosphere icosphere(4);
+  Icosphere icosphere(config_node["icosphere"]);
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
   Backtrace backtrace;
@@ -120,5 +129,6 @@ int main(int argc, char** argv) {
   metrics_view.AddListener(&shortcuts_listener);
 
   glutMainLoop();
+  config_file.close();
   return 0;
 }

@@ -1,0 +1,5 @@
+icosphere:
+  radius: 4
+  splits: 4
+  source_file: ""  # Empty for default building. 
+  texture_coords_file: "../res/tex_coords/coords_1.txt"

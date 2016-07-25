@@ -7,7 +7,6 @@
 #include <fstream>
 #include <algorithm>
 #include <map>
-#include <iostream>
 
 #include <GL/freeglut.h>
 #include <glog/logging.h>

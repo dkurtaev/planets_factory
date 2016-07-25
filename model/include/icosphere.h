@@ -8,15 +8,23 @@
 #include <vector>
 #include <string>
 
+#include <yaml-cpp/yaml.h>
+
 #include "include/structures.h"
 
 class Icosphere {
  public:
-  explicit Icosphere(float radius, const std::string& src_file = "");
+  // Config node (key: [type]):
+  // radius: [float]
+  // splits: [int]
+  // source_file: [string]
+  // texture_coords_file: [string]
+  explicit Icosphere(const YAML::Node& config_node);
 
   ~Icosphere();
 
-  void Build(const std::string& src_file, float radius = 1.0f);
+  void Build(const std::string& src_file, float radius = 1.0f,
+             unsigned n_splits = 0);
 
   // Drawing textured mesh.
   void Draw();
@@ -67,6 +75,7 @@ class Icosphere {
   unsigned normals_vbo_;
   unsigned tex_coords_vbo_;
   bool need_to_update_vbo_;
+  const YAML::Node* config_node_;
 };
 
 #endif  // MODEL_INCLUDE_ICOSPHERE_H_
