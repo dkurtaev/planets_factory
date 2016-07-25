@@ -22,15 +22,10 @@ ConsoleView::ConsoleView(GLView* parent)
 }
 
 void ConsoleView::Display() {
-  timeval now;
-  gettimeofday(&now, 0);
-  if (!content_changed_) {
-    if ((now.tv_sec - last_display_.tv_sec) * 1e+3 +
-        (now.tv_usec - last_display_.tv_usec) * 1e-3 < kDisplayDelay) {
-      return;
-    }
+  if (!content_changed_ && TimeFrom(last_display_) < kDisplayDelay) {
+    return;
   }
-  last_display_ = now;
+  gettimeofday(&last_display_, 0);
 
   glClearColor(0.19f, 0.04f, 0.34f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -328,3 +328,10 @@ void Triangle::GetCoords(float* dst) const {
   points_[1]->GetPosition(dst + 3);
   points_[2]->GetPosition(dst + 6);
 }
+
+float TimeFrom(const timeval& tv) {
+  timeval current_tv;
+  gettimeofday(&current_tv, 0);
+  return ((current_tv.tv_sec - tv.tv_sec) * 1e+3 +
+          (current_tv.tv_usec - tv.tv_usec) * 1e-3);
+}

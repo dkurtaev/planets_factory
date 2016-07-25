@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <vector>
+#include <sys/time.h>
 
 class Edge;
 class Point3f {
@@ -139,5 +140,7 @@ float Determinant(float* col_1, float* col_2, float* col_3);
 float Determinant(float* col_1, float* col_2);
 
 void Normalize(float* vec);
+
+float TimeFrom(const timeval& tv);
 
 #endif  // MODEL_INCLUDE_STRUCTURES_H_
