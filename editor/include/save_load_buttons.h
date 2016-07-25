@@ -8,20 +8,20 @@
 #include "include/button.h"
 #include "include/icosphere.h"
 #include "include/backtrace.h"
-
-#include <opencv2/opencv.hpp>
+#include "include/texture_colorizer.h"
 
 class SaveButton : public Button {
  public:
-  SaveButton(const Icosphere* icosphere, const cv::Mat* texture);
+  SaveButton(const Icosphere* icosphere,
+             const TextureColorizer* texture_colorizer);
 
   virtual void MouseFunc(int button, int state, int x, int y);
 
-  void Save();
+  void Save() const;
 
  private:
   const Icosphere* icosphere_;
-  const cv::Mat* texture_;
+  const TextureColorizer* texture_colorizer_;
   std::string last_model_path_;
   std::string last_texture_path_;
 };

@@ -4,7 +4,7 @@
 #define EDITOR_INCLUDE_TEXTURE_COLORIZER_H_
 
 #include <vector>
-#include <utility>
+#include <string>
 
 #include "include/triangles_toucher.h"
 #include "include/structures.h"
@@ -37,6 +37,8 @@ class TextureColorizer : public TrianglesToucher {
 
   // Return angle of drawing cone for highlighting ring.
   float GetHighlightingAngle() const;
+
+  void ExportTexture(const std::string& path) const;
 
   ~TextureColorizer();
 

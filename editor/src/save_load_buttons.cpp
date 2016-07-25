@@ -9,9 +9,10 @@
 #include <QObject>
 #include <QString>
 
-SaveButton::SaveButton(const Icosphere* icosphere, const cv::Mat* texture)
+SaveButton::SaveButton(const Icosphere* icosphere,
+                       const TextureColorizer* texture_colorizer)
   : Button("Save"), icosphere_(icosphere), last_model_path_(""),
-    last_texture_path_(""), texture_(texture) {}
+    last_texture_path_(""), texture_colorizer_(texture_colorizer) {}
 
 void SaveButton::MouseFunc(int button, int state, int x, int y) {
   if (!state) {
@@ -41,13 +42,13 @@ void SaveButton::MouseFunc(int button, int state, int x, int y) {
   }
 }
 
-void SaveButton::Save() {
+void SaveButton::Save() const {
   if (last_model_path_ != "") {
     icosphere_->Save(last_model_path_);
     std::cout << "Model saved as " << last_model_path_ << std::endl;
   }
   if (last_texture_path_ != "") {
-    cv::imwrite(last_texture_path_, *texture_);
+    texture_colorizer_->ExportTexture(last_texture_path_);
     std::cout << "Texture saved as " << last_texture_path_ << std::endl;
   }
 }
