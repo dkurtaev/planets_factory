@@ -7,6 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <map>
+#include <iostream>
 
 #include <GL/freeglut.h>
 #include <glog/logging.h>
@@ -82,9 +83,9 @@ void ActionsView::ParseConfig(const std::string& path,
   std::ifstream file(path.c_str());
   CHECK(file.is_open());
 
-  std::string str;
-  file >> str;
-  CHECK_EQ(str, "<menu='actions_view'>");
+  YAML::Parser parser(file);
+  YAML::Node doc;
+  parser.GetNextDocument(doc);
 
   std::map<std::string, Button*> all_buttons;
   const unsigned n_buttons = buttons.size();
@@ -93,62 +94,59 @@ void ActionsView::ParseConfig(const std::string& path,
   }
 
   std::vector<Button*> top_menu_buttons;
-  ParseMenu(&file, all_buttons, &top_menu_buttons);
+  ParseMenu(doc[0], all_buttons, &top_menu_buttons);
+
+  file.close();
+
   SetMenu(top_menu_buttons);
   file.close();
 }
 
-void ActionsView::ParseMenu(std::ifstream* ifs,
+void ActionsView::ParseMenu(const YAML::Node& node,
                             const std::map<std::string, Button*>& all_buttons,
                             std::vector<Button*>* menu_buttons) {
-  static const char kPseudoWhitespace = '+';
-  std::string str;
+  std::string node_type;
+  std::string node_title;
   std::map<std::string, Button*>::const_iterator it;
-  std::vector<SubmenuOpener*> found_submenus;
   std::vector<Button*> submenu_buttons;
-  unsigned n_buttons;
+  std::vector<SubmenuOpener*> found_submenus;
 
-  *ifs >> str;
-  while (str != "</menu>" && !ifs->eof()) {
-    if (str == "<button>") {
-      *ifs >> str;
-      std::replace(str.begin(), str.end(), kPseudoWhitespace, ' ');
-      it = all_buttons.find(str);
-      CHECK(it != all_buttons.end()) << "Button " << str << " not presented";
+  node["type"] >> node_type;
+  CHECK_EQ(node_type, "menu");
+
+  const YAML::Node& buttons = node["buttons"];
+  for (unsigned i = 0; i < buttons.size(); ++i) {
+    buttons[i]["type"] >> node_type;
+    buttons[i]["title"] >> node_title;
+
+    CHECK(node_type == "menu" || node_type == "button");
+    if (node_type == "button") {
+      it = all_buttons.find(node_title);
+      CHECK(it != all_buttons.end())
+          << "Button " << node_title << " not presented";
       menu_buttons->push_back(it->second);
-      *ifs >> str;
-      CHECK_EQ(str, "</button>");
-    } else if (str.find("<menu='") != -1) {
-      // Substring is button name: <menu='Show/Hide'> for example.
-      str = str.substr(str.find("<menu='") + 7, str.length() - 9);
-      std::replace(str.begin(), str.end(), kPseudoWhitespace, ' ');
-      SubmenuOpener* submenu = new SubmenuOpener(this, str);
+    } else {
+      SubmenuOpener* submenu = new SubmenuOpener(this, node_title);
       submenu_buttons.clear();
-      ParseMenu(ifs, all_buttons, &submenu_buttons);
-      n_buttons = submenu_buttons.size();
-      for (unsigned i = 0; i < n_buttons; ++i) {
+      ParseMenu(buttons[i], all_buttons, &submenu_buttons);
+      for (unsigned i = 0; i < submenu_buttons.size(); ++i) {
         submenu->AddToSubmenu(submenu_buttons[i]);
       }
       menu_buttons->push_back(submenu);
       found_submenus.push_back(submenu);
       created_submenus_.push_back(submenu);
     }
-    *ifs >> str;
   }
-  CHECK_EQ(str, "</menu>");
 
   // Back button.
   if (!found_submenus.empty()) {
     SubmenuOpener* back_button = new SubmenuOpener(this, "<--Back");
     created_submenus_.push_back(back_button);
 
-    n_buttons = menu_buttons->size();
-    for (unsigned i = 0; i < n_buttons; ++i) {
+    for (unsigned i = 0; i < menu_buttons->size(); ++i) {
       back_button->AddToSubmenu(menu_buttons->operator[](i));
     }
-
-    const unsigned n_submenus = found_submenus.size();
-    for (unsigned i = 0; i < n_submenus; ++i) {
+    for (unsigned i = 0; i < found_submenus.size(); ++i) {
       found_submenus[i]->AddToSubmenu(back_button);
     }
   }

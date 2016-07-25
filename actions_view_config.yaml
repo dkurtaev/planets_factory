@@ -1,0 +1,36 @@
+- type: menu
+  title: "Actions View"
+  buttons:
+  - type: menu
+    title: "Tools"
+    buttons:
+    - type: button
+      title: "Color"
+    - type: button 
+      title: "Palette"
+    - type: button 
+      title: "Brush size"
+    - type: button 
+      title: "Terrain up"
+    - type: button 
+      title: "Terrain down"
+    - type: button 
+      title: "Grass"
+  - type: menu
+    title: "Show/Hide"
+    buttons:
+    - type: button
+      title: "Sun shading"
+    - type: button
+      title: "Draw grass"
+    - type: button
+      title: "Grid"
+    - type: button
+      title: "Mesh"
+  - type: menu
+    title: "Import/Export"
+    buttons:
+    - type: button
+      title: "Save"
+    - type: button
+      title: "Load"

@@ -24,6 +24,8 @@
 #include <glog/logging.h>
 #include <QApplication>
 
+#include <fstream>
+
 int main(int argc, char** argv) {
   GLView::InitGLContext();
   QApplication app(argc, argv);
@@ -110,7 +112,8 @@ int main(int argc, char** argv) {
   buttons.push_back(&draw_grass_switcher);
   buttons.push_back(&save_button);
   buttons.push_back(&load_button);
-  ActionsView actions_view(buttons, "../actions_view_config.xml", &planet_view);
+  ActionsView actions_view(buttons, "../actions_view_config.yaml",
+                           &planet_view);
   actions_view.AddListener(&shortcuts_listener);
 
   MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);

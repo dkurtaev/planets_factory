@@ -20,5 +20,6 @@ target_link_libraries(
   engine
   model
   glog
+  yaml-cpp
   Qt5::Widgets
 )
