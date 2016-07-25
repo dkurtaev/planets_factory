@@ -13,9 +13,8 @@
 #include "include/brush_size_button.h"
 #include "include/metrics_view.h"
 #include "include/vertices_mover.h"
-#include "include/save_button.h"
-#include "include/load_button.h"
-#include "include/console_view.h"
+#include "include/save_load_buttons.h"
+#include "include/shortcuts_listener.h"
 #include "include/backtrace.h"
 #include "include/grass_field.h"
 #include "include/grass_grower.h"
@@ -23,9 +22,11 @@
 #include <GL/freeglut.h>
 #include <opencv2/opencv.hpp>
 #include <glog/logging.h>
+#include <QApplication>
 
 int main(int argc, char** argv) {
   GLView::InitGLContext();
+  QApplication app(argc, argv);
 
   SphericalCS identity_cs;
   SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
@@ -88,16 +89,13 @@ int main(int argc, char** argv) {
 
   grass_field.Init();
 
-  ConsoleView console_view(&planet_view);
+  SaveButton save_button(&icosphere, &texture_colorizer);
+  LoadButton load_button(&icosphere, &backtrace, &texture_colorizer);
 
-  SaveButton save_button(&icosphere, &console_view);
-  LoadButton load_button(&icosphere, &console_view, &backtrace);
-
-  ConsoleViewListener console_view_listener(&console_view, &save_button,
-                                            &draw_grid_switcher,
-                                            &texture_colorizer_enable_switcher,
-                                            &backtrace);
-  planet_view.AddListener(&console_view_listener);
+  ShortcutsListener shortcuts_listener(&save_button, &draw_grid_switcher,
+                                       &texture_colorizer_enable_switcher,
+                                       &backtrace);
+  planet_view.AddListener(&shortcuts_listener);
 
   std::vector<Button*> buttons;
   buttons.push_back(&texture_colorizer_enable_switcher);
@@ -113,10 +111,10 @@ int main(int argc, char** argv) {
   buttons.push_back(&save_button);
   buttons.push_back(&load_button);
   ActionsView actions_view(buttons, "../actions_view_config.xml", &planet_view);
-  actions_view.AddListener(&console_view_listener);
+  actions_view.AddListener(&shortcuts_listener);
 
   MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
-  metrics_view.AddListener(&console_view_listener);
+  metrics_view.AddListener(&shortcuts_listener);
 
   glutMainLoop();
   return 0;

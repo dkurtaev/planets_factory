@@ -62,7 +62,7 @@ void GrassField::SetupTextures() {
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.cols, texture.rows, 0, GL_RGB,
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture.cols, texture.rows, 0, GL_BGR,
                GL_UNSIGNED_BYTE, texture.data);
 
   texture = cv::imread("./grass_alpha.png");
@@ -72,7 +72,7 @@ void GrassField::SetupTextures() {
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.cols, texture.rows, 0, GL_RGB,
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture.cols, texture.rows, 0, GL_BGR,
                GL_UNSIGNED_BYTE, texture.data);
 }
 
@@ -97,8 +97,10 @@ void GrassField::UpdateVBOs() {
   float base_triangle_vertices[9];
   float middle_point[3];
   for (unsigned i = 0; i < n_grass_objects; ++i) {
-    memcpy(rotations + i * 12, rotations, sizeof(float) * 12);
-    memcpy(vertices_ids + i * 12, vertices_ids, sizeof(uint8_t) * 12);
+    if (i != 0) {
+      memcpy(rotations + i * 12, rotations, sizeof(float) * 12);
+      memcpy(vertices_ids + i * 12, vertices_ids, sizeof(uint8_t) * 12);
+    }
 
     const Triangle* triangle = bases_[i].triangle;
     float* bary_coords = bases_[i].bary_coords;

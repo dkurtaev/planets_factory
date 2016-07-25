@@ -3,7 +3,6 @@
 #include "include/texture_colorizer.h"
 
 #include <vector>
-#include <utility>
 #include <fstream>
 #include <string>
 
@@ -77,7 +76,7 @@ void TextureColorizer::DoAction(Triangle* triangle, float bary_p1,
   // Setup selected color from palette view.
   uint8_t color[3];
   change_color_button_->GetSelectedColor(color);
-  cv::Scalar cv_color(color[0], color[1], color[2]);
+  cv::Scalar cv_color(color[2], color[1], color[0]);  // BGR.
 
   // Compute texture coordinates of touch point.
   float tex_coords[kNumTexCoords];
@@ -356,6 +355,32 @@ float TextureColorizer::GetHighlightingAngle() const {
   const unsigned kMaxBrushSize = texture_->rows * (0.5f / 3.0f);
   const float kBrushSize = brush_size_button_->GetBrushSize(kMaxBrushSize);
   return (kBrushSize / kMaxBrushSize) * (M_PI / 6.0f);
+}
+
+void TextureColorizer::ExportTexture(const std::string& path) const {
+  static const unsigned kNumTriangles = 20;
+
+  // Fill black area outside icosahedron triangles.
+  cv::Mat texture_copy = texture_->clone();
+  cv::Mat mask = cv::Mat::ones(texture_->size(), CV_8UC1);
+  std::vector<cv::Point> points(3);
+
+  for (unsigned i = 0; i < kNumTriangles; ++i) {
+    float* data = ico_tex_coords_[i];
+    for (uint8_t j = 0; j < 3; ++j) {
+      points[j].x = data[j * 2] * (texture_->cols - 1);
+      points[j].y = data[j * 2 + 1] * (texture_->rows - 1);
+    }
+    cv::fillConvexPoly(mask, points, cv::Scalar(0));
+  }
+  cv::erode(mask, mask, cv::Mat());
+  texture_copy.setTo(0, mask);
+  cv::imwrite(path, texture_copy);
+}
+
+void TextureColorizer::ImportTexture(const std::string& path) {
+  cv::Mat import_texture = cv::imread(path);
+  import_texture.copyTo(*texture_);
 }
 
 TextureColorizerAction::TextureColorizerAction(cv::Mat* texture)
