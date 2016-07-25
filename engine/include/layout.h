@@ -43,6 +43,11 @@ class Layout : public GLViewListener {
   // Using for detecting mouse entry/leave for ROIs.
   int last_mouse_x_;
   int last_mouse_y_;
+  // Layout can be changed during processing mouse or key event. Use temporal
+  // storage for new listeners or clearing requests.
+  std::vector<GLViewListener*> new_listeners_;
+  std::vector<Roi> new_listeners_rois_;
+  bool clear_request_;
 };
 
 class Roi {
