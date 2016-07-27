@@ -26,23 +26,72 @@
 #include <QApplication>
 #include <yaml-cpp/yaml.h>
 
+struct CameraParameters {
+  CameraParameters();
+
+  float orbit_radius;
+  float azimuth;
+  float zenith;
+  float own_rotation;
+};
+
+struct IcosphereParameters {
+  IcosphereParameters();
+
+  float radius;
+  unsigned n_splits;
+  std::string texture_coords_file;
+};
+
+struct PlanetParameters {
+  cv::Mat texture;
+};
+
+struct GrassParameters {
+  std::vector<std::string> vertex_shader_sources;
+  std::vector<std::string> fragment_shader_sources;
+  cv::Mat texture_color;
+  cv::Mat texture_alpha;
+};
+
+void operator >> (const YAML::Node& config, CameraParameters& params);
+
+void operator >> (const YAML::Node& config, IcosphereParameters& params);
+
+void operator >> (const YAML::Node& config, PlanetParameters& params);
+
+void operator >> (const YAML::Node& config, GrassParameters& params);
+
+void operator >> (const YAML::Node& config, std::vector<std::string>& vec);
+
 int main(int argc, char** argv) {
   GLView::InitGLContext();
   QApplication app(argc, argv);
 
-  // Configuration nodes:
-  // icosphere
   std::ifstream config_file("../config.yaml");
   CHECK(config_file.is_open()) << "Not found configuration file ../config.yaml";
 
   YAML::Parser parser(config_file);
-  YAML::Node config_node;
-  parser.GetNextDocument(config_node);
+  YAML::Node root_config_node;
+  parser.GetNextDocument(root_config_node);
+
+  CameraParameters camera_params;
+  IcosphereParameters ico_params;
+  PlanetParameters planet_params;
+  GrassParameters grass_params;
+  root_config_node["camera"] >> camera_params;
+  root_config_node["icosphere"] >> ico_params;
+  root_config_node["planet"] >> planet_params;
+  root_config_node["grass"] >> grass_params;
 
   SphericalCS identity_cs;
-  SphericalCS camera_cs(20, 0, 80, 0, &identity_cs);
+  SphericalCS camera_cs(camera_params.orbit_radius, camera_params.azimuth,
+                        camera_params.zenith, camera_params.own_rotation,
+                        &identity_cs);
+
   CameraMover camera_mover(&camera_cs);
-  Icosphere icosphere(config_node["icosphere"]);
+  Icosphere icosphere(ico_params.radius, ico_params.n_splits,
+                      ico_params.texture_coords_file);
   ChangeColorButton change_color_button;
   BrushSizeButton brush_size_button;
   Backtrace backtrace;
@@ -52,13 +101,8 @@ int main(int argc, char** argv) {
   std::vector<Triangle*>* triangles = icosphere.GetTriangles();
   std::vector<Point3f*>* vertices = icosphere.GetVertices();
 
-  cv::Mat texture = cv::imread("./texture.png");
-  if (!texture.data) {
-    texture = cv::Mat(512, 1024, CV_8UC3);
-    texture.setTo(255);
-  }
   Switcher texture_colorizer_enable_switcher("Color");
-  TextureColorizer texture_colorizer(&texture, init_triangles,
+  TextureColorizer texture_colorizer(&planet_params.texture, init_triangles,
                                      &change_color_button,
                                      &brush_size_button,
                                      &texture_colorizer_enable_switcher,
@@ -89,16 +133,19 @@ int main(int argc, char** argv) {
   Switcher sun_shading_switcher("Sun shading", &use_sun_shading);
   Switcher draw_grass_switcher("Draw grass", &draw_grass);
 
-  PlanetView planet_view(&icosphere, &camera_cs, &texture, &draw_grid,
-                         &draw_mesh, &use_sun_shading, &texture_colorizer,
-                         &vertices_mover, &grass_field, &draw_grass);
+  PlanetView planet_view(&icosphere, &camera_cs, &planet_params.texture,
+                         &draw_grid, &draw_mesh, &use_sun_shading,
+                         &texture_colorizer, &vertices_mover, &grass_field,
+                         &draw_grass);
   planet_view.AddListener(&camera_mover);
   planet_view.AddIcosphereToucher(&texture_colorizer);
   planet_view.AddIcosphereToucher(&vertices_mover);
   planet_view.AddIcosphereToucher(&grass_grower);
   planet_view.AsRootView();
 
-  grass_field.Init();
+  grass_field.Init(grass_params.vertex_shader_sources,
+                   grass_params.fragment_shader_sources,
+                   grass_params.texture_color, grass_params.texture_alpha);
 
   SaveButton save_button(&icosphere, &texture_colorizer);
   LoadButton load_button(&icosphere, &backtrace, &texture_colorizer);
@@ -125,10 +172,75 @@ int main(int argc, char** argv) {
                            &planet_view);
   actions_view.AddListener(&shortcuts_listener);
 
-  MetricsView metrics_view(&planet_view, *vertices, *triangles, texture);
+  MetricsView metrics_view(&planet_view, *vertices, *triangles,
+                           planet_params.texture);
   metrics_view.AddListener(&shortcuts_listener);
 
   glutMainLoop();
   config_file.close();
   return 0;
 }
+
+void operator >> (const YAML::Node& config, CameraParameters& params) {
+  config["orbit_radius"] >> params.orbit_radius;
+  config["init_azimuth"] >> params.azimuth;
+  config["init_zenith"] >> params.zenith;
+  config["init_own_rotation"] >> params.own_rotation;
+}
+
+void operator >> (const YAML::Node& config, IcosphereParameters& params) {
+  config["radius"] >> params.radius;
+  config["splits"] >> params.n_splits;
+  config["texture_coords_file"] >> params.texture_coords_file;
+}
+
+void operator >> (const YAML::Node& config, PlanetParameters& params) {
+  std::string path;
+  config["texture"] >> path;
+  params.texture = cv::imread(path);
+  if (!params.texture.data) {
+    int width, height;
+    config["default_texture_width"] >> width;
+    config["default_texture_height"] >> height;
+    params.texture = cv::Mat(height, width, CV_8UC3);
+    params.texture.setTo(255);
+  }
+}
+
+void operator >> (const YAML::Node& config, GrassParameters& params) {
+  unsigned default_texture_size;
+  std::string path;
+  config["default_texture_size"] >> default_texture_size;
+
+  config["texture_color"] >> path;
+  params.texture_color = cv::imread(path);
+  if (!params.texture_color.data) {
+    params.texture_color = cv::Mat(default_texture_size, default_texture_size,
+                                   CV_8UC3);
+    params.texture_color.setTo(cv::Scalar(0, 255, 0));
+  }
+
+  config["texture_alpha"] >> path;
+  params.texture_alpha = cv::imread(path);
+  if (!params.texture_alpha.data) {
+    params.texture_alpha = cv::Mat(default_texture_size, default_texture_size,
+                                   CV_8UC3);
+    params.texture_alpha.setTo(255);
+  }
+  config["vertex_shader"] >> params.vertex_shader_sources;
+  config["fragment_shader"] >> params.fragment_shader_sources;
+}
+
+
+void operator >> (const YAML::Node& config, std::vector<std::string>& vec) {
+  vec.resize(config.size());
+  for (unsigned i = 0; i < config.size(); ++i) {
+    config[i]["src"] >> vec[i];
+  }
+}
+
+CameraParameters::CameraParameters()
+  : orbit_radius(0.0f), azimuth(0.0f), zenith(0.0f), own_rotation(0.0f) {}
+
+IcosphereParameters::IcosphereParameters()
+  : radius(1.0f), n_splits(0) {}

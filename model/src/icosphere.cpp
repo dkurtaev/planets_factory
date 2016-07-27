@@ -19,16 +19,12 @@
 
 #include "include/shaders_factory.h"
 
-Icosphere::Icosphere(const YAML::Node& config_node)
+Icosphere::Icosphere(float radius, unsigned n_splits,
+                     const std::string& tex_coords_file)
   : indices_array_(0), tex_coord_array_(0), coordinates_vbo_(0), norms_vbo_(0),
-    normals_vbo_(0), tex_coords_vbo_(0), config_node_(&config_node) {
-  std::string src_file;
-  float radius;
-  unsigned n_splits;
-  config_node["source_file"] >> src_file;
-  config_node["radius"] >> radius;
-  config_node["splits"] >> n_splits;
-  Build(src_file, radius, n_splits);
+    normals_vbo_(0), tex_coords_vbo_(0), tex_coords_file_(tex_coords_file),
+    n_splits_(n_splits) {
+  Build("", radius, n_splits);
 }
 
 Icosphere::~Icosphere() {
@@ -421,10 +417,7 @@ std::vector<Triangle*>* Icosphere::GetInitTriangles() {
 void Icosphere::SetTexCoords() {
   CHECK_EQ(triangles_.size(), 20);
 
-  std::string path;
-  (*config_node_)["texture_coords_file"] >> path;
-
-  std::ifstream file(path.c_str());
+  std::ifstream file(tex_coords_file_.c_str());
   CHECK(file.is_open()) << "File with icosphere texture coordinates not found";
 
   uint16_t texture_coordinates[6];

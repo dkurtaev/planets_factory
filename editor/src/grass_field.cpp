@@ -43,37 +43,32 @@ GrassField::~GrassField() {
   glDeleteBuffers(1, &base_positions_vbo_);
 }
 
-void GrassField::Init() {
-  std::vector<std::string> vertex_shaders(1);
-  std::vector<std::string> fragment_shaders(2);
-  vertex_shaders[0] = "../res/shaders/grass_shader.vertex";
-  fragment_shaders[0] = "../res/shaders/grass_shader.fragment";
-  fragment_shaders[1] = "../res/shaders/sun_shading.fragment";
-  shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
-                                                       fragment_shaders);
-  SetupTextures();
+void GrassField::Init(const std::vector<std::string>& vertex_shader_sources,
+                      const std::vector<std::string>& fragment_shader_sources,
+                      const cv::Mat& texture_color,
+                      const cv::Mat& texture_alpha) {
+  shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shader_sources,
+                                                       fragment_shader_sources);
+  SetupTextures(texture_color, texture_alpha);
 }
 
-void GrassField::SetupTextures() {
-  cv::Mat texture = cv::imread("./grass_color.png");
-  CHECK(texture.data);
+void GrassField::SetupTextures(const cv::Mat& texture_color,
+                               const cv::Mat& texture_alpha) {
   glGenTextures(1, &texture_color_id_);
   glBindTexture(GL_TEXTURE_2D, texture_color_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture.cols, texture.rows, 0, GL_BGR,
-               GL_UNSIGNED_BYTE, texture.data);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture_color.cols, texture_color.rows, 0,
+               GL_BGR, GL_UNSIGNED_BYTE, texture_color.data);
 
-  texture = cv::imread("./grass_alpha.png");
-  CHECK(texture.data);
   glGenTextures(1, &texture_alpha_id_);
   glBindTexture(GL_TEXTURE_2D, texture_alpha_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture.cols, texture.rows, 0, GL_BGR,
-               GL_UNSIGNED_BYTE, texture.data);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, texture_alpha.cols, texture_alpha.rows, 0,
+               GL_BGR, GL_UNSIGNED_BYTE, texture_alpha.data);
 }
 
 void GrassField::UpdateVBOs() {

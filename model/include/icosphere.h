@@ -8,18 +8,12 @@
 #include <vector>
 #include <string>
 
-#include <yaml-cpp/yaml.h>
-
 #include "include/structures.h"
 
 class Icosphere {
  public:
-  // Config node (key: [type]):
-  // radius: [float]
-  // splits: [int]
-  // source_file: [string]
-  // texture_coords_file: [string]
-  explicit Icosphere(const YAML::Node& config_node);
+  Icosphere(float radius, unsigned n_splits,
+            const std::string& tex_coords_file);
 
   ~Icosphere();
 
@@ -69,13 +63,13 @@ class Icosphere {
   std::vector<Triangle*> all_triangles_;
   uint16_t* indices_array_;
   uint16_t* tex_coord_array_;
-  uint8_t n_splits_;
+  unsigned n_splits_;
   unsigned coordinates_vbo_;
   unsigned norms_vbo_;
   unsigned normals_vbo_;
   unsigned tex_coords_vbo_;
   bool need_to_update_vbo_;
-  const YAML::Node* config_node_;
+  std::string tex_coords_file_;
 };
 
 #endif  // MODEL_INCLUDE_ICOSPHERE_H_

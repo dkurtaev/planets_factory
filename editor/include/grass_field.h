@@ -4,6 +4,9 @@
 #define EDITOR_INCLUDE_GRASS_FIELD_H_
 
 #include <vector>
+#include <string>
+
+#include <opencv2/opencv.hpp>
 
 #include "include/structures.h"
 
@@ -21,12 +24,15 @@ class GrassField {
 
   void Draw(bool sun_shading);
 
-  void Init();
+  void Init(const std::vector<std::string>& vertex_shader_sources,
+            const std::vector<std::string>& fragment_shader_sources,
+            const cv::Mat& texture_color, const cv::Mat& texture_alpha);
 
   void Update();
 
  private:
-  void SetupTextures();
+  void SetupTextures(const cv::Mat& texture_color,
+                     const cv::Mat& texture_alpha);
 
   void UpdateVBOs();
 
