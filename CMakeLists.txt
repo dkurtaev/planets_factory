@@ -12,9 +12,11 @@ include_directories(
   "./engine"
   "./model"
   "./editor"
+  "./3rdparty/yaml-cpp/include"
 )
 
 add_subdirectory("./3rdparty/glog")
+add_subdirectory("./3rdparty/yaml-cpp")
 add_subdirectory("./engine")
 add_subdirectory("./model")
 add_subdirectory("./editor")

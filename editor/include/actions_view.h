@@ -11,6 +11,8 @@
 #include "include/button.h"
 #include "include/layout.h"
 
+#include <yaml-cpp/yaml.h>
+
 class SubmenuOpener;
 class ActionsView : public GLView {
  public:
@@ -35,7 +37,7 @@ class ActionsView : public GLView {
   void ParseConfig(const std::string& path,
                    const std::vector<Button*>& buttons);
 
-  void ParseMenu(std::ifstream* ifs,
+  void ParseMenu(const YAML::Node& node,
                  const std::map<std::string, Button*>& all_buttons,
                  std::vector<Button*>* menu_buttons);
 

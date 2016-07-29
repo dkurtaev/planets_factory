@@ -1,0 +1,37 @@
+icosphere:
+  radius: 4.0
+  splits: 4
+  texture_coords_file: "../res/tex_coords/coords_1.txt"
+
+planet:
+  texture: ""  # Empty string for default texturing
+  # Width x Height. Must be powers of 2 and Width = 2 * Height
+  default_texture_width: 1024
+  default_texture_height: 512
+
+  mesh_vertex_shader:
+  - src: "../res/shaders/planet_shader.vertex"
+  mesh_fragment_shader:
+  - src: "../res/shaders/planet_shader.fragment"
+  - src: "../res/shaders/sun_shading.fragment"
+
+  grid_vertex_shader:
+  - src: "../res/shaders/icogrid_shader.vertex"
+  grid_fragment_shader:
+  - src: "../res/shaders/icogrid_shader.fragment"
+
+camera:
+  orbit_radius: 20.0
+  init_azimuth: 0.0
+  init_zenith: 80.0
+  init_own_rotation: 0.0
+
+grass:
+  texture_color: ""
+  texture_alpha: ""
+  default_texture_size: 64
+  vertex_shader:
+  - src: "../res/shaders/grass_shader.vertex"
+  fragment_shader:
+  - src: "../res/shaders/grass_shader.fragment"
+  - src: "../res/shaders/sun_shading.fragment"

@@ -52,7 +52,11 @@ class PlanetView : public GLView {
              const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
              bool* sun_shading, TextureColorizer* texture_colorizer,
              VerticesMover* vertices_mover, GrassField* grass_field,
-             bool* draw_grass);
+             bool* draw_grass,
+             const std::vector<std::string>& mesh_vert_shader_srcs,
+             const std::vector<std::string>& mesh_frag_shader_srcs,
+             const std::vector<std::string>& grid_vert_shader_srcs,
+             const std::vector<std::string>& grid_frag_shader_srcs);
 
   virtual void Display();
 

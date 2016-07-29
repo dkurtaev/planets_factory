@@ -20,7 +20,11 @@ PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
                        const cv::Mat* texture, bool* draw_grid, bool* draw_mesh,
                        bool* sun_shading, TextureColorizer* texture_colorizer,
                        VerticesMover* vertices_mover, GrassField* grass_field,
-                       bool* draw_grass)
+                       bool* draw_grass,
+                       const std::vector<std::string>& mesh_vert_shader_srcs,
+                       const std::vector<std::string>& mesh_frag_shader_srcs,
+                       const std::vector<std::string>& grid_vert_shader_srcs,
+                       const std::vector<std::string>& grid_frag_shader_srcs)
   : GLView(500, 500, "Planets factory"), icosphere_(icosphere),
     camera_(camera_cs), texture_(texture), draw_grid_(draw_grid),
     draw_mesh_(draw_mesh), texture_colorizer_(texture_colorizer),
@@ -28,18 +32,10 @@ PlanetView::PlanetView(Icosphere* icosphere, SphericalCS* camera_cs,
     grass_field_(grass_field), draw_grass_(draw_grass) {
   InitGL();
 
-  std::vector<std::string> vertex_shaders(1);
-  std::vector<std::string> fragment_shaders(2);
-  vertex_shaders[0] = "../res/shaders/planet_shader.vertex";
-  fragment_shaders[0] = "../res/shaders/planet_shader.fragment";
-  fragment_shaders[1] = "../res/shaders/sun_shading.fragment";
-  planet_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
-                                                              fragment_shaders);
-  fragment_shaders.resize(1);
-  vertex_shaders[0] = "../res/shaders/icogrid_shader.vertex";
-  fragment_shaders[0] = "../res/shaders/icogrid_shader.fragment";
-  grid_shader_program_ = ShadersFactory::GetProgramFromFile(vertex_shaders,
-                                                            fragment_shaders);
+  planet_shader_program_ = ShadersFactory::GetProgramFromFile(
+                               mesh_vert_shader_srcs, mesh_frag_shader_srcs);
+  grid_shader_program_ = ShadersFactory::GetProgramFromFile(
+                               grid_vert_shader_srcs, grid_frag_shader_srcs);
   SetTexture();
   AddIcosphereToucher(&highlighting_toucher_);
 }

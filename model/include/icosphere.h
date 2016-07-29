@@ -12,11 +12,13 @@
 
 class Icosphere {
  public:
-  explicit Icosphere(float radius, const std::string& src_file = "");
+  Icosphere(float radius, unsigned n_splits,
+            const std::string& tex_coords_file);
 
   ~Icosphere();
 
-  void Build(const std::string& src_file, float radius = 1.0f);
+  void Build(const std::string& src_file, float radius = 1.0f,
+             unsigned n_splits = 0);
 
   // Drawing textured mesh.
   void Draw();
@@ -61,12 +63,13 @@ class Icosphere {
   std::vector<Triangle*> all_triangles_;
   uint16_t* indices_array_;
   uint16_t* tex_coord_array_;
-  uint8_t n_splits_;
+  unsigned n_splits_;
   unsigned coordinates_vbo_;
   unsigned norms_vbo_;
   unsigned normals_vbo_;
   unsigned tex_coords_vbo_;
   bool need_to_update_vbo_;
+  std::string tex_coords_file_;
 };
 
 #endif  // MODEL_INCLUDE_ICOSPHERE_H_

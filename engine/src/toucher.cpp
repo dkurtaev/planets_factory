@@ -30,7 +30,7 @@ void Toucher::ProcessTouch(int x, int y) {
   int view[4];
   double model[16];
   double proj[16];
-  float z;
+  float z = 1.0f;
   glGetIntegerv(GL_VIEWPORT, view);
   glGetDoublev(GL_MODELVIEW_MATRIX, model);
   glGetDoublev(GL_PROJECTION_MATRIX, proj);

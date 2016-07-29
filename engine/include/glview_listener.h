@@ -15,7 +15,7 @@
 
 class GLViewListener {
  public:
-  GLViewListener() { is_enabled_ = true; }
+  GLViewListener() : is_enabled_(true), display_width_(0), display_height_(0) {}
 
   virtual void MouseFunc(int button, int state, int x, int y) {}
 
