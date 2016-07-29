@@ -9,6 +9,17 @@ planet:
   default_texture_width: 1024
   default_texture_height: 512
 
+  mesh_vertex_shader:
+  - src: "../res/shaders/planet_shader.vertex"
+  mesh_fragment_shader:
+  - src: "../res/shaders/planet_shader.fragment"
+  - src: "../res/shaders/sun_shading.fragment"
+
+  grid_vertex_shader:
+  - src: "../res/shaders/icogrid_shader.vertex"
+  grid_fragment_shader:
+  - src: "../res/shaders/icogrid_shader.fragment"
+
 camera:
   orbit_radius: 20.0
   init_azimuth: 0.0

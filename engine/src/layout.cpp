@@ -107,6 +107,8 @@ void Layout::DoEvents() {
               listeners_rois_.begin());
     new_listeners_.clear();
     new_listeners_rois_.clear();
+    // Send display size to new listeners.
+    Reshape(display_width_, display_height_);
   }
 
   n_listeners = listeners_.size();

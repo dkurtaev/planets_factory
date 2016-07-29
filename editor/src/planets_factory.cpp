@@ -45,6 +45,10 @@ struct IcosphereParameters {
 
 struct PlanetParameters {
   cv::Mat texture;
+  std::vector<std::string> mesh_vert_shader_srcs;
+  std::vector<std::string> mesh_frag_shader_srcs;
+  std::vector<std::string> grid_vert_shader_srcs;
+  std::vector<std::string> grid_frag_shader_srcs;
 };
 
 struct GrassParameters {
@@ -136,7 +140,10 @@ int main(int argc, char** argv) {
   PlanetView planet_view(&icosphere, &camera_cs, &planet_params.texture,
                          &draw_grid, &draw_mesh, &use_sun_shading,
                          &texture_colorizer, &vertices_mover, &grass_field,
-                         &draw_grass);
+                         &draw_grass, planet_params.mesh_vert_shader_srcs,
+                         planet_params.mesh_frag_shader_srcs,
+                         planet_params.grid_vert_shader_srcs,
+                         planet_params.grid_frag_shader_srcs);
   planet_view.AddListener(&camera_mover);
   planet_view.AddIcosphereToucher(&texture_colorizer);
   planet_view.AddIcosphereToucher(&vertices_mover);
@@ -205,6 +212,10 @@ void operator >> (const YAML::Node& config, PlanetParameters& params) {
     params.texture = cv::Mat(height, width, CV_8UC3);
     params.texture.setTo(255);
   }
+  config["mesh_vertex_shader"] >> params.mesh_vert_shader_srcs;
+  config["mesh_fragment_shader"] >> params.mesh_frag_shader_srcs;
+  config["grid_vertex_shader"] >> params.grid_vert_shader_srcs;
+  config["grid_fragment_shader"] >> params.grid_frag_shader_srcs;
 }
 
 void operator >> (const YAML::Node& config, GrassParameters& params) {
